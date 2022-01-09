@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' data: https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com https://formulae.brew.sh; style-src 'self' 'unsafe-inline' data: https://cdn.jsdelivr.net https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; img-src 'self' data:"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootswatch@5.1.3/dist/sandstone/bootstrap.min.css"
+      integrity="sha256-zWAnZkKmT2MYxdCMp506rQtnA9oE2w0/K/WVU7V08zw="
+      crossorigin="anonymous"
+    />
+
+    <title>OpenStore</title>
+  </head>
+  <body>
+    <header class="sticky-top bg-light">
+      <nav class="navbar navbar-light">
+        <div class="container-fluid">
+          <div class="d-flex justify-content-start" style="flex: 1 0 8.5vw">
+            <openstore-settings-button></openstore-settings-button>
+          </div>
+
+          <form class="d-flex" style="flex: 1 0 40vw">
+            <input
+              id="search-bar"
+              class="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+            />
+            <button
+              class="btn btn-outline-success"
+              type="submit"
+              onclick="event.preventDefault(); window.openStore.updateWindowLocationFragment({ ...window.openStore.decodeFragment(window.location.hash), search: document.querySelector('#search-bar')?.value ?? '', subpage: null });"
+            >
+              Search
+            </button>
+          </form>
+
+          <div
+            class="d-flex justify-content-end"
+            style="flex: 0 0 15vw; min-width: 120px"
+          >
+            <openstore-tasks-button></openstore-tasks-button>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <div class="container-fluid">
+      <openstore-floating-pane
+        id="openstore-settings-pane"
+        anchorPoint='{ "top": "56px", "left": "10px" }'
+        width="25vw"
+        height="88vh"
+      >
+        <openstore-settings-pane></openstore-settings-pane>
+      </openstore-floating-pane>
+
+      <openstore-floating-pane
+        id="openstore-tasks-pane"
+        anchorPoint='{ "top": "56px", "right": "10px" }'
+        width="25vw"
+        height="88vh"
+      >
+        <openstore-tasks-pane></openstore-tasks-pane>
+      </openstore-floating-pane>
+
+      <openstore-floating-pane
+        id="openstore-terminal-pane"
+        anchorPoint='{ "top": "56px", "right": "calc(10px + 25vw)" }'
+        width="50vw"
+        height="88vh"
+      >
+        <div id="terminal"></div>
+      </openstore-floating-pane>
+
+      <main id="content">
+        <noscript>Please enable JavaScript to use OpenStore.</noscript>
+      </main>
+    </div>
+
+    <template id="openstore-template-page-title">
+      <div
+        class="container-fluid d-flex flex-row justify-content-center align-items-end flex-nowrap sticky-top bg-white pt-1 pb-2"
+        style="top: 54px"
+      >
+        <nav
+          class="d-flex justify-content-start ms-4 me-auto"
+          style="flex: 1"
+          aria-label="Go back"
+        >
+          <a
+            class="openstore-jsnav-back-link btn btn-link fs-3 text-decoration-none p-0"
+          >
+            <svg
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              width="34"
+              height="34"
+              viewBox="0, 0, 128, 128"
+              color="inherit"
+            >
+              <g id="Layer_2">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="64"
+                  fill="none"
+                  stroke="currentcolor"
+                  stroke-width="20"
+                  clip-path="url(#back-arrow-bg-circle-clip)"
+                />
+                <clipPath id="back-arrow-bg-circle-clip">
+                  <circle cx="64" cy="64" r="64" />
+                </clipPath>
+              </g>
+              <g id="Layer_1">
+                <g>
+                  <path
+                    d="M98.178,64.412 L32,64.412"
+                    fill="none"
+                    stroke="currentcolor"
+                    stroke-width="12"
+                  />
+                  <path
+                    fill="currentcolor"
+                    d="M97.096,69.912 C93.782,69.912 91.096,67.225 91.096,63.912 C91.096,60.598 93.782,57.912 97.096,57.912 C100.41,57.912 103.096,60.598 103.096,63.912 C103.096,67.225 100.41,69.912 97.096,69.912 z"
+                  />
+                </g>
+                <g>
+                  <path
+                    d="M53.293,85.696 L31.064,63.467"
+                    fill="none"
+                    stroke="currentcolor"
+                    stroke-width="12"
+                  />
+                  <path
+                    fill="currentcolor"
+                    d="M57.11,81.028 C54.767,78.685 50.968,78.685 48.625,81.028 C46.282,83.371 46.282,87.17 48.625,89.513 C50.968,91.857 54.767,91.857 57.11,89.513 C59.453,87.17 59.453,83.371 57.11,81.028 z"
+                  />
+                </g>
+                <g>
+                  <path
+                    d="M53.253,43.304 L31.064,65.493"
+                    fill="none"
+                    stroke="currentcolor"
+                    stroke-width="12"
+                  />
+                  <path
+                    fill="currentcolor"
+                    d="M57.07,46.972 C54.727,49.315 50.928,49.315 48.585,46.972 C46.242,44.629 46.242,40.83 48.585,38.487 C50.928,36.143 54.727,36.143 57.07,38.487 C59.413,40.83 59.413,44.629 57.07,46.972 z"
+                  />
+                </g>
+                <path
+                  fill="currentcolor"
+                  d="M34.927,67.835 C32.76,70.002 29.247,70.002 27.08,67.835 C24.913,65.668 24.913,62.155 27.08,59.989 C29.247,57.822 32.76,57.822 34.927,59.989 C37.093,62.155 37.093,65.668 34.927,67.835 z"
+                />
+              </g>
+            </svg>
+          </a>
+        </nav>
+        <div
+          class="d-flex justify-content-center text-center text-nowrap mt-4"
+          style="flex: 1"
+        >
+          <h1 id="openstore-page-title" class="mb-0"></h1>
+        </div>
+        <span
+          class="d-flex justify-content-end ms-auto me-4"
+          style="flex: 1"
+        ></span>
+      </div>
+    </template>
+
+    <template id="openstore-template-loading">
+      <div class="openstore-loading-container mx-auto text-center mb-4">
+        <h2>Loading…</h2>
+      </div>
+    </template>
+
+    <div id="modalContainer"></div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

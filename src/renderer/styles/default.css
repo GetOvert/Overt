@@ -1,0 +1,69 @@
+/* Overrides rule in Bootstrap's _reboot.scss */
+:root {
+  scroll-behavior: auto !important;
+}
+
+body {
+  --bs-body-font-size: 0.9rem;
+}
+.h1,
+h1 {
+  font-size: 1.85rem;
+}
+.fs-1 {
+  font-size: 1.85rem !important;
+}
+.h2,
+h2 {
+  font-size: calc(1.3rem + 0.6vw);
+}
+.fs-2 {
+  font-size: calc(1.3rem + 0.6vw) !important;
+}
+.fs-3,
+.h3,
+h3 {
+  font-size: calc(1rem + 0.6vw);
+}
+.fs-3 {
+  font-size: calc(1rem + 0.6vw) !important;
+}
+.h4,
+h4 {
+  font-size: calc(0.92rem + 0.3vw);
+}
+.fs-4 {
+  font-size: calc(0.92rem + 0.3vw) !important;
+}
+.h5,
+h5 {
+  font-size: calc(0.8rem + 0.15vw);
+}
+.fs-5 {
+  font-size: calc(0.8rem + 0.15vw) !important;
+}
+.h6,
+h6 {
+  font-size: 0.7rem;
+}
+.fs-6 {
+  font-size: 0.7rem;
+}
+
+a,
+.nav-link,
+.btn-link {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+a:hover,
+.nav-link:hover,
+.btn-link:hover {
+  color: var(--accent-color-dark);
+}
+
+.tooltip {
+  font-size: calc(0.9 * var(--bs-body-font-size));
+  text-transform: none;
+  font-weight: normal;
+}

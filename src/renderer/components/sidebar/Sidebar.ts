@@ -1,0 +1,139 @@
+import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
+import "components/sidebar/SidebarNavLink";
+import { css, html } from "lit";
+import { customElement } from "lit/decorators.js";
+
+@customElement("openstore-sidebar")
+export default class Sidebar extends BootstrapBlockElement {
+  constructor() {
+    super();
+  }
+
+  static styles = [
+    BootstrapBlockElement.styles,
+    css`
+      :host {
+        max-width: 300px;
+      }
+      :host > div {
+        max-height: 100%;
+      }
+
+      .nav-pills .nav-link:hover {
+        color: var(--bs-gray-dark);
+      }
+      .nav-pills .nav-link:focus {
+        color: var(--bs-gray-dark);
+      }
+      .nav-pills .nav-link.active {
+        color: var(--bs-light);
+        background-color: var(--accent-color);
+      }
+    `,
+  ];
+
+  render() {
+    return html`${BootstrapBlockElement.styleLink}
+
+      <div
+        class="d-flex flex-column justify-content-between overflow-scroll py-3 px-0"
+      >
+        <nav class="nav nav-pills nav-fill flex-column">
+          <span class="fs-6 fw-bold text-uppercase ms-2 mt-1 mb-2"
+            >Sources</span
+          >
+
+          <openstore-sidebar-nav-link
+            href=${(window as any).openStore.encodeFragment({
+              source: "brew-cask",
+            })}
+            label="Apps (brew cask)"
+            ?active=${(window as any).openStore.decodeFragment(
+              window.location.hash
+            ).source === "brew-cask"}
+          ></openstore-sidebar-nav-link>
+          <!-- <openstore-sidebar-nav-link
+            href=${((window as any).openStore as any).encodeFragment({
+            source: "brew",
+          })}
+            label="CLI Tools & Libraries (brew)"
+          ></openstore-sidebar-nav-link> -->
+        </nav>
+
+        <hr class="border border-dark mx-2" />
+
+        <nav class="nav nav-pills nav-fill flex-column">
+          <span class="fs-6 fw-bold text-uppercase ms-2 mt-1 mb-2"
+            >Filters</span
+          >
+
+          <openstore-sidebar-nav-link
+            href=${((window as any).openStore as any).encodeFragment({
+              filter: "available",
+            })}
+            label="Available"
+            ?active=${(window as any).openStore.decodeFragment(
+              window.location.hash
+            ).filter === "available"}
+          ></openstore-sidebar-nav-link>
+          <openstore-sidebar-nav-link
+            href=${((window as any).openStore as any).encodeFragment({
+              filter: "installed",
+            })}
+            label="Installed"
+            ?active=${(window as any).openStore.decodeFragment(
+              window.location.hash
+            ).filter === "installed"}
+          ></openstore-sidebar-nav-link>
+        </nav>
+
+        <hr class="border border-dark mx-2" />
+
+        <nav class="nav nav-pills nav-fill flex-column">
+          <span class="fs-6 fw-bold text-uppercase ms-2 mt-1 mb-2"
+            >Sort by</span
+          >
+
+          <openstore-sidebar-nav-link
+            href=${((window as any).openStore as any).encodeFragment({
+              sort: "installed-30d",
+            })}
+            label="Most Installed (30 Days)"
+            ?active=${(window as any).openStore.decodeFragment(
+              window.location.hash
+            ).sort === "installed-30d"}
+          ></openstore-sidebar-nav-link>
+          <openstore-sidebar-nav-link
+            href=${((window as any).openStore as any).encodeFragment({
+              sort: "installed-90d",
+            })}
+            label="Most Installed (90 Days)"
+            ?active=${(window as any).openStore.decodeFragment(
+              window.location.hash
+            ).sort === "installed-90d"}
+          ></openstore-sidebar-nav-link>
+          <openstore-sidebar-nav-link
+            href=${((window as any).openStore as any).encodeFragment({
+              sort: "installed-365d",
+            })}
+            label="Most Installed (365 Days)"
+            ?active=${(window as any).openStore.decodeFragment(
+              window.location.hash
+            ).sort === "installed-365d"}
+          ></openstore-sidebar-nav-link>
+          <!-- <openstore-sidebar-nav-link
+            href=${((window as any).openStore as any).encodeFragment({
+            sort: "updated",
+          })}
+            label="Recently Updated"
+          ></openstore-sidebar-nav-link>
+          <openstore-sidebar-nav-link
+            href=${((window as any).openStore as any).encodeFragment({
+            sort: "added",
+          })}
+            label="Newly Added"
+          ></openstore-sidebar-nav-link> -->
+        </nav>
+      </div> `;
+  }
+}
