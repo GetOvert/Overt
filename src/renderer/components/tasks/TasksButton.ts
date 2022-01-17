@@ -95,4 +95,8 @@ export default class TasksButton extends BootstrapBlockElement {
       this.terminalButton.toggleShown();
     }
   }
+
+  show() {
+    if (!this.pane.shown) this.toggleShown();
+  }
 }

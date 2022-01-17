@@ -1,5 +1,5 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
-import { css, html } from "lit";
+import { css, html, HTMLTemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { Tooltip } from "bootstrap";
 import taskQueue from "components/tasks/model/TaskQueue";
@@ -11,6 +11,8 @@ export class SettingsPane extends BootstrapBlockElement {
   homebrewPath: string;
   @state()
   validateCodeSignatures: boolean;
+  @state()
+  sendNativeNotifications: boolean;
 
   protected updated(
     changedProperties: Map<string | number | symbol, unknown>
@@ -23,6 +25,9 @@ export class SettingsPane extends BootstrapBlockElement {
     this.homebrewPath = await window.settings.get("homebrewPath");
     this.validateCodeSignatures = await window.settings.get(
       "validateCodeSignatures"
+    );
+    this.sendNativeNotifications = await window.settings.get(
+      "sendNativeNotifications"
     );
   }
 
@@ -45,30 +50,18 @@ export class SettingsPane extends BootstrapBlockElement {
       </div>
 
       <div class="d-flex flex-column justify-content-around m-2 mt-3">
-        <label
-          class="mb-3"
-          data-bs-toggle="tooltip"
-          data-bs-placement="right"
-          title="When enabled, macOS will validate the digital signature of apps installed through OpenStore. This blocks both malware and unsigned legitimate software from running. Enabled by default."
-          @mousedown=${(event: Event) => event.preventDefault()}
-          @click=${(event: Event) => {
-            if ((event.target as HTMLElement).tagName === "LABEL") {
-              // Prevent checkbox gaining focus
-              event.preventDefault();
-              (event.target as HTMLLabelElement).control.click();
-            }
-          }}
-        >
-          <input
-            type="checkbox"
-            class="form-check-input me-1"
-            name="validateCodeSignatures"
-            ?checked=${this.validateCodeSignatures}
-            @change=${this.onCheckboxClicked}
-            @mousedown=${(event: Event) => event.preventDefault()}
-          />
-          Validate code signatures
-        </label>
+        ${this.makeCheckbox(
+          "sendNativeNotifications",
+          "Send Notifications",
+          "When enabled, OpenStore will send you desktop notifications when major tasks are started or completed. Enabled by default.",
+          this.sendNativeNotifications
+        )}
+        ${this.makeCheckbox(
+          "validateCodeSignatures",
+          "Validate Code Signatures",
+          "When enabled, macOS will validate the digital signature of apps installed through OpenStore. This blocks both malware and unsigned legitimate software from running. Enabled by default.",
+          this.validateCodeSignatures
+        )}
 
         <label
           class="mb-3"
@@ -76,7 +69,7 @@ export class SettingsPane extends BootstrapBlockElement {
           data-bs-placement="right"
           title="Path to root directory of the Homebrew installation to use. The standard location for arm64 (“Apple silicon”) architecture is /opt/homebrew, and the standard location for x86_64 (“Intel”) architecture is /usr/local. There are two reasons to change this setting: 1) You want to switch Homebrew architectures on an arm64 Mac; 2) You have installed Homebrew in a custom location."
         >
-          Homebrew path
+          Homebrew Path
           <input
             type="text"
             class="form-control form-control-sm"
@@ -98,6 +91,40 @@ export class SettingsPane extends BootstrapBlockElement {
       </div> `;
   }
 
+  private makeCheckbox(
+    name: string,
+    label: string,
+    tooltip: string,
+    checked: boolean
+  ): HTMLTemplateResult {
+    return html`
+      <label
+        class="mb-3"
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        title=${tooltip}
+        @mousedown=${(event: Event) => event.preventDefault()}
+        @click=${(event: Event) => {
+          if ((event.target as HTMLElement).tagName === "LABEL") {
+            // Prevent checkbox gaining focus
+            event.preventDefault();
+            (event.target as HTMLLabelElement).control.click();
+          }
+        }}
+      >
+        <input
+          type="checkbox"
+          class="form-check-input me-1"
+          name=${name}
+          ?checked=${checked}
+          @change=${this.onCheckboxClicked}
+          @mousedown=${(event: Event) => event.preventDefault()}
+        />
+        ${label}
+      </label>
+    `;
+  }
+
   private popperTooltips: any;
   private addPopperTooltips() {
     this.popperTooltips = Array.from(
@@ -116,10 +143,13 @@ export class SettingsPane extends BootstrapBlockElement {
   }
 
   private rebuildIndex() {
-    taskQueue.push({
-      type: "cask-reindex-all",
-      label: "Rebuild index",
-      condition: "always",
-    } as CaskReindexAllTask);
+    taskQueue.push(
+      {
+        type: "cask-reindex-all",
+        label: "Rebuild index",
+        condition: "always",
+      } as CaskReindexAllTask,
+      ["before", "after"]
+    );
   }
 }

@@ -149,11 +149,14 @@ export default class AppView extends BootstrapBlockElement {
             }"
             style="min-width: 32vw; height: 2.7rem"
             @click=${async () => {
-              taskQueue.push({
-                label: `Install ${this.app.name[0]}`,
-                type: "cask-install",
-                caskIdentifier: this.app.full_token,
-              } as CaskInstallTask);
+              taskQueue.push(
+                {
+                  label: `Install ${this.app.name[0]}`,
+                  type: "cask-install",
+                  caskIdentifier: this.app.full_token,
+                } as CaskInstallTask,
+                ["before", "after"]
+              );
             }}
           >
             Install
@@ -177,11 +180,14 @@ export default class AppView extends BootstrapBlockElement {
               }"
               style="min-width: 16vw; height: 2.7rem"
               @click=${async () => {
-                taskQueue.push({
-                  label: `Update ${this.app.name[0]}`,
-                  type: "cask-upgrade",
-                  caskIdentifier: this.app.full_token,
-                } as CaskUpgradeTask);
+                taskQueue.push(
+                  {
+                    label: `Update ${this.app.name[0]}`,
+                    type: "cask-upgrade",
+                    caskIdentifier: this.app.full_token,
+                  } as CaskUpgradeTask,
+                  ["before", "after"]
+                );
               }}
             >
               Update
@@ -192,11 +198,14 @@ export default class AppView extends BootstrapBlockElement {
               }"
               style="min-width: 16vw; height: 2.7rem"
               @click=${async () => {
-                taskQueue.push({
-                  label: `Uninstall ${this.app.name[0]}`,
-                  type: "cask-uninstall",
-                  caskIdentifier: this.app.full_token,
-                } as CaskUninstallTask);
+                taskQueue.push(
+                  {
+                    label: `Uninstall ${this.app.name[0]}`,
+                    type: "cask-uninstall",
+                    caskIdentifier: this.app.full_token,
+                  } as CaskUninstallTask,
+                  ["before", "after"]
+                );
               }}
             >
               Uninstall

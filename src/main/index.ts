@@ -64,6 +64,7 @@ const createWindow = (): void => {
   type Config = {
     validateCodeSignatures: boolean;
     homebrewPath: string;
+    sendNativeNotifications: boolean;
   };
 
   const store = new ElectronStore<Config>({
@@ -72,6 +73,7 @@ const createWindow = (): void => {
       homebrewPath: existsSync("/opt/homebrew/bin/brew")
         ? "/opt/homebrew"
         : "/usr/local",
+      sendNativeNotifications: true,
     },
   });
 

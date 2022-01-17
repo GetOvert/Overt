@@ -277,11 +277,14 @@ const brewCask = {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
-          taskQueue.push({
-            type: "prompt-for-password",
-            label: `Authenticate to install ${caskName}`,
-            prompt: `The installer for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
-          } as PromptForPasswordTask);
+          taskQueue.push(
+            {
+              type: "prompt-for-password",
+              label: `Authenticate to install ${caskName}`,
+              prompt: `The installer for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
+            } as PromptForPasswordTask,
+            ["before"]
+          );
         }
         if (
           data.match(new RegExp(`Cask '${caskName}' is already installed`, "i"))
@@ -316,11 +319,14 @@ const brewCask = {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
-          taskQueue.push({
-            type: "prompt-for-password",
-            label: `Authenticate to update ${caskName}`,
-            prompt: `The updater for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
-          } as PromptForPasswordTask);
+          taskQueue.push(
+            {
+              type: "prompt-for-password",
+              label: `Authenticate to update ${caskName}`,
+              prompt: `The updater for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
+            } as PromptForPasswordTask,
+            ["before"]
+          );
         }
         if (data.match(/(?<!')-- openstore-succeeded: cask-upgrade --/)) {
           terminal.offReceive(callbackID);
@@ -349,11 +355,14 @@ const brewCask = {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
-          taskQueue.push({
-            type: "prompt-for-password",
-            label: `Authenticate to uninstall ${caskName}`,
-            prompt: `The uninstaller for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
-          } as PromptForPasswordTask);
+          taskQueue.push(
+            {
+              type: "prompt-for-password",
+              label: `Authenticate to uninstall ${caskName}`,
+              prompt: `The uninstaller for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
+            } as PromptForPasswordTask,
+            ["before"]
+          );
         }
         if (data.match(/(?<!')-- openstore-succeeded: cask-uninstall --/)) {
           terminal.offReceive(callbackID);

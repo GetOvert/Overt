@@ -3,6 +3,7 @@ import {
   LiveTaskState,
   QueuedTask,
   Task,
+  TaskNotifyPoints,
   TaskType,
 } from "./Task";
 
@@ -47,10 +48,15 @@ export class TaskQueue {
     return task;
   }
 
-  push(task: Task, state: LiveTaskState = "pending") {
+  push(
+    task: Task,
+    notify: TaskNotifyPoints = [],
+    state: LiveTaskState = "pending"
+  ) {
     const queuedTask: QueuedTask = {
       serial: this._lastSerial++,
       state,
+      notify,
       ...task,
     };
 

@@ -1,6 +1,7 @@
 export type QueuedTask = Task & {
   serial: number;
   state: TaskState;
+  notify: TaskNotifyPoints;
 };
 
 export type TaskState = LiveTaskState | DeadTaskState;
@@ -18,6 +19,8 @@ export function isDeadTaskState(
 ): taskState is DeadTaskState {
   return deadTaskStates.includes(taskState as DeadTaskState);
 }
+
+export type TaskNotifyPoints = ("before" | "after")[];
 
 export type Task = {
   label: string;

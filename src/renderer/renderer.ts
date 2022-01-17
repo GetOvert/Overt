@@ -45,6 +45,7 @@ import "components/icon-button/IconButton";
 import "components/terminal/TerminalButton";
 import "components/terminal/terminal";
 import "components/task-processing";
+import "components/tasks/task-notifications";
 import "components/modal/PasswordPromptModal";
 
 import taskQueue from "components/tasks/model/TaskQueue";
