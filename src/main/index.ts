@@ -5,6 +5,7 @@ import {
   IpcMainEvent,
   systemPreferences,
 } from "electron";
+import contextMenu from "electron-context-menu";
 import ElectronStore from "electron-store";
 import { existsSync } from "fs";
 import * as pty from "node-pty";
@@ -85,6 +86,11 @@ const createWindow = (): void => {
   );
   ipcMain.handle("settings.get", (event: IpcMainEvent, key: keyof Config) => {
     return store.get(key);
+  });
+
+  contextMenu({
+    showSearchWithGoogle: false,
+    showCopyImageAddress: false
   });
 };
 
