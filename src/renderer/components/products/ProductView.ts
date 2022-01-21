@@ -57,7 +57,7 @@ export abstract class ProductView extends BootstrapBlockElement {
       <div class="mx-4">
         <h2 class="h3 text-muted text-center mt-1 mb-4">${this.subtitle}</h2>
 
-        <div class="openstore-apps-buttons-container text-center mb-4">
+        <div class="text-center mb-4">
           ${repeat(
             this.buttons,
             ({ title }) => title,
@@ -77,8 +77,10 @@ export abstract class ProductView extends BootstrapBlockElement {
           this.fields,
           ({ heading }) => heading,
           ({ heading, value }) =>
-            html`<h3>${heading}</h3>
-              ${htmlForFieldValue(value)}`
+            value
+              ? html`<h3>${heading}</h3>
+                  ${htmlForFieldValue(value)}`
+              : ""
         )}
         </div>
       </div>
