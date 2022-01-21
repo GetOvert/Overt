@@ -79,7 +79,7 @@ export abstract class ProductView extends BootstrapBlockElement {
           ({ heading, value }) =>
             value
               ? html`<h3>${heading}</h3>
-                  ${htmlForFieldValue(value)}`
+                  ${htmlForFieldValue(value, true)}`
               : ""
         )}
         </div>
@@ -88,7 +88,10 @@ export abstract class ProductView extends BootstrapBlockElement {
   }
 }
 
-function htmlForFieldValue(value?: FieldValue): HTMLTemplateResult {
+function htmlForFieldValue(
+  value?: FieldValue,
+  isRoot: boolean = false
+): HTMLTemplateResult {
   if (!value) return html``;
 
   if (Array.isArray(value)) {
@@ -103,7 +106,9 @@ function htmlForFieldValue(value?: FieldValue): HTMLTemplateResult {
   }
 
   if (typeof value === "string") {
-    return html` <p style="white-space: pre-wrap">${value}</p> `;
+    return isRoot
+      ? html` <p style="white-space: pre-wrap">${value}</p> `
+      : html`${value}`;
   }
 
   return value;
