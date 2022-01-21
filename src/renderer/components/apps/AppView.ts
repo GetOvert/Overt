@@ -1,4 +1,4 @@
-import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
+import { Button, Field, ProductView } from "components/products/ProductView";
 import {
   caskIdentifiersOfTask,
   CaskInstallTask,
@@ -7,56 +7,28 @@ import {
   QueuedTask,
 } from "components/tasks/model/Task";
 import taskQueue, { TaskQueueObserver } from "components/tasks/model/TaskQueue";
-import { html } from "lit";
+import { html, HTMLTemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 
 @customElement("openstore-app-view")
-export default class AppView extends BootstrapBlockElement {
+export default class AppView extends ProductView {
   @property({ attribute: false })
   app: any = {};
 
-  private taskQueueObserver: TaskQueueObserver;
-
-  connectedCallback(): void {
-    super.connectedCallback();
-
-    this.taskQueueObserver = this.taskQueueChanged.bind(this);
-    taskQueue.addObserver(this.taskQueueObserver);
+  protected get subtitle(): string {
+    return this.app.full_token;
   }
 
-  disconnectedCallback(): void {
-    super.disconnectedCallback();
-
-    taskQueue.removeObserver(this.taskQueueObserver);
+  protected shouldCauseRerender(successfulTask: QueuedTask): boolean {
+    return (
+      ["cask-reindex-all", "cask-reindex"].includes(successfulTask.type) &&
+      caskIdentifiersOfTask(successfulTask)?.includes(this.app.full_token)
+    );
   }
 
-  private taskQueueChanged(updatedTask: QueuedTask) {
-    if (
-      updatedTask.state === "succeeded" &&
-      ["cask-reindex-all", "cask-reindex"].includes(updatedTask.type) &&
-      caskIdentifiersOfTask(updatedTask)?.includes(this.app.full_token)
-    ) {
-      (window as any).openStore.displayPageForWindowLocation(
-        document.querySelector("#content")
-      );
-    }
-  }
-
-  render() {
-    // For Launch button
-    const appFileName = this.app.artifacts
-      .filter((artifact) => Array.isArray(artifact))
-      ?.map(
-        (candidateArray) =>
-          candidateArray.filter(
-            (fileName) =>
-              typeof fileName.endsWith === "function" &&
-              fileName.endsWith(".app")
-          )?.[0]
-      )?.[0];
-
-    const fields = [
+  protected get fields(): Field[] {
+    return [
       {
         heading: "Description",
         value: this.app.desc ?? "No description available.",
@@ -133,113 +105,76 @@ export default class AppView extends BootstrapBlockElement {
         ],
       },
     ];
+  }
 
-    return html`
-      ${BootstrapBlockElement.styleLink}
-      
-      <div class="mx-4">
-        <h2 class="h3 text-muted text-center mt-1 mb-4">${
-          this.app.full_token
-        }</h2>
+  protected get buttons(): Button[] {
+    return [
+      {
+        title: "Install",
+        color: "success",
+        shown: this.app.installed === null,
+        onClick: async () => {
+          taskQueue.push(
+            {
+              label: `Install ${this.app.name[0]}`,
+              type: "cask-install",
+              caskIdentifier: this.app.full_token,
+            } as CaskInstallTask,
+            ["before", "after"]
+          );
+        },
+      },
+      {
+        title: "Launch",
+        color: "primary",
+        shown: this.app.installed !== null && !!this.appFileName,
+        onClick: async () => {
+          window.openProduct.openApp(this.appFileName);
+        },
+      },
+      {
+        title: "Update",
+        color: "success",
+        shown: this.app.installed !== null && !this.app.auto_updates,
+        onClick: async () => {
+          taskQueue.push(
+            {
+              label: `Update ${this.app.name[0]}`,
+              type: "cask-upgrade",
+              caskIdentifier: this.app.full_token,
+            } as CaskUpgradeTask,
+            ["before", "after"]
+          );
+        },
+      },
+      {
+        title: "Uninstall",
+        color: "danger",
+        shown: this.app.installed !== null,
+        onClick: async () => {
+          taskQueue.push(
+            {
+              label: `Uninstall ${this.app.name[0]}`,
+              type: "cask-uninstall",
+              caskIdentifier: this.app.full_token,
+            } as CaskUninstallTask,
+            ["before", "after"]
+          );
+        },
+      },
+    ];
+  }
 
-        <div class="openstore-apps-buttons-container text-center mb-4">
-          <button
-            class="openstore-button-install btn btn-success ${
-              this.app.installed !== null ? "d-none" : ""
-            }"
-            style="min-width: 32vw; height: 2.7rem"
-            @click=${async () => {
-              taskQueue.push(
-                {
-                  label: `Install ${this.app.name[0]}`,
-                  type: "cask-install",
-                  caskIdentifier: this.app.full_token,
-                } as CaskInstallTask,
-                ["before", "after"]
-              );
-            }}
-          >
-            Install
-          </button>
-            <button
-              class="openstore-button-launch btn btn-primary ${
-                this.app.installed === null || !appFileName ? "d-none" : ""
-              }"
-              style="min-width: 16vw; height: 2.7rem"
-              @click=${() => {
-                window.openProduct.openApp(appFileName);
-              }}
-            >
-              Launch
-            </button>
-            <button
-              class="openstore-button-update btn btn-success ${
-                this.app.installed === null || this.app.auto_updates
-                  ? "d-none"
-                  : ""
-              }"
-              style="min-width: 16vw; height: 2.7rem"
-              @click=${async () => {
-                taskQueue.push(
-                  {
-                    label: `Update ${this.app.name[0]}`,
-                    type: "cask-upgrade",
-                    caskIdentifier: this.app.full_token,
-                  } as CaskUpgradeTask,
-                  ["before", "after"]
-                );
-              }}
-            >
-              Update
-            </button>
-            <button
-              class="openstore-button-uninstall btn btn-danger ${
-                this.app.installed === null ? "d-none" : ""
-              }"
-              style="min-width: 16vw; height: 2.7rem"
-              @click=${async () => {
-                taskQueue.push(
-                  {
-                    label: `Uninstall ${this.app.name[0]}`,
-                    type: "cask-uninstall",
-                    caskIdentifier: this.app.full_token,
-                  } as CaskUninstallTask,
-                  ["before", "after"]
-                );
-              }}
-            >
-              Uninstall
-            </button>
-          </div>
-
-          ${repeat(
-            fields,
-            ({ heading }) => heading,
-            ({ heading, value }) =>
-              value
-                ? html` <h3>${heading}</h3>
-                    ${(() => {
-                      if (Array.isArray(value)) {
-                        return html`
-                          <ul>
-                            ${repeat(value, (item) => html`<li>${item}</li>`)}
-                          </ul>
-                        `;
-                      }
-                      if (value && typeof value === "string") {
-                        return html`
-                          <p style="white-space: pre-wrap">${value}</p>
-                        `;
-                      }
-                      if (value) {
-                        return html`${value}`;
-                      }
-                      return html``;
-                    })()}`
-                : ""
-          )}
-        </div>
-      </div>
-    `;
+  private get appFileName(): string | null {
+    return this.app.artifacts
+      .filter((artifact) => Array.isArray(artifact))
+      ?.map(
+        (candidateArray) =>
+          candidateArray.filter(
+            (fileName) =>
+              typeof fileName.endsWith === "function" &&
+              fileName.endsWith(".app")
+          )?.[0]
+      )?.[0];
   }
 }
