@@ -1,15 +1,14 @@
 import { Button, Field, ProductView } from "components/products/ProductView";
-import {
-  caskIdentifiersOfTask,
-  CaskInstallTask,
-  CaskUninstallTask,
-  CaskUpgradeTask,
-  QueuedTask,
-} from "components/tasks/model/Task";
-import taskQueue, { TaskQueueObserver } from "components/tasks/model/TaskQueue";
-import { html, HTMLTemplateResult } from "lit";
+import { caskIdentifiersOfTask, QueuedTask } from "components/tasks/model/Task";
+import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
+import {
+  getCaskAppFileName,
+  installCaskApp,
+  uninstallCaskApp,
+  upgradeCaskApp,
+} from "./app-events";
 
 @customElement("openstore-app-view")
 export default class AppView extends ProductView {
@@ -113,68 +112,26 @@ export default class AppView extends ProductView {
         title: "Install",
         color: "success",
         shown: this.app.installed === null,
-        onClick: async () => {
-          taskQueue.push(
-            {
-              label: `Install ${this.app.name[0]}`,
-              type: "cask-install",
-              caskIdentifier: this.app.full_token,
-            } as CaskInstallTask,
-            ["before", "after"]
-          );
-        },
+        onClick: () => installCaskApp(this.app.full_token, this.app.name[0]),
       },
       {
         title: "Launch",
         color: "primary",
-        shown: this.app.installed !== null && !!this.appFileName,
-        onClick: async () => {
-          window.openProduct.openApp(this.appFileName);
-        },
+        shown: this.app.installed !== null && !!getCaskAppFileName(this.app),
+        onClick: () => window.openProduct.openApp(getCaskAppFileName(this.app)),
       },
       {
         title: "Update",
         color: "success",
         shown: this.app.installed !== null && !this.app.auto_updates,
-        onClick: async () => {
-          taskQueue.push(
-            {
-              label: `Update ${this.app.name[0]}`,
-              type: "cask-upgrade",
-              caskIdentifier: this.app.full_token,
-            } as CaskUpgradeTask,
-            ["before", "after"]
-          );
-        },
+        onClick: () => upgradeCaskApp(this.app.full_token, this.app.name[0]),
       },
       {
         title: "Uninstall",
         color: "danger",
         shown: this.app.installed !== null,
-        onClick: async () => {
-          taskQueue.push(
-            {
-              label: `Uninstall ${this.app.name[0]}`,
-              type: "cask-uninstall",
-              caskIdentifier: this.app.full_token,
-            } as CaskUninstallTask,
-            ["before", "after"]
-          );
-        },
+        onClick: () => uninstallCaskApp(this.app.full_token, this.app.name[0]),
       },
     ];
-  }
-
-  private get appFileName(): string | null {
-    return this.app.artifacts
-      .filter((artifact) => Array.isArray(artifact))
-      ?.map(
-        (candidateArray) =>
-          candidateArray.filter(
-            (fileName) =>
-              typeof fileName.endsWith === "function" &&
-              fileName.endsWith(".app")
-          )?.[0]
-      )?.[0];
   }
 }

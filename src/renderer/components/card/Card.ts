@@ -33,7 +33,22 @@ class Card extends BootstrapBlockElement {
         }
       }
 
-      .card .card-title {
+      .card,
+      .card * {
+        z-index: 2;
+      }
+      .card:hover::before,
+      .openstore-card-link:focus .card::before {
+        content: "";
+        position: absolute;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        background: var(--accent-color-dark);
+        opacity: 20%;
+      }
+
+      .card-title {
         font-size: 1.25rem;
       }
     `,
@@ -42,9 +57,14 @@ class Card extends BootstrapBlockElement {
   render() {
     return html`${BootstrapBlockElement.styleLink}
 
-      <div class="card shadow-sm my-3">
-        <div class="row g-0 ms-lg-2 align-items-center">
-          <!-- <a
+      <a
+        href=${this.href}
+        class="openstore-card-link openstore-jsnav-link col-lg-8"
+        @click=${this.clicked}
+      >
+        <div class="card shadow-sm my-3">
+          <div class="row g-0 ms-lg-2 align-items-center">
+            <!-- <a
             href=${this.href}
             class="col-lg-4 openstore-card-link openstore-jsnav-link"
             @click=${this.clicked}
@@ -56,24 +76,18 @@ class Card extends BootstrapBlockElement {
             />
           </a> -->
 
-          <div class="card-body col-lg-8">
-            <h2 class="card-title">
-              <a
-                href=${this.href}
-                class="openstore-card-link openstore-jsnav-link"
-                @click=${this.clicked}
-                >${this.title}</a
-              >
-            </h2>
-            ${this.subtitle
-              ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
-                  ${this.subtitle}
-                </h3>`
-              : ""}
-            <p class="card-text">${this.details}</p>
+            <div class="card-body col-lg-8">
+              <h2 class="card-title">${this.title}</h2>
+              ${this.subtitle
+                ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
+                    ${this.subtitle}
+                  </h3>`
+                : ""}
+              <p class="card-text text-dark">${this.details}</p>
+            </div>
           </div>
         </div>
-      </div> `;
+      </a> `;
   }
 
   private clicked(event: Event) {

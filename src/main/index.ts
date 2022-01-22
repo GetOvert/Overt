@@ -3,6 +3,7 @@ import {
   BrowserWindow,
   ipcMain,
   IpcMainEvent,
+  MenuItemConstructorOptions,
   systemPreferences,
 } from "electron";
 import contextMenu from "electron-context-menu";
@@ -88,9 +89,33 @@ const createWindow = (): void => {
     return store.get(key);
   });
 
+  let contextMenuItems: {
+    items: (MenuItemConstructorOptions & { callback: string; args: any[] })[];
+  } = { items: [] };
+
+  ipcMain.handle(
+    "contextmenu.set",
+    (
+      event: IpcMainEvent,
+      items: (MenuItemConstructorOptions & { callback: string; args: any[] })[]
+    ) => {
+      contextMenuItems.items = items.map((item) => ({
+        ...item,
+        click() {
+          mainWindow.webContents.send(
+            `contextmenu.callback.${item.callback}`,
+            ...item.args
+          );
+        },
+      }));
+
+      setTimeout(() => (contextMenuItems.items = []), 100);
+    }
+  );
+
   contextMenu({
-    showSearchWithGoogle: false,
-    showCopyImageAddress: false
+    menu: (actions) => [actions.separator(), actions.cut({}), actions.copy({}), actions.paste({})],
+    prepend: () => contextMenuItems.items,
   });
 };
 

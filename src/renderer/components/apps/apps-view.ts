@@ -8,7 +8,6 @@ import { FilterKey, SortKey } from "ipc/IPCBrewCask";
 import { html, render } from "lit";
 import { asyncAppend } from "lit-html/directives/async-append.js";
 import { customElement, property, state } from "lit/decorators.js";
-import { classMap } from "lit/directives/class-map.js";
 import { repeat } from "lit/directives/repeat.js";
 import { getAppInfo, searchApps } from "./apps";
 
@@ -167,6 +166,28 @@ export default class AppsView extends BootstrapBlockElement {
                           subpage: app.full_token,
                         }
                       )}
+                      @contextmenu=${() =>
+                        window.contextMenu.set([
+                          {
+                            label: "Install",
+                            enabled: app.installed === null,
+                            callback: "cask-install",
+                            args: [app.full_token, app.name[0]],
+                          },
+                          {
+                            label: "Update",
+                            enabled:
+                              app.installed !== null && !app.auto_updates,
+                            callback: "cask-upgrade",
+                            args: [app.full_token, app.name[0]],
+                          },
+                          {
+                            label: "Uninstall",
+                            enabled: app.installed !== null,
+                            callback: "cask-uninstall",
+                            args: [app.full_token, app.name[0]],
+                          },
+                        ])}
                     ></openstore-card>
                   </openstore-col>
                 `
