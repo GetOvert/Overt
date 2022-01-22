@@ -30,12 +30,20 @@ export abstract class ProductView extends BootstrapBlockElement {
 
     this.taskQueueObserver = this.taskQueueChanged.bind(this);
     taskQueue.addObserver(this.taskQueueObserver);
+
+    document.addEventListener("keydown", this.keydown);
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
 
     taskQueue.removeObserver(this.taskQueueObserver);
+
+    document.removeEventListener("keydown", this.keydown);
+  }
+
+  private keydown(event: KeyboardEvent) {
+    if (event.key === "Escape") window.history.back();
   }
 
   private taskQueueChanged(updatedTask: QueuedTask) {
