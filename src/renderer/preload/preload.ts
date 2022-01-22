@@ -1,4 +1,4 @@
-import { contextBridge } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 import brewCask from "./brewCask";
 import contextMenu from "./contextMenu";
 import openExternalLink from "./openExternalLink";
@@ -16,3 +16,10 @@ contextBridge.exposeInMainWorld("settings", settings);
 contextBridge.exposeInMainWorld("taskQueueIPC", taskQueueIPC);
 contextBridge.exposeInMainWorld("terminal", terminal);
 contextBridge.exposeInMainWorld("theme", theme);
+
+// TODO: Move to search bar component (once the search bar has been converted to a component)
+ipcRenderer.on("focus_search_bar", () => {
+  const searchBar = document.querySelector("#search-bar") as HTMLInputElement;
+  searchBar.focus();
+  searchBar.select();
+});

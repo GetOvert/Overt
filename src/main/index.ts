@@ -1,3 +1,4 @@
+import { initAppMenu } from "./AppMenu";
 import {
   app,
   BrowserWindow,
@@ -114,9 +115,16 @@ const createWindow = (): void => {
   );
 
   contextMenu({
-    menu: (actions) => [actions.separator(), actions.cut({}), actions.copy({}), actions.paste({})],
+    menu: (actions) => [
+      actions.separator(),
+      actions.cut({}),
+      actions.copy({}),
+      actions.paste({}),
+    ],
     prepend: () => contextMenuItems.items,
   });
+
+  initAppMenu();
 };
 
 // This method will be called when Electron has finished
