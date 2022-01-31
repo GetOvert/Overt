@@ -62,7 +62,7 @@ class Card extends BootstrapBlockElement {
         class="openstore-card-link openstore-jsnav-link col-lg-8 user-select-none"
         @click=${this.clicked}
       >
-        <div class="card shadow-sm my-3">
+        <div class="card bg-light shadow-sm my-3">
           <div class="row g-0 ms-lg-2 align-items-center">
             <!-- <a
             href=${this.href}
