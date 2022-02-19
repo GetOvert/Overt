@@ -186,7 +186,10 @@ export default class AppsView extends BootstrapBlockElement {
                         },
                         {
                           label: "Update",
-                          enabled: app.installed !== null && !app.auto_updates,
+                          enabled:
+                            app.installed !== null &&
+                            !app.auto_updates &&
+                            app.installed !== app.version,
                           callback: "cask-upgrade",
                           args: [app.full_token, app.name[0]],
                         },

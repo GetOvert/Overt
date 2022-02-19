@@ -123,7 +123,10 @@ export default class AppView extends ProductView {
       {
         title: "Update",
         color: "success",
-        shown: this.app.installed !== null && !this.app.auto_updates,
+        shown:
+          this.app.installed !== null &&
+          !this.app.auto_updates &&
+          this.app.installed !== this.app.version,
         onClick: () => upgradeCaskApp(this.app.full_token, this.app.name[0]),
       },
       {
