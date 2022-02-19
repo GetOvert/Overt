@@ -152,46 +152,54 @@ export default class AppsView extends BootstrapBlockElement {
       >
         <openstore-row>
           ${repeat(this._appGenerators, (appGenerator) =>
-            asyncAppend(
-              appGenerator,
-              (app: any) =>
-                html`
-                  <openstore-col class="mx-2">
-                    <openstore-card
-                      .title=${app.name[0]}
-                      .subtitle=${app.full_token}
-                      .details=${app.desc}
-                      .href=${((window as any).openStore as any).encodeFragment(
+            asyncAppend(appGenerator, (app: any) => {
+              const installed = !!app.installed;
+              const outdated = app.installed !== app.version;
+
+              return html`
+                <openstore-col class="mx-2">
+                  <openstore-card
+                    .title=${app.name[0]}
+                    .subtitle=${app.full_token}
+                    .status=${installed
+                      ? outdated
+                        ? "update available"
+                        : "installed"
+                      : "not installed"}
+                    .statusColor=${installed
+                      ? outdated
+                        ? "info"
+                        : "success"
+                      : "muted"}
+                    .details=${app.desc}
+                    .href=${((window as any).openStore as any).encodeFragment({
+                      subpage: app.full_token,
+                    })}
+                    @contextmenu=${() =>
+                      window.contextMenu.set([
                         {
-                          subpage: app.full_token,
-                        }
-                      )}
-                      @contextmenu=${() =>
-                        window.contextMenu.set([
-                          {
-                            label: "Install",
-                            enabled: app.installed === null,
-                            callback: "cask-install",
-                            args: [app.full_token, app.name[0]],
-                          },
-                          {
-                            label: "Update",
-                            enabled:
-                              app.installed !== null && !app.auto_updates,
-                            callback: "cask-upgrade",
-                            args: [app.full_token, app.name[0]],
-                          },
-                          {
-                            label: "Uninstall",
-                            enabled: app.installed !== null,
-                            callback: "cask-uninstall",
-                            args: [app.full_token, app.name[0]],
-                          },
-                        ])}
-                    ></openstore-card>
-                  </openstore-col>
-                `
-            )
+                          label: "Install",
+                          enabled: app.installed === null,
+                          callback: "cask-install",
+                          args: [app.full_token, app.name[0]],
+                        },
+                        {
+                          label: "Update",
+                          enabled: app.installed !== null && !app.auto_updates,
+                          callback: "cask-upgrade",
+                          args: [app.full_token, app.name[0]],
+                        },
+                        {
+                          label: "Uninstall",
+                          enabled: app.installed !== null,
+                          callback: "cask-uninstall",
+                          args: [app.full_token, app.name[0]],
+                        },
+                      ])}
+                  ></openstore-card>
+                </openstore-col>
+              `;
+            })
           )}
         </openstore-row>
         <openstore-row>

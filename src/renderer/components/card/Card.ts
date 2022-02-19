@@ -9,6 +9,10 @@ class Card extends BootstrapBlockElement {
   @property()
   subtitle = "";
   @property()
+  status = "status";
+  @property()
+  statusColor = "muted";
+  @property()
   details = "";
   @property()
   href = "#";
@@ -78,9 +82,14 @@ class Card extends BootstrapBlockElement {
 
             <div class="card-body col-lg-8">
               <h2 class="card-title">${this.title}</h2>
-              ${this.subtitle
+              ${this.subtitle || this.status
                 ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
                     ${this.subtitle}
+                    ${this.status
+                      ? html`<span class="text-${this.statusColor}">
+                          (${this.status})
+                        </span>`
+                      : ""}
                   </h3>`
                 : ""}
               <p class="card-text text-dark">${this.details}</p>
