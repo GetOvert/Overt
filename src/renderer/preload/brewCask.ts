@@ -58,7 +58,6 @@ const brewCask = {
     let stdout = "";
     let stderr = "";
     brewProcess.stdout.on("data", (data) => {
-      console.log(`stdout: ${data}`);
       stdout += data;
     });
     brewProcess.stderr.on("data", (data) => {
@@ -114,7 +113,6 @@ const brewCask = {
       let json = "";
       let stderr = "";
       brewProcess.stdout.on("data", (data) => {
-        console.log(`stdout: ${data}`);
         json += data;
       });
       brewProcess.stderr.on("data", (data) => {
