@@ -1,7 +1,7 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import { QueuedTask } from "components/tasks/model/Task";
 import taskQueue, { TaskQueueObserver } from "components/tasks/model/TaskQueue";
-import { html, HTMLTemplateResult } from "lit";
+import { css, CSSResultArray, html, HTMLTemplateResult } from "lit";
 import { repeat } from "lit/directives/repeat.js";
 
 export type Field = {
@@ -56,6 +56,21 @@ export abstract class ProductView extends BootstrapBlockElement {
       );
     }
   }
+
+  static styles: CSSResultArray = [
+    BootstrapBlockElement.styles,
+    css`
+      dt,
+      dd {
+        display: inline;
+      }
+      /* Break line after dd */
+      dl dd::after {
+        content: "";
+        display: block;
+      }
+    `,
+  ];
 
   render() {
     const shownButtons = this.buttons.filter((button) => button.shown);

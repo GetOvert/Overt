@@ -46,13 +46,17 @@ export default class AppView extends ProductView {
         </p>`,
       },
       {
-        heading: "Version",
-        value:
-          this.app.version +
-          "\n" +
-          (this.app.auto_updates
-            ? "This app updates itself."
-            : "This app does not update itself. You can install updates from OpenStore."),
+        heading: "Versions",
+        value: html`<dl>
+          <dt>Installed:</dt>
+          <dd>${this.app.installed ?? "None"}</dd>
+          <dt>Latest:</dt>
+          <dd>${this.app.version}</dd>
+          <dt>Updates:</dt>
+          <dd>
+            ${this.app.auto_updates ? "Via built-in updater" : "Via OpenStore"}
+          </dd>
+        </dl>`,
       },
       {
         heading: "Requirements",
