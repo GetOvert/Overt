@@ -239,7 +239,7 @@ export default class AppsView extends BootstrapBlockElement {
     render(html`<openstore-apps-view></openstore-apps-view>`, content);
   },
   async getSubpage(appIdentifier: string): Promise<any> {
-    const app = getAppInfo(appIdentifier) as any;
+    const app = (await getAppInfo(appIdentifier)) as any;
 
     return {
       title: app.name[0],

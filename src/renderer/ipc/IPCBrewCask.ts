@@ -6,9 +6,12 @@ declare global {
 
 export interface IPCBrewCask {
   addIndexListener(listener: () => void): void;
-  rebuildIndex(condition: "always" | "if-nonexistent"): Promise<void>;
+  rebuildIndex(
+    condition: "always" | "if-too-old" | "if-nonexistent",
+    wipeIndexFirst?: boolean
+  ): Promise<void>;
   reindexOutdated(): Promise<void>;
-  updateIndex(caskNames: string[]): Promise<void>;
+  updateIndex(caskNames?: string[]): Promise<void>;
 
   search(
     searchString: string,
@@ -16,8 +19,8 @@ export interface IPCBrewCask {
     filterBy: FilterKey,
     limit: number,
     offset: number
-  ): object[];
-  info(caskName: string): object;
+  ): Promise<object[]>;
+  info(caskName: string): Promise<object>;
 
   install(caskName: string): Promise<boolean>;
   upgrade(caskName: string): Promise<boolean>;

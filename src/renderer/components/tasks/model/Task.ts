@@ -30,6 +30,7 @@ export type Task = {
 export type TaskType =
   | "prompt-for-password"
   | "cask-reindex-all"
+  | "cask-reindex-outdated"
   | "cask-reindex"
   | "cask-install"
   | "cask-upgrade"
@@ -41,7 +42,11 @@ export type PromptForPasswordTask = Task & {
 };
 export type CaskReindexAllTask = Task & {
   type: "cask-reindex-all";
-  condition: "always" | "if-nonexistent";
+  condition?: "always" | "if-too-old" | "if-nonexistent";
+  wipeIndexFirst?: boolean;
+};
+export type CaskReindexOutdatedTask = Task & {
+  type: "cask-reindex-outdated";
 };
 export type CaskReindexTask = Task & {
   type: "cask-reindex";

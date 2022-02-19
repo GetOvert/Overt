@@ -10,9 +10,15 @@ export async function searchApps(
   limit: number,
   offset: number
 ): Promise<object[]> {
-  return window.brewCask.search(searchString, sortBy, filterBy, limit, offset);
+  return await window.brewCask.search(
+    searchString,
+    sortBy,
+    filterBy,
+    limit,
+    offset
+  );
 }
 
-export function getAppInfo(caskName: string): object {
-  return window.brewCask.info(caskName);
+export async function getAppInfo(caskName: string): Promise<object> {
+  return await window.brewCask.info(caskName);
 }

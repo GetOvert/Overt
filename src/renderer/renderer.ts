@@ -49,7 +49,10 @@ import "components/tasks/task-notifications";
 import "components/modal/PasswordPromptModal";
 
 import taskQueue from "components/tasks/model/TaskQueue";
-import { CaskReindexAllTask } from "components/tasks/model/Task";
+import {
+  CaskReindexAllTask,
+  CaskReindexOutdatedTask,
+} from "components/tasks/model/Task";
 
 const accentColor = window.theme.getAccentColor();
 document.documentElement.style.setProperty("--accent-color", accentColor);
@@ -94,7 +97,11 @@ window.addEventListener("load", () => {
 
   taskQueue.push({
     type: "cask-reindex-all",
-    label: "Build index if necessary",
-    condition: "if-nonexistent",
+    label: "Rebuild catalog if too old",
+    condition: "if-too-old",
   } as CaskReindexAllTask);
+  taskQueue.push({
+    type: "cask-reindex-outdated",
+    label: "Check for updates",
+  } as CaskReindexOutdatedTask);
 });

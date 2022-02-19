@@ -1,7 +1,11 @@
 import { spawn } from "child_process";
 import { quote } from "shell-quote";
 
-import { cacheDB } from "./cacheDB";
+import {
+  cacheDB,
+  cacheDB_addSchema,
+  cacheDB_ModifiedTimeAtLaunch,
+} from "./cacheDB";
 import {
   deleteAllRecords,
   deleteRecords,
@@ -15,27 +19,28 @@ import { PromptForPasswordTask } from "components/tasks/model/Task";
 import settings from "./settings";
 import path from "path";
 
-cacheDB
-  .prepare(
-    sql`
-  CREATE TABLE IF NOT EXISTS "casks" (
-    "token" TEXT NOT NULL COLLATE NOCASE,
-    "full_token" TEXT COLLATE NOCASE PRIMARY KEY,
-    "tap" TEXT NOT NULL COLLATE NOCASE,
-    "name" TEXT,
-    "version" TEXT,
-    "desc" TEXT,
-    "homepage" TEXT,
-    "installed" TEXT, -- Version of the cask installed on this machine, or null if not installed
-    "json" TEXT,
-    "installed_30d" INTEGER, -- Install count analytics for last 30 days
-    "installed_90d" INTEGER, -- Install count analytics for last 90 days
-    "installed_365d" INTEGER, -- Install count analytics for last 365 days
-    "updated" TIMESTAMP, -- Last time the cask was updated
-    "added" TIMESTAMP -- Time the cask was added to the Homebrew
-  )`
-  )
-  .run();
+// TODO: Make user-configurable?
+const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
+
+cacheDB_addSchema(
+  sql`
+    CREATE TABLE IF NOT EXISTS "casks" (
+      "token" TEXT NOT NULL COLLATE NOCASE,
+      "full_token" TEXT COLLATE NOCASE PRIMARY KEY,
+      "tap" TEXT NOT NULL COLLATE NOCASE,
+      "name" TEXT,
+      "version" TEXT,
+      "desc" TEXT,
+      "homepage" TEXT,
+      "installed" TEXT, -- Version of the cask installed on this machine, or null if not installed
+      "json" TEXT,
+      "installed_30d" INTEGER, -- Install count analytics for last 30 days
+      "installed_90d" INTEGER, -- Install count analytics for last 90 days
+      "installed_365d" INTEGER, -- Install count analytics for last 365 days
+      "updated" TIMESTAMP, -- Last time the cask was updated
+      "added" TIMESTAMP -- Time the cask was added to the Homebrew
+    )`
+);
 
 let indexListeners = new Set<() => void>();
 
@@ -67,39 +72,40 @@ const brewCask = {
 
     return new Promise((resolve, reject) => {
       brewProcess.on("exit", async (code) => {
-        await (brewCask as any)._runBrewInfoAndRebuildIndex(
-          stdout.split(/\s+/).filter((s) => s)
-        );
+        await brewCask.updateIndex(stdout.split(/\s+/).filter((s) => s));
         resolve();
       });
       brewProcess.on("error", reject);
     });
   },
 
-  async rebuildIndex(condition) {
-    if (condition === "if-nonexistent") {
-      try {
-        if (
-          cacheDB.prepare(sql`SELECT "rowid" FROM "casks" LIMIT 1`).get() !==
-          undefined
-        ) {
-          brewCask.reindexOutdated();
-          return;
-        }
-      } catch (e) {}
+  async rebuildIndex(condition, wipeIndexFirst) {
+    if (!condition) condition = "always";
+
+    let indexExists = false;
+    try {
+      indexExists =
+        (await cacheDB())
+          .prepare(sql`SELECT "rowid" FROM "casks" LIMIT 1`)
+          .get() !== undefined;
+    } catch (e) {}
+
+    const nowTime = new Date().getTime();
+    const indexTooOld =
+      (nowTime - (await cacheDB_ModifiedTimeAtLaunch())) / 1000 >
+      rebuildIndexAfterSeconds;
+
+    if (
+      !indexExists ||
+      (condition === "if-too-old" && indexTooOld) ||
+      condition === "always"
+    ) {
+      if (wipeIndexFirst) deleteAllRecords(await cacheDB(), "casks");
+      await brewCask.updateIndex();
     }
-
-    deleteAllRecords(cacheDB, "casks");
-    await (brewCask as any)._runBrewInfoAndRebuildIndex("--all");
   },
 
-  async updateIndex(caskNames) {
-    await (brewCask as any)._runBrewInfoAndRebuildIndex(caskNames);
-  },
-
-  async _runBrewInfoAndRebuildIndex(
-    caskNames: string[] | "--all"
-  ): Promise<void> {
+  async updateIndex(caskNames?: string[]): Promise<void> {
     if (Array.isArray(caskNames) && caskNames.length === 0) return;
 
     (await (async () => {
@@ -107,7 +113,7 @@ const brewCask = {
         "info",
         "--json=v2",
         "--cask",
-        ...(caskNames === "--all" ? ["--all"] : caskNames),
+        ...(caskNames ?? ["--all"]),
       ]);
 
       let json = "";
@@ -157,8 +163,8 @@ const brewCask = {
     indexListeners.clear();
   },
 
-  _rebuildIndexFromCaskInfo(
-    caskNamesToUpdate: string[] | "--all",
+  async _rebuildIndexFromCaskInfo(
+    caskNamesToUpdate: string[] | undefined,
     casks: any[],
     installs30d: CaskAnalyticsData,
     installs90d: CaskAnalyticsData,
@@ -171,7 +177,7 @@ const brewCask = {
           : "all")
     );
     insertOrReplaceRecords(
-      cacheDB,
+      await cacheDB(),
       "casks",
       [
         "token",
@@ -212,9 +218,9 @@ const brewCask = {
       }))
     );
 
-    if (caskNamesToUpdate !== "--all") {
+    if (caskNamesToUpdate) {
       deleteRecords(
-        cacheDB,
+        await cacheDB(),
         "casks",
         caskNamesToUpdate
           .map((caskName) => {
@@ -229,10 +235,10 @@ const brewCask = {
     }
   },
 
-  search(searchString, sortBy, filterBy, limit, offset) {
+  async search(searchString, sortBy, filterBy, limit, offset) {
     const keywords = searchString.split(/\s+/);
 
-    return cacheDB
+    return (await cacheDB())
       .prepare(
         sql`
         SELECT
@@ -271,8 +277,8 @@ const brewCask = {
       }));
   },
 
-  info(caskName) {
-    const row = cacheDB
+  async info(caskName) {
+    const row = (await cacheDB())
       .prepare(
         sql`
         SELECT

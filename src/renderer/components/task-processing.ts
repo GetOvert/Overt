@@ -59,14 +59,20 @@ const promptForPasswordProcessor = new TaskProcessor(
 );
 
 const reindexProcessor = new TaskProcessor(
-  ["cask-reindex-all", "cask-reindex"],
+  ["cask-reindex-all", "cask-reindex-outdated", "cask-reindex"],
   async (task: QueuedTask) => {
     let success = false;
     switch (task.type) {
       case "cask-reindex-all":
+        const reindexAll = task as unknown as CaskReindexAllTask;
         await window.brewCask.rebuildIndex(
-          (task as unknown as CaskReindexAllTask).condition
+          reindexAll.condition,
+          reindexAll.wipeIndexFirst
         );
+        success = true;
+        break;
+      case "cask-reindex-outdated":
+        await window.brewCask.reindexOutdated();
         success = true;
         break;
       case "cask-reindex":

@@ -83,10 +83,10 @@ export class SettingsPane extends BootstrapBlockElement {
           class="btn btn-outline-secondary mb-3"
           data-bs-toggle="tooltip"
           data-bs-placement="right"
-          title="Replace OpenStore's dataset with a fresh copy from the package manager. This may take a few minutes."
+          title="Replace OpenStore's catalog with a fresh copy from the package manager. This may take a few minutes."
           @click=${this.rebuildIndex}
         >
-          Rebuild Index
+          Rebuild Catalog
         </button>
       </div> `;
   }
@@ -146,8 +146,9 @@ export class SettingsPane extends BootstrapBlockElement {
     taskQueue.push(
       {
         type: "cask-reindex-all",
-        label: "Rebuild index",
+        label: "Rebuild catalog",
         condition: "always",
+        wipeIndexFirst: true,
       } as CaskReindexAllTask,
       ["before", "after"]
     );
