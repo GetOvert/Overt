@@ -57,7 +57,7 @@ const brewCask = {
     const brewProcess = spawn(await getBrewExecutablePath(), [
       "outdated",
       "--cask",
-      "--greedy",
+      "--greedy-latest",
     ]);
 
     let stdout = "";

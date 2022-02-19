@@ -154,7 +154,8 @@ export default class AppsView extends BootstrapBlockElement {
           ${repeat(this._appGenerators, (appGenerator) =>
             asyncAppend(appGenerator, (app: any) => {
               const installed = !!app.installed;
-              const outdated = app.installed !== app.version;
+              const outdated =
+                !app.auto_updates && app.installed !== app.version;
 
               return html`
                 <openstore-col class="mx-2">
