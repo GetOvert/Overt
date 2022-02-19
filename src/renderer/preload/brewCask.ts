@@ -48,6 +48,35 @@ const brewCask = {
     indexListeners.add(listener);
   },
 
+  async reindexOutdated() {
+    const brewProcess = spawn(await getBrewExecutablePath(), [
+      "outdated",
+      "--cask",
+      "--greedy",
+    ]);
+
+    let stdout = "";
+    let stderr = "";
+    brewProcess.stdout.on("data", (data) => {
+      console.log(`stdout: ${data}`);
+      stdout += data;
+    });
+    brewProcess.stderr.on("data", (data) => {
+      console.error(`stderr: ${data}`);
+      stderr += data;
+    });
+
+    return new Promise((resolve, reject) => {
+      brewProcess.on("exit", async (code) => {
+        await (brewCask as any)._runBrewInfoAndRebuildIndex(
+          stdout.split(/\s+/).filter((s) => s)
+        );
+        resolve();
+      });
+      brewProcess.on("error", reject);
+    });
+  },
+
   async rebuildIndex(condition) {
     if (condition === "if-nonexistent") {
       try {
@@ -55,6 +84,7 @@ const brewCask = {
           cacheDB.prepare(sql`SELECT "rowid" FROM "casks" LIMIT 1`).get() !==
           undefined
         ) {
+          brewCask.reindexOutdated();
           return;
         }
       } catch (e) {}

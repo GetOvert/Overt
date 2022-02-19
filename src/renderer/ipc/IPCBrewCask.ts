@@ -7,6 +7,7 @@ declare global {
 export interface IPCBrewCask {
   addIndexListener(listener: () => void): void;
   rebuildIndex(condition: "always" | "if-nonexistent"): Promise<void>;
+  reindexOutdated(): Promise<void>;
   updateIndex(caskNames: string[]): Promise<void>;
 
   search(
