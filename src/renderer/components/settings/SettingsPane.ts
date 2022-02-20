@@ -83,7 +83,7 @@ export class SettingsPane extends BootstrapBlockElement {
           class="btn btn-outline-secondary mb-3"
           data-bs-toggle="tooltip"
           data-bs-placement="right"
-          title="Replace OpenStore's catalog with a fresh copy from the package manager. This may take a few minutes."
+          title="Replace OpenStore's catalog with a fresh copy from the package manager. This may take a minute or two."
           @click=${this.rebuildIndex}
         >
           Rebuild Catalog

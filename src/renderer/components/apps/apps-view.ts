@@ -1,13 +1,13 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import "components/card/Card";
 import "components/grid/grid";
-import { Grid } from "components/grid/grid";
-import { QueuedTask } from "components/tasks/model/Task";
+import { CaskReindexAllTask, QueuedTask } from "components/tasks/model/Task";
 import taskQueue, { TaskQueueObserver } from "components/tasks/model/TaskQueue";
 import { FilterKey, SortKey } from "ipc/IPCBrewCask";
-import { html, render } from "lit";
+import { css, html, HTMLTemplateResult, render } from "lit";
 import { asyncAppend } from "lit-html/directives/async-append.js";
 import { customElement, property, state } from "lit/decorators.js";
+import { Ref, createRef, ref } from "lit/directives/ref.js";
 import { repeat } from "lit/directives/repeat.js";
 import { getAppInfo, searchApps } from "./apps";
 
@@ -43,12 +43,13 @@ export default class AppsView extends BootstrapBlockElement {
   @state()
   private _appGenerators: AsyncGenerator<object>[] = [];
   @state()
+  private _loadedCount = 0;
+  @state()
   private _canLoadMore = true;
 
-  private _lastFragment: string = window.location.hash;
-
-  get grid(): Grid {
-    return this.renderRoot.querySelector("openstore-grid");
+  private _scrollContainerRef: Ref<HTMLElement> = createRef();
+  get _scrollContainer(): HTMLElement {
+    return this._scrollContainerRef.value;
   }
 
   constructor() {
@@ -70,18 +71,32 @@ export default class AppsView extends BootstrapBlockElement {
     super.disconnectedCallback();
 
     taskQueue.removeObserver(this.taskQueueObserver);
-
-    this._lastFragment = window.location.hash;
   }
 
   private taskQueueChanged(updatedTask: QueuedTask) {
     if (
       updatedTask.state === "succeeded" &&
-      ["cask-reindex-all", "cask-reindex"].includes(updatedTask.type)
+      ["cask-reindex-all", "cask-reindex-outdated", "cask-reindex"].includes(
+        updatedTask.type
+      )
     ) {
-      this._appGenerators = [];
+      this._reset();
       this._loadApps(lastOffset + fetchedChunkSize);
     }
+
+    if (
+      updatedTask.state === "running" &&
+      updatedTask.type === "cask-reindex-all" &&
+      (updatedTask as CaskReindexAllTask).wipeIndexFirst
+    ) {
+      this._reset();
+    }
+  }
+
+  private _reset() {
+    this._appGenerators = [];
+    this._loadedCount = 0;
+    this._canLoadMore = true;
   }
 
   private _loadApps(limit: number) {
@@ -92,13 +107,14 @@ export default class AppsView extends BootstrapBlockElement {
       provideAppsAsGenerator(
         routeParams.search ?? "",
         routeParams.sort ?? "installed-30d",
-        routeParams.filter ?? "available",
+        routeParams.filter ?? "all",
         limit,
         this.offset,
         (result) => {
+          this._loadedCount += result.length;
           this._canLoadMore = result.length === fetchedChunkSize;
           window.setTimeout(() => {
-            this.grid.scrollTo({ top: lastScrollY });
+            this._scrollContainer.scrollTo({ top: lastScrollY });
           }, 0);
         }
       )
@@ -109,10 +125,10 @@ export default class AppsView extends BootstrapBlockElement {
   protected firstUpdated(
     changedProperties: Map<string | number | symbol, unknown>
   ): void {
-    this.grid.addEventListener(
+    this._scrollContainer.addEventListener(
       "scroll",
       () => {
-        lastScrollY = this.grid.scrollTop;
+        lastScrollY = this._scrollContainer.scrollTop;
       },
       { passive: true }
     );
@@ -122,9 +138,35 @@ export default class AppsView extends BootstrapBlockElement {
     changedProperties: Map<string | number | symbol, unknown>
   ): void {
     if (changedProperties.has("offset")) {
-      this.grid.scrollTo({ top: lastScrollY });
+      this._scrollContainer.scrollTo({ top: lastScrollY });
     }
   }
+
+  loadMoreApps() {
+    this.offset += fetchedChunkSize;
+    lastOffset = this.offset;
+
+    this._loadApps(fetchedChunkSize);
+  }
+
+  static styles = [
+    BootstrapBlockElement.styles,
+    css`
+      .loading-letter {
+        animation: loading-letter 2s ease-out infinite;
+      }
+
+      @keyframes loading-letter {
+        7% {
+          opacity: 60%;
+        }
+
+        35% {
+          opacity: 100%;
+        }
+      }
+    `,
+  ];
 
   render() {
     return html`
@@ -141,7 +183,8 @@ export default class AppsView extends BootstrapBlockElement {
       >
       </openstore-sidebar>
 
-      <openstore-grid
+      <div
+        ${ref(this._scrollContainerRef)}
         class="position-fixed overflow-scroll pe-2"
         style="
           top: 56px;
@@ -150,89 +193,115 @@ export default class AppsView extends BootstrapBlockElement {
           height: calc(100vh - 56px);
         "
       >
-        <openstore-row>
-          ${repeat(this._appGenerators, (appGenerator) =>
-            asyncAppend(appGenerator, (app: any) => {
-              const installed = !!app.installed;
-              const outdated =
-                !app.auto_updates && app.installed !== app.version;
+        <div
+          class="text-center position-absolute top-50 start-50 translate-middle pb-5 ${this
+            ._loadedCount === 0
+            ? ""
+            : "d-none"}"
+        >
+          <div class="spinner-border border-5 text-primary" style="width: 2.5rem; height: 2.5rem;" role="status"></div>
+          <h1 class="h3 fw-bold mt-3">
+            ${this.animatedLoadingText("Building catalog…")}
+          </h1>
+          <p class="text-muted fst-italic fw-normal mt-3">
+            This may take a minute or two
+          </p>
+        </div>
+        <openstore-grid class="${this._loadedCount !== 0 ? "" : "d-none"}">
+          <openstore-row>
+            ${repeat(this._appGenerators, (appGenerator) =>
+              asyncAppend(appGenerator, (app: any) => {
+                const installed = !!app.installed;
+                const outdated =
+                  !app.auto_updates && app.installed !== app.version;
 
-              return html`
-                <openstore-col class="mx-2">
-                  <openstore-card
-                    .title=${app.name[0]}
-                    .subtitle=${app.full_token}
-                    .status=${installed
-                      ? outdated
-                        ? "update available"
-                        : "installed"
-                      : "not installed"}
-                    .statusColor=${installed
-                      ? outdated
-                        ? "info"
-                        : "success"
-                      : "muted"}
-                    .details=${app.desc}
-                    .href=${((window as any).openStore as any).encodeFragment({
-                      subpage: app.full_token,
-                    })}
-                    @contextmenu=${() =>
-                      window.contextMenu.set([
+                return html`
+                  <openstore-col class="mx-2">
+                    <openstore-card
+                      .title=${app.name[0]}
+                      .subtitle=${app.full_token}
+                      .status=${installed
+                        ? outdated
+                          ? "update available"
+                          : "installed"
+                        : "not installed"}
+                      .statusColor=${installed
+                        ? outdated
+                          ? "info"
+                          : "success"
+                        : "muted"}
+                      .details=${app.desc}
+                      .href=${((window as any).openStore as any).encodeFragment(
                         {
-                          label: "Install",
-                          enabled: app.installed === null,
-                          callback: "cask-install",
-                          args: [app.full_token, app.name[0]],
-                        },
-                        {
-                          label: "Update",
-                          enabled:
-                            app.installed !== null &&
-                            !app.auto_updates &&
-                            app.installed !== app.version,
-                          callback: "cask-upgrade",
-                          args: [app.full_token, app.name[0]],
-                        },
-                        {
-                          label: "Uninstall",
-                          enabled: app.installed !== null,
-                          callback: "cask-uninstall",
-                          args: [app.full_token, app.name[0]],
-                        },
-                      ])}
-                  ></openstore-card>
-                </openstore-col>
-              `;
-            })
-          )}
-        </openstore-row>
-        <openstore-row>
-          ${this._canLoadMore
-            ? html`
-                <button
-                  class="${this._canLoadMore
-                    ? ""
-                    : "d-none"} btn btn-primary mt-2 mb-4"
-                  @click=${this.loadMoreApps}
-                >
-                  Load More
-                </button>
-              `
-            : html`
-                <div class="text-center text-muted fst-italic mt-2 mb-4">
-                  Nothing more to load
-                </div>
-              `}
-        </openstore-row>
-      </openstore-grid>
+                          subpage: app.full_token,
+                        }
+                      )}
+                      @contextmenu=${() =>
+                        window.contextMenu.set([
+                          {
+                            label: "Install",
+                            enabled: app.installed === null,
+                            callback: "cask-install",
+                            args: [app.full_token, app.name[0]],
+                          },
+                          {
+                            label: "Update",
+                            enabled:
+                              app.installed !== null &&
+                              !app.auto_updates &&
+                              app.installed !== app.version,
+                            callback: "cask-upgrade",
+                            args: [app.full_token, app.name[0]],
+                          },
+                          {
+                            label: "Uninstall",
+                            enabled: app.installed !== null,
+                            callback: "cask-uninstall",
+                            args: [app.full_token, app.name[0]],
+                          },
+                        ])}
+                    ></openstore-card>
+                  </openstore-col>
+                `;
+              })
+            )}
+          </openstore-row>
+          <openstore-row>
+            ${this._canLoadMore
+              ? html`
+                  <button
+                    class="${this._canLoadMore
+                      ? ""
+                      : "d-none"} btn btn-primary mt-2 mb-4"
+                    @click=${this.loadMoreApps}
+                  >
+                    Load More
+                  </button>
+                `
+              : html`
+                  <div class="text-center text-muted fst-italic mt-2 mb-4">
+                    Nothing more to load
+                  </div>
+                `}
+          </openstore-row>
+        </openstore-grid>
+      </div>
     `;
   }
 
-  loadMoreApps() {
-    this.offset += fetchedChunkSize;
-    lastOffset = this.offset;
-
-    this._loadApps(fetchedChunkSize);
+  private animatedLoadingText(text: string): HTMLTemplateResult {
+    return html`<span class="visually-hidden">${text}</span>${text
+        .split(/(?=.)/)
+        .filter((s) => s)
+        .map(
+          (s, index) =>
+            html`<span
+              aria-hidden="true"
+              class="loading-letter"
+              style="animation-delay: ${index * 0.05}s"
+              >${s}</span
+            >`
+        )} `;
   }
 }
 
