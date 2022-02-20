@@ -112,7 +112,7 @@ export default class AppsView extends BootstrapBlockElement {
         this.offset,
         (result) => {
           this._loadedCount += result.length;
-          this._canLoadMore = result.length === fetchedChunkSize;
+          this._canLoadMore = result.length === limit;
           window.setTimeout(() => {
             this._scrollContainer.scrollTo({ top: lastScrollY });
           }, 0);
@@ -143,8 +143,8 @@ export default class AppsView extends BootstrapBlockElement {
   }
 
   loadMoreApps() {
-    this.offset += fetchedChunkSize;
-    lastOffset = this.offset;
+    lastOffset += fetchedChunkSize;
+    this.offset = lastOffset;
 
     this._loadApps(fetchedChunkSize);
   }
@@ -199,7 +199,11 @@ export default class AppsView extends BootstrapBlockElement {
             ? ""
             : "d-none"}"
         >
-          <div class="spinner-border border-5 text-primary" style="width: 2.5rem; height: 2.5rem;" role="status"></div>
+          <div
+            class="spinner-border border-5 text-primary"
+            style="width: 2.5rem; height: 2.5rem;"
+            role="status"
+          ></div>
           <h1 class="h3 fw-bold mt-3">
             ${this.animatedLoadingText("Building catalog…")}
           </h1>
