@@ -1,6 +1,6 @@
 import Database from "better-sqlite3";
 import path from "path";
-import fs, { stat } from "fs";
+import fs from "fs";
 import { promisify } from "util";
 
 // Passed in webPreferences.additionalArguments:
@@ -8,7 +8,22 @@ const cachePath = process.argv
   .filter((arg) => arg.includes("OpenStore.cachePath="))[0]
   .slice("OpenStore.cachePath=".length);
 
-const cacheDir = path.join(cachePath, "OpenStore_v1");
+const cacheDir = path.join(cachePath, "OpenStore_v2");
+const oldCacheDirs = [path.join(cachePath, "OpenStore_v1")];
+
+// Try to delete older versions of cache
+for (const oldCacheDir of oldCacheDirs) {
+  try {
+    if (fs.existsSync(oldCacheDir)) {
+      console.log(`Deleting old cache dir: ${oldCacheDir}`);
+      fs.rmSync(oldCacheDir, { recursive: true });
+    }
+  } catch (e) {
+    console.error(`Couldn't delete older cache dir: ${e}`);
+  }
+}
+
+// Set up cache (for current version)
 fs.mkdirSync(cacheDir, { recursive: true });
 
 const cacheDBPath = path.join(cacheDir, "OpenStore_Cache.db");
@@ -29,7 +44,7 @@ export async function cacheDB() {
   if (!_cacheDB) {
     try {
       _cacheDB_ModifiedTimeAtLaunch = (
-        await promisify(stat)(cacheDBPath)
+        await promisify(fs.stat)(cacheDBPath)
       ).mtime.getTime();
     } catch (e) {
       // Presumably the file doesn't exist
