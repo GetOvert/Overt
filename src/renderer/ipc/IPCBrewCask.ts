@@ -33,4 +33,4 @@ export type SortKey =
   | "installed-365d"
   | "updated"
   | "added";
-export type FilterKey = "available" | "installed";
+export type FilterKey = "all" | "available" | "installed" | "updates";

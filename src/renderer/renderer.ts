@@ -91,7 +91,7 @@ followSystemColorScheme(
 window.addEventListener("load", () => {
   (window as any).openStore.updateWindowLocationFragment({
     source: "brew-cask",
-    filter: "available",
+    filter: "all",
     sort: "installed-30d",
   });
 

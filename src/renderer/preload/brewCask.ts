@@ -33,6 +33,7 @@ cacheDB_addSchema(
       "desc" TEXT,
       "homepage" TEXT,
       "installed" TEXT, -- Version of the cask installed on this machine, or null if not installed
+      "auto_updates" BOOLEAN, -- Whether the cask auto-updates (NULL means false)
       "json" TEXT,
       "installed_30d" INTEGER, -- Install count analytics for last 30 days
       "installed_90d" INTEGER, -- Install count analytics for last 90 days
@@ -188,6 +189,7 @@ const brewCask = {
         "desc",
         "homepage",
         "installed",
+        "auto_updates",
         "json",
         "installed_30d",
         "installed_90d",
@@ -255,8 +257,21 @@ const brewCask = {
                   OR casks.name LIKE $pattern${index}
                   OR casks.desc LIKE $pattern${index})`
             )
-            .join(" AND ")})
-          AND casks.installed IS ${filterBy === "installed" ? "NOT" : ""} NULL
+            .join(sql` AND `)})
+          ${(() => {
+            switch (filterBy) {
+              case "all":
+                return "";
+              case "available":
+                return sql`AND casks.installed IS NULL`;
+              case "installed":
+                return sql`AND casks.installed IS NOT NULL`;
+              case "updates":
+                return sql`
+                  AND casks.installed IS NOT NULL
+                  AND casks.auto_updates IS NULL`;
+            }
+          })()}
         ORDER BY casks.${dbKeyForSortKey(sortBy)} DESC
         LIMIT $l OFFSET $o
       `

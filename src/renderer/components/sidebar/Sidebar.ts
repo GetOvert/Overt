@@ -69,6 +69,15 @@ export default class Sidebar extends BootstrapBlockElement {
 
           <openstore-sidebar-nav-link
             href=${((window as any).openStore as any).encodeFragment({
+              filter: "all",
+            })}
+            label="All"
+            ?active=${(window as any).openStore.decodeFragment(
+              window.location.hash
+            ).filter === "all"}
+          ></openstore-sidebar-nav-link>
+          <openstore-sidebar-nav-link
+            href=${((window as any).openStore as any).encodeFragment({
               filter: "available",
             })}
             label="Available"
@@ -84,6 +93,15 @@ export default class Sidebar extends BootstrapBlockElement {
             ?active=${(window as any).openStore.decodeFragment(
               window.location.hash
             ).filter === "installed"}
+          ></openstore-sidebar-nav-link>
+          <openstore-sidebar-nav-link
+            href=${((window as any).openStore as any).encodeFragment({
+              filter: "updates",
+            })}
+            label="Updates"
+            ?active=${(window as any).openStore.decodeFragment(
+              window.location.hash
+            ).filter === "updates"}
           ></openstore-sidebar-nav-link>
         </nav>
 
