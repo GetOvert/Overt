@@ -93,6 +93,14 @@ export default class AppsView extends BootstrapBlockElement {
     }
   }
 
+  private get _currentlyIndexing(): boolean {
+    return !!taskQueue.liveTasks.find(
+      (task) =>
+        task.type === "cask-reindex-all" &&
+        (task as CaskReindexAllTask).wipeIndexFirst
+    );
+  }
+
   private _reset() {
     this._appGenerators = [];
     this._loadedCount = 0;
@@ -195,7 +203,7 @@ export default class AppsView extends BootstrapBlockElement {
       >
         <div
           class="text-center position-absolute top-50 start-50 translate-middle pb-5 ${this
-            ._loadedCount === 0
+            ._currentlyIndexing
             ? ""
             : "d-none"}"
         >
@@ -211,7 +219,21 @@ export default class AppsView extends BootstrapBlockElement {
             This may take a minute or two
           </p>
         </div>
-        <openstore-grid class="${this._loadedCount !== 0 ? "" : "d-none"}">
+
+        <div
+          class="text-center position-absolute top-50 start-50 translate-middle pb-5 ${!this
+            ._currentlyIndexing && this._loadedCount === 0
+            ? ""
+            : "d-none"}"
+        >
+          <h1 class="h3 text-muted mt-3">No results</h1>
+        </div>
+
+        <openstore-grid
+          class="${!this._currentlyIndexing && this._loadedCount !== 0
+            ? ""
+            : "d-none"}"
+        >
           <openstore-row>
             ${repeat(this._appGenerators, (appGenerator) =>
               asyncAppend(appGenerator, (app: any) => {
@@ -276,14 +298,14 @@ export default class AppsView extends BootstrapBlockElement {
                   <button
                     class="${this._canLoadMore
                       ? ""
-                      : "d-none"} btn btn-primary mt-2 mb-4"
+                      : "d-none"} btn btn-primary mt-3 mb-5"
                     @click=${this.loadMoreApps}
                   >
                     Load More
                   </button>
                 `
               : html`
-                  <div class="text-center text-muted fst-italic mt-2 mb-4">
+                  <div class="h4 text-center text-muted mt-3 mb-5">
                     Nothing more to load
                   </div>
                 `}
