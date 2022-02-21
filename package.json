@@ -1,7 +1,7 @@
 {
   "name": "openstore",
   "productName": "OpenStore",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "An open app store",
   "main": ".webpack/main",
   "scripts": {
