@@ -29,6 +29,7 @@
 // import { auto as followSystemColorScheme, setFetchMethod } from "darkreader";
 import Color from "color";
 
+import "bootswatch/dist/sandstone/bootstrap.min.css";
 import "styles/default.css";
 
 import "core/nav";
