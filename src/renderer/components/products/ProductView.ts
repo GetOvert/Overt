@@ -101,7 +101,7 @@ export abstract class ProductView extends BootstrapBlockElement {
           ({ heading }) => heading,
           ({ heading, value }) =>
             value
-              ? html`<h3>${heading}</h3>
+              ? html`<h3 style="font-weight: 500">${heading}</h3>
                   ${htmlForFieldValue(value, true)}`
               : ""
         )}

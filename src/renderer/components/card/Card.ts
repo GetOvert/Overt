@@ -81,7 +81,7 @@ class Card extends BootstrapBlockElement {
           </a> -->
 
             <div class="card-body col-lg-8">
-              <h2 class="card-title">${this.title}</h2>
+              <h2 class="card-title" style="font-weight: 500">${this.title}</h2>
               ${this.subtitle || this.status
                 ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
                     ${this.subtitle}
