@@ -63,7 +63,7 @@
         [
           "@electron-forge/plugin-webpack",
           {
-            "devContentSecurityPolicy": "default-src 'self' 'unsafe-inline' data: https://cdn.jsdelivr.net https://fonts.googleapis.com https://fonts.gstatic.com https://formulae.brew.sh; script-src 'self' 'unsafe-eval' 'unsafe-inline' data: https://cdn.jsdelivr.net; img-src 'self' data: https://99designs-blog.imgix.net",
+            "devContentSecurityPolicy": "default-src 'self' 'unsafe-inline' data: https://fonts.googleapis.com https://fonts.gstatic.com https://formulae.brew.sh; script-src 'self' 'unsafe-eval' 'unsafe-inline' data:; img-src 'self' data: https://99designs-blog.imgix.net",
             "mainConfig": "./webpack.main.config.js",
             "renderer": {
               "config": "./webpack.renderer.config.js",
