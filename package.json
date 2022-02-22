@@ -22,70 +22,7 @@
   },
   "license": "MIT",
   "config": {
-    "forge": {
-      "publishers": [
-        {
-          "name": "@electron-forge/publisher-github",
-          "config": {
-            "repository": {
-              "owner": "GetOpenStore",
-              "name": "OpenStore"
-            }
-          }
-        }
-      ],
-      "packagerConfig": {
-        "icon": "./icons/openstore-app-icon"
-      },
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "openstore"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ],
-      "plugins": [
-        [
-          "@electron-forge/plugin-webpack",
-          {
-            "devContentSecurityPolicy": "default-src 'self' 'unsafe-inline' data: https://fonts.googleapis.com https://fonts.gstatic.com https://formulae.brew.sh; script-src 'self' 'unsafe-eval' 'unsafe-inline' data:; img-src 'self' data: https://99designs-blog.imgix.net",
-            "mainConfig": "./webpack.main.config.js",
-            "renderer": {
-              "config": "./webpack.renderer.config.js",
-              "entryPoints": [
-                {
-                  "html": "index.html",
-                  "js": "renderer.ts",
-                  "name": "main_window",
-                  "preload": {
-                    "js": "preload/preload.ts"
-                  }
-                }
-              ]
-            }
-          },
-          "@electron-forge/plugin-electronegativity",
-          {
-            "isSarif": true
-          }
-        ]
-      ]
-    }
+    "forge": "./forge.config.js"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.61",
