@@ -10,10 +10,13 @@ module.exports = {
       },
     },
   ],
+
+  // https://electron.github.io/electron-packager/main/interfaces/electronpackager.options.html
   packagerConfig: {
     icon: "./icons/openstore-app-icon",
-    "app-bundle-id": "app.getopenstore.OpenStore",
-    "app-category-type": "public.app-category.utilities",
+    appBundleId: "app.getopenstore.OpenStore",
+    appCategoryType: "public.app-category.utilities",
+    appCopyright: "© 2022 OpenStore Contributors",
     osxSign: {
       // Name of certificate to sign with
       identity: process.env.CODESIGN_IDENTITY,
