@@ -95,7 +95,9 @@ export default class AppsView extends BootstrapBlockElement {
 
   private get _currentlyIndexing(): boolean {
     return !!taskQueue.liveTasks.find(
-      (task) => task.type === "cask-reindex-all"
+      (task) =>
+        task.type === "cask-reindex-all" &&
+        ((task as CaskReindexAllTask).wipeIndexFirst || this._loadedCount === 0)
     );
   }
 
