@@ -91,22 +91,26 @@ const createWindow = (): void => {
   });
 
   let contextMenuItems: {
-    items: (MenuItemConstructorOptions & { callback: string; args: any[] })[];
+    items: (MenuItemConstructorOptions &
+      ({ callback: string; args: any[] } | { type: "separator" }))[];
   } = { items: [] };
 
   ipcMain.handle(
     "contextmenu.set",
     (
       event: IpcMainEvent,
-      items: (MenuItemConstructorOptions & { callback: string; args: any[] })[]
+      items: (MenuItemConstructorOptions &
+        ({ callback: string; args: any[] } | { type: "separator" }))[]
     ) => {
       contextMenuItems.items = items.map((item) => ({
         ...item,
         click() {
-          mainWindow.webContents.send(
-            `contextmenu.callback.${item.callback}`,
-            ...item.args
-          );
+          if ("callback" in item) {
+            mainWindow.webContents.send(
+              `contextmenu.callback.${item.callback}`,
+              ...item.args
+            );
+          }
         },
       }));
 

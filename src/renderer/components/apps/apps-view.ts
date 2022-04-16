@@ -285,6 +285,14 @@ export default class AppsView extends BootstrapBlockElement {
                             callback: "cask-uninstall",
                             args: [app.full_token, app.name[0]],
                           },
+                          {
+                            type: "separator",
+                          },
+                          {
+                            label: "Reindex",
+                            callback: "cask-reindex",
+                            args: [app.full_token, app.name[0]],
+                          },
                         ])}
                     ></openstore-card>
                   </openstore-col>

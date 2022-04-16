@@ -8,7 +8,8 @@ declare global {
 
 export interface IPCContextMenu {
   set(
-    items: (MenuItemConstructorOptions & { callback: string; args: any[] })[]
+    items: (MenuItemConstructorOptions &
+      ({ callback: string; args: any[] } | { type: "separator" }))[]
   ): Promise<void>;
   setCallback(
     key: string,

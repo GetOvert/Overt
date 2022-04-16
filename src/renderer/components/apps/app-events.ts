@@ -1,5 +1,6 @@
 import {
   CaskInstallTask,
+  CaskReindexTask,
   CaskUninstallTask,
   CaskUpgradeTask,
 } from "components/tasks/model/Task";
@@ -47,6 +48,20 @@ export async function uninstallCaskApp(
   );
 }
 
+export async function reindexCaskApp(
+  caskIdentifier: string,
+  caskFullName: string
+) {
+  taskQueue.push(
+    {
+      label: `Index ${caskFullName}`,
+      type: "cask-reindex",
+      caskIdentifiers: [caskIdentifier],
+    } as CaskReindexTask,
+    ["before", "after"]
+  );
+}
+
 export function getCaskAppFileName(app: any): string | null {
   return app.artifacts
     .filter((artifact) => Array.isArray(artifact))
@@ -62,3 +77,4 @@ export function getCaskAppFileName(app: any): string | null {
 window.contextMenu.setCallback("cask-install", installCaskApp);
 window.contextMenu.setCallback("cask-upgrade", upgradeCaskApp);
 window.contextMenu.setCallback("cask-uninstall", uninstallCaskApp);
+window.contextMenu.setCallback("cask-reindex", reindexCaskApp);

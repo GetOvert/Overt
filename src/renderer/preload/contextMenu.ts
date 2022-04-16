@@ -6,7 +6,10 @@ import {
 import { IPCContextMenu } from "ipc/IPCContextMenu";
 
 export default {
-  async set(items: (MenuItemConstructorOptions & { callback: string })[]) {
+  async set(
+    items: (MenuItemConstructorOptions &
+      ({ callback: string; args: any[] } | { type: "separator" }))[]
+  ) {
     await ipcRenderer.invoke("contextmenu.set", items);
   },
   async setCallback(key: string, callback: (...args: any) => Promise<void>) {
