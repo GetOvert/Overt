@@ -128,10 +128,21 @@ export function initAppMenu() {
         role: "help",
         submenu: [
           {
-            label: "Learn More",
+            label: "Wiki",
             click: async () => {
               const { shell } = require("electron");
-              await shell.openExternal("https://electronjs.org");
+              await shell.openExternal(
+                "https://github.com/GetOpenStore/OpenStore/wiki"
+              );
+            },
+          },
+          {
+            label: "Discuss",
+            click: async () => {
+              const { shell } = require("electron");
+              await shell.openExternal(
+                "https://github.com/GetOpenStore/OpenStore/discussions"
+              );
             },
           },
         ],
