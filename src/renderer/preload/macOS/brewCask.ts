@@ -5,7 +5,7 @@ import {
   cacheDB,
   cacheDB_addSchema,
   cacheDB_ModifiedTimeAtLaunch,
-} from "./cacheDB";
+} from "../cacheDB";
 import {
   deleteAllRecords,
   deleteRecords,
@@ -13,35 +13,37 @@ import {
   sql,
 } from "util/sql";
 import { IPCBrewCask, SortKey } from "ipc/IPCBrewCask";
-import terminal from "./terminal";
-import * as taskQueue from "./taskQueueIPC";
+import terminal from "../terminal";
+import * as taskQueue from "../taskQueueIPC";
 import { PromptForPasswordTask } from "components/tasks/model/Task";
-import settings from "./settings";
+import settings from "../settings";
 import path from "path";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
 
-cacheDB_addSchema(
-  sql`
-    CREATE TABLE IF NOT EXISTS "casks" (
-      "token" TEXT NOT NULL COLLATE NOCASE,
-      "full_token" TEXT COLLATE NOCASE PRIMARY KEY,
-      "tap" TEXT NOT NULL COLLATE NOCASE,
-      "name" TEXT,
-      "version" TEXT,
-      "desc" TEXT,
-      "homepage" TEXT,
-      "installed" TEXT, -- Version of the cask installed on this machine, or null if not installed
-      "auto_updates" BOOLEAN, -- Whether the cask auto-updates
-      "json" TEXT,
-      "installed_30d" INTEGER, -- Install count analytics for last 30 days
-      "installed_90d" INTEGER, -- Install count analytics for last 90 days
-      "installed_365d" INTEGER, -- Install count analytics for last 365 days
-      "updated" TIMESTAMP, -- Last time the cask was updated
-      "added" TIMESTAMP -- Time the cask was added to the Homebrew
-    )`
-);
+if (process.platform === "darwin") {
+  cacheDB_addSchema(
+    sql`
+      CREATE TABLE IF NOT EXISTS "casks" (
+        "token" TEXT NOT NULL COLLATE NOCASE,
+        "full_token" TEXT COLLATE NOCASE PRIMARY KEY,
+        "tap" TEXT NOT NULL COLLATE NOCASE,
+        "name" TEXT,
+        "version" TEXT,
+        "desc" TEXT,
+        "homepage" TEXT,
+        "installed" TEXT, -- Version of the cask installed on this machine, or null if not installed
+        "auto_updates" BOOLEAN, -- Whether the cask auto-updates
+        "json" TEXT,
+        "installed_30d" INTEGER, -- Install count analytics for last 30 days
+        "installed_90d" INTEGER, -- Install count analytics for last 90 days
+        "installed_365d" INTEGER, -- Install count analytics for last 365 days
+        "updated" TIMESTAMP, -- Last time the cask was updated
+        "added" TIMESTAMP -- Time the cask was added to the Homebrew
+      )`
+  );
+}
 
 let indexListeners = new Set<() => void>();
 

@@ -1,5 +1,4 @@
 import { contextBridge, ipcRenderer } from "electron";
-import brewCask from "./brewCask";
 import contextMenu from "./contextMenu";
 import openExternalLink from "./openExternalLink";
 import openProduct from "./openProduct";
@@ -7,8 +6,8 @@ import settings from "./settings";
 import taskQueueIPC from "./taskQueueIPC";
 import terminal from "./terminal";
 import theme from "./theme";
+import "./macOS/preload";
 
-contextBridge.exposeInMainWorld("brewCask", brewCask);
 contextBridge.exposeInMainWorld("contextMenu", contextMenu);
 contextBridge.exposeInMainWorld("openExternalLink", openExternalLink);
 contextBridge.exposeInMainWorld("openProduct", openProduct);
