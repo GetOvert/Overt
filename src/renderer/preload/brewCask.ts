@@ -110,6 +110,17 @@ const brewCask = {
     if (Array.isArray(caskNames) && caskNames.length === 0) return;
 
     (await (async () => {
+      if (!caskNames) {
+        // Updating index for all, so we'd might as well fetch from remote
+        // while we're at it.
+        try {
+          await (brewCask as any)._runBrewUpdate();
+        } catch (error) {
+          // Bad omen...
+          console.error(error);
+        }
+      }
+
       const brewProcess = spawn(await getBrewExecutablePath(), [
         "info",
         "--json=v2",
@@ -162,6 +173,18 @@ const brewCask = {
 
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
+  },
+
+  async _runBrewUpdate(): Promise<void> {
+    const brewUpdateProcess = spawn(await getBrewExecutablePath(), [
+      "update",
+      "--quiet",
+    ]);
+
+    return new Promise((resolve, reject) => {
+      brewUpdateProcess.on("exit", resolve);
+      brewUpdateProcess.on("error", reject);
+    });
   },
 
   async _rebuildIndexFromCaskInfo(
