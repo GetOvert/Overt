@@ -36,11 +36,11 @@ export default class Sidebar extends BootstrapBlockElement {
     return html`${BootstrapBlockElement.styleLink}
 
       <div
-        class="d-flex flex-column justify-content-between overflow-scroll py-3 px-0"
+        class="d-flex flex-column justify-content-between overflow-auto pt-3 px-0"
       >
         <nav class="nav nav-pills nav-fill flex-column">
           <span class="fs-6 fw-bold text-uppercase ms-2 mt-1 mb-2"
-            >Sources</span
+            >Source</span
           >
 
           <openstore-sidebar-nav-link
@@ -60,11 +60,9 @@ export default class Sidebar extends BootstrapBlockElement {
           ></openstore-sidebar-nav-link> -->
         </nav>
 
-        <hr class="border border-dark mx-2" />
-
         <nav class="nav nav-pills nav-fill flex-column">
-          <span class="fs-6 fw-bold text-uppercase ms-2 mt-1 mb-2"
-            >Filters</span
+          <span class="fs-6 fw-bold text-uppercase ms-2 mt-3 mb-2"
+            >Filter</span
           >
 
           <openstore-sidebar-nav-link
@@ -105,10 +103,8 @@ export default class Sidebar extends BootstrapBlockElement {
           ></openstore-sidebar-nav-link>
         </nav>
 
-        <hr class="border border-dark mx-2" />
-
         <nav class="nav nav-pills nav-fill flex-column">
-          <span class="fs-6 fw-bold text-uppercase ms-2 mt-1 mb-2"
+          <span class="fs-6 fw-bold text-uppercase ms-2 mt-3 mb-2"
             >Sort by</span
           >
 
