@@ -7,14 +7,17 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
-    "publish": "electron-forge publish",
     "lint": "eslint --ext .js,.jsx.ts,.tsx .",
     "install-for-arm64": "npm i --target_arch=arm64",
     "postinstall-for-arm64": "npx electron-rebuild --arch arm64",
     "make-for-arm64": "npm run install-for-arm64 && electron-forge make --arch arm64",
     "install-for-x86_64": "npm i --target_arch=x64",
     "postinstall-for-x86_64": "npx electron-rebuild --arch x64",
-    "make-for-x86_64": "npm run install-for-x86_64 && electron-forge make --arch x64"
+    "make-for-x86_64": "npm run install-for-x86_64 && electron-forge make --arch x64",
+    "bump-patch": "npm version patch -m \"Bump version to %s\"",
+    "bump-minor": "npm version minor -m \"Bump version to %s\"",
+    "bump-major": "npm version major -m \"Bump version to %s\"",
+    "distribute-macos": "scripts/distribute-macos.sh"
   },
   "keywords": [],
   "author": {
