@@ -42,7 +42,7 @@ h5 {
 .fs-5 {
   font-size: calc(0.8rem + 0.15vw) !important;
 }
-.h6,
+.h6:not(.modal-title),
 h6 {
   font-size: 0.7rem;
 }
