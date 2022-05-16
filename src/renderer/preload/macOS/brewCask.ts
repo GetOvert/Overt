@@ -12,7 +12,7 @@ import {
   insertOrReplaceRecords,
   sql,
 } from "util/sql";
-import { IPCBrewCask, SortKey } from "ipc/IPCBrewCask";
+import { IPCBrewCask, SortKey } from "ipc/package-managers/macOS/IPCBrewCask";
 import terminal from "../terminal";
 import * as taskQueue from "../taskQueueIPC";
 import { PromptForPasswordTask } from "components/tasks/model/Task";

@@ -3,32 +3,17 @@ import "components/card/Card";
 import "components/grid/grid";
 import { CaskReindexAllTask, QueuedTask } from "components/tasks/model/Task";
 import taskQueue, { TaskQueueObserver } from "components/tasks/model/TaskQueue";
-import { FilterKey, SortKey } from "ipc/IPCBrewCask";
+import {
+  FilterKey,
+  IPCPackageManager,
+} from "ipc/package-managers/IPCPackageManager";
+import { SortKey } from "ipc/package-managers/macOS/IPCBrewCask";
 import { css, html, HTMLTemplateResult, render } from "lit";
 import { asyncAppend } from "lit-html/directives/async-append.js";
 import { customElement, property, state } from "lit/decorators.js";
 import { Ref, createRef, ref } from "lit/directives/ref.js";
 import { repeat } from "lit/directives/repeat.js";
-import { getAppInfo, searchApps } from "./apps";
-
-async function* provideAppsAsGenerator(
-  searchString: string,
-  sortBy: SortKey,
-  filterBy: FilterKey,
-  limit: number,
-  offset: number,
-  completedCallback: (result: object[]) => void
-) {
-  const result = await searchApps(
-    searchString,
-    sortBy,
-    filterBy,
-    limit,
-    offset
-  );
-  completedCallback(result);
-  yield* result;
-}
+import { packageManagerForName } from "package-manager/PackageManagerRegistry";
 
 const fetchedChunkSize = 25;
 let lastOffset = 0;
@@ -36,12 +21,19 @@ let lastOffset = 0;
 let lastScrollY = 0;
 
 @customElement("openstore-apps-view")
-export default class AppsView extends BootstrapBlockElement {
+export default class AppsView<
+  PackageManager extends IPCPackageManager<PackageInfo, SortKey>,
+  PackageInfo,
+  SortKey
+> extends BootstrapBlockElement {
+  @property()
+  packageManager: PackageManager;
+
   @property({ type: Number, reflect: true })
   offset = 0;
 
   @state()
-  private _appGenerators: AsyncGenerator<object>[] = [];
+  private _appGenerators: AsyncGenerator<PackageInfo>[] = [];
   @state()
   private _loadedCount = 0;
   @state()
@@ -112,7 +104,7 @@ export default class AppsView extends BootstrapBlockElement {
       window.location.hash
     );
     this._appGenerators.push(
-      provideAppsAsGenerator(
+      this.provideAppsAsGenerator(
         routeParams.search ?? "",
         routeParams.sort ?? "installed-30d",
         routeParams.filter ?? "all",
@@ -155,6 +147,25 @@ export default class AppsView extends BootstrapBlockElement {
     this.offset = lastOffset;
 
     this._loadApps(fetchedChunkSize);
+  }
+
+  private async *provideAppsAsGenerator(
+    searchString: string,
+    sortBy: SortKey,
+    filterBy: FilterKey,
+    limit: number,
+    offset: number,
+    completedCallback: (result: PackageInfo[]) => void
+  ): AsyncGenerator<PackageInfo, void, undefined> {
+    const result = await this.packageManager.search(
+      searchString,
+      sortBy,
+      filterBy,
+      limit,
+      offset
+    );
+    completedCallback(result);
+    yield* result;
   }
 
   static styles = [
@@ -339,14 +350,25 @@ export default class AppsView extends BootstrapBlockElement {
   }
 }
 
-(window as any).openStore.pages["brew-cask"] = {
+(window as any).openStore.pages["apps"] = {
   title: "",
+  
+  _currentPackageManager: null,
 
   async onNavigatedTo(content: HTMLElement) {
-    render(html`<openstore-apps-view></openstore-apps-view>`, content);
+    this._currentPackageManager = packageManagerForName(
+      (window as any).openStore.decodeFragment(window.location.hash).source
+    );
+    
+    render(
+      html`<openstore-apps-view
+        .packageManager=${this._currentPackageManager}
+      ></openstore-apps-view>`,
+      content
+    );
   },
   async getSubpage(appIdentifier: string): Promise<any> {
-    const app = (await getAppInfo(appIdentifier)) as any;
+    const app = (await this._currentPackageManager.info(appIdentifier)) as any;
 
     return {
       title: app.name[0],

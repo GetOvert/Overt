@@ -57,7 +57,7 @@ window.openStore.displayPageForAnchorElement = async (
 window.openStore.displayPageForFragment = async (fragment, target) => {
   const routeParams = window.openStore.decodeFragment(fragment);
   await window.openStore.displayPage(
-    window.openStore.pages[routeParams.source],
+    window.openStore.pages["apps"], // TODO: Rework this entire thing anyway
     routeParams.subpage ?? null,
     target
   );
