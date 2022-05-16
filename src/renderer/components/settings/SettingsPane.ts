@@ -4,6 +4,7 @@ import { customElement, state } from "lit/decorators.js";
 import { Tooltip } from "bootstrap";
 import taskQueue from "components/tasks/model/TaskQueue";
 import { CaskReindexAllTask } from "components/tasks/model/Task";
+import SourceRepositoriesModal from "components/modal/SourceRepositoriesModal";
 
 @customElement("openstore-settings-pane")
 export class SettingsPane extends BootstrapBlockElement {
@@ -62,6 +63,12 @@ export class SettingsPane extends BootstrapBlockElement {
           "When enabled, macOS will validate the digital signature of apps installed through OpenStore. This blocks both malware and unsigned legitimate software from running. Enabled by default.",
           this.validateCodeSignatures
         )}
+        ${this.makeButton(
+          "Software Sources",
+          "Add/remove additional software sources. Reminder: Avoiding malware is your responsibility.",
+          "primary",
+          this.showSourceRepositories.bind(this)
+        )}
 
         <label
           class="mb-3"
@@ -79,15 +86,12 @@ export class SettingsPane extends BootstrapBlockElement {
           />
         </label>
 
-        <button
-          class="btn btn-outline-secondary mb-3"
-          data-bs-toggle="tooltip"
-          data-bs-placement="right"
-          title="Replace OpenStore's catalog with a fresh copy from the package manager. This may take a minute or two."
-          @click=${this.rebuildIndex}
-        >
-          Rebuild Catalog
-        </button>
+        ${this.makeButton(
+          "Rebuild Catalog",
+          "Replace OpenStore's catalog with a fresh copy from the package manager. This may take a minute or two.",
+          "secondary",
+          this.rebuildIndex.bind(this)
+        )}
       </div> `;
   }
 
@@ -125,6 +129,26 @@ export class SettingsPane extends BootstrapBlockElement {
     `;
   }
 
+  private makeButton(
+    label: string,
+    tooltip: string,
+    color: string,
+    action: () => void
+  ) {
+    return html`
+      <button
+        type="button"
+        class="btn btn-outline-${color} mb-3"
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        title=${tooltip}
+        @click=${action}
+      >
+        ${label}
+      </button>
+    `;
+  }
+
   private popperTooltips: any;
   private addPopperTooltips() {
     this.popperTooltips = Array.from(
@@ -140,6 +164,25 @@ export class SettingsPane extends BootstrapBlockElement {
   private onTextBoxChanged(event: Event) {
     const textBox = event.target as HTMLInputElement;
     window.settings.set(textBox.name, textBox.value);
+  }
+
+  private async showSourceRepositories() {
+    await SourceRepositoriesModal.runModal(
+      [
+        {
+          packageManager: "brew",
+          name: "homebrew/cask",
+          url: "https://github.com/Homebrew/homebrew-cask.git",
+        },
+        {
+          packageManager: "brew",
+          name: "homebrew/cask-versions",
+          url: "https://github.com/Homebrew/homebrew-cask-versions.git",
+        },
+      ],
+      "Sources must specify a package manager, a unique name, and a repository URL.\nAvailable package mangers depend on the host environment.",
+      "Software sources"
+    );
   }
 
   private rebuildIndex() {
