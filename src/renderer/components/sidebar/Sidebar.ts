@@ -39,9 +39,7 @@ export default class Sidebar extends BootstrapBlockElement {
         class="d-flex flex-column justify-content-between overflow-auto pt-3 px-0"
       >
         <nav class="nav nav-pills nav-fill flex-column">
-          <span class="fs-6 fw-bold text-uppercase ms-2 mt-1 mb-2"
-            >Source</span
-          >
+          <span class="fs-6 fw-bold text-uppercase ms-2 mt-1 mb-2">Source</span>
 
           <openstore-sidebar-nav-link
             href=${(window as any).openStore.encodeFragment({
@@ -52,18 +50,19 @@ export default class Sidebar extends BootstrapBlockElement {
               window.location.hash
             ).source === "brew-cask"}
           ></openstore-sidebar-nav-link>
-          <!-- <openstore-sidebar-nav-link
+          <openstore-sidebar-nav-link
             href=${((window as any).openStore as any).encodeFragment({
-            source: "brew",
-          })}
-            label="CLI Tools & Libraries (brew)"
-          ></openstore-sidebar-nav-link> -->
+              source: "brew",
+            })}
+            label="Tools & Libraries (brew)"
+            ?active=${(window as any).openStore.decodeFragment(
+              window.location.hash
+            ).source === "brew"}
+          ></openstore-sidebar-nav-link>
         </nav>
 
         <nav class="nav nav-pills nav-fill flex-column">
-          <span class="fs-6 fw-bold text-uppercase ms-2 mt-3 mb-2"
-            >Filter</span
-          >
+          <span class="fs-6 fw-bold text-uppercase ms-2 mt-3 mb-2">Filter</span>
 
           <openstore-sidebar-nav-link
             href=${((window as any).openStore as any).encodeFragment({

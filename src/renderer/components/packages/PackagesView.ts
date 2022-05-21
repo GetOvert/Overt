@@ -1,26 +1,29 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import "components/card/Card";
 import "components/grid/grid";
-import { CaskReindexAllTask, QueuedTask } from "components/tasks/model/Task";
+import { QueuedTask, ReindexAllTask } from "components/tasks/model/Task";
 import taskQueue, { TaskQueueObserver } from "components/tasks/model/TaskQueue";
 import {
   FilterKey,
   IPCPackageManager,
 } from "ipc/package-managers/IPCPackageManager";
-import { SortKey } from "ipc/package-managers/macOS/IPCBrewCask";
 import { css, html, HTMLTemplateResult, render } from "lit";
 import { asyncAppend } from "lit-html/directives/async-append.js";
 import { customElement, property, state } from "lit/decorators.js";
 import { Ref, createRef, ref } from "lit/directives/ref.js";
 import { repeat } from "lit/directives/repeat.js";
-import { packageManagerForName } from "package-manager/PackageManagerRegistry";
+import { PackageInfoAdapter } from "package-manager/PackageInfoAdapter";
+import {
+  packageInfoAdapterForPackageManagerName,
+  packageManagerForName,
+} from "package-manager/PackageManagerRegistry";
 
 const fetchedChunkSize = 25;
 let lastOffset = 0;
 
 let lastScrollY = 0;
 
-@customElement("openstore-apps-view")
+@customElement("openstore-packages-view")
 export default class AppsView<
   PackageManager extends IPCPackageManager<PackageInfo, SortKey>,
   PackageInfo,
@@ -28,6 +31,8 @@ export default class AppsView<
 > extends BootstrapBlockElement {
   @property()
   packageManager: PackageManager;
+  @property()
+  packageInfoAdapter: PackageInfoAdapter<PackageInfo>;
 
   @property({ type: Number, reflect: true })
   offset = 0;
@@ -68,9 +73,7 @@ export default class AppsView<
   private taskQueueChanged(updatedTask: QueuedTask) {
     if (
       updatedTask.state === "succeeded" &&
-      ["cask-reindex-all", "cask-reindex-outdated", "cask-reindex"].includes(
-        updatedTask.type
-      )
+      ["reindex-all", "reindex-outdated", "reindex"].includes(updatedTask.type)
     ) {
       this._reset();
       this._loadApps(lastOffset + fetchedChunkSize);
@@ -78,8 +81,8 @@ export default class AppsView<
 
     if (
       updatedTask.state === "running" &&
-      updatedTask.type === "cask-reindex-all" &&
-      (updatedTask as CaskReindexAllTask).wipeIndexFirst
+      updatedTask.type === "reindex-all" &&
+      (updatedTask as unknown as ReindexAllTask).wipeIndexFirst
     ) {
       this._reset();
     }
@@ -88,8 +91,9 @@ export default class AppsView<
   private get _currentlyIndexing(): boolean {
     return !!taskQueue.liveTasks.find(
       (task) =>
-        task.type === "cask-reindex-all" &&
-        ((task as CaskReindexAllTask).wipeIndexFirst || this._loadedCount === 0)
+        task.type === "reindex-all" &&
+        ((task as unknown as ReindexAllTask).wipeIndexFirst ||
+          this._loadedCount === 0)
     );
   }
 
@@ -247,62 +251,65 @@ export default class AppsView<
         >
           <openstore-row>
             ${repeat(this._appGenerators, (appGenerator) =>
-              asyncAppend(appGenerator, (app: any) => {
-                const installed = !!app.installed;
-                const outdated =
-                  !app.auto_updates && app.installed !== app.version;
+              asyncAppend(appGenerator, (packageInfo: PackageInfo) => {
+                const name = this.packageInfoAdapter.packageName(packageInfo);
+                const identifier =
+                  this.packageInfoAdapter.packageIdentifier(packageInfo);
+                const description =
+                  this.packageInfoAdapter.packageDescription(packageInfo);
+                const isInstalled =
+                  this.packageInfoAdapter.isPackageInstalled(packageInfo);
+                const isOutdated =
+                  this.packageInfoAdapter.isPackageOutdated(packageInfo);
 
                 return html`
                   <openstore-col class="mx-2">
                     <openstore-card
-                      .title=${app.name[0]}
-                      .subtitle=${app.full_token}
-                      .status=${installed
-                        ? outdated
+                      .title=${name}
+                      .subtitle=${identifier}
+                      .status=${isInstalled
+                        ? isOutdated
                           ? "update available"
                           : "installed"
                         : "not installed"}
-                      .statusColor=${installed
-                        ? outdated
+                      .statusColor=${isInstalled
+                        ? isOutdated
                           ? "info"
                           : "success"
                         : "muted"}
-                      .details=${app.desc}
+                      .details=${description}
                       .href=${((window as any).openStore as any).encodeFragment(
                         {
-                          subpage: app.full_token,
+                          subpage: identifier,
                         }
                       )}
                       @contextmenu=${() =>
                         window.contextMenu.set([
                           {
                             label: "Install",
-                            enabled: app.installed === null,
-                            callback: "cask-install",
-                            args: [app.full_token, app.name[0]],
+                            enabled: !isInstalled,
+                            callback: "install",
+                            args: [identifier, name],
                           },
                           {
                             label: "Update",
-                            enabled:
-                              app.installed !== null &&
-                              !app.auto_updates &&
-                              app.installed !== app.version,
-                            callback: "cask-upgrade",
-                            args: [app.full_token, app.name[0]],
+                            enabled: isInstalled && isOutdated,
+                            callback: "upgrade",
+                            args: [identifier, name],
                           },
                           {
                             label: "Uninstall",
-                            enabled: app.installed !== null,
-                            callback: "cask-uninstall",
-                            args: [app.full_token, app.name[0]],
+                            enabled: isInstalled,
+                            callback: "uninstall",
+                            args: [identifier, name],
                           },
                           {
                             type: "separator",
                           },
                           {
                             label: "Reindex",
-                            callback: "cask-reindex",
-                            args: [app.full_token, app.name[0]],
+                            callback: "reindex",
+                            args: [identifier, name],
                           },
                         ])}
                     ></openstore-card>
@@ -352,32 +359,41 @@ export default class AppsView<
 
 (window as any).openStore.pages["apps"] = {
   title: "",
-  
+
   _currentPackageManager: null,
+  _currentPackageInfoAdapter: null,
 
   async onNavigatedTo(content: HTMLElement) {
-    this._currentPackageManager = packageManagerForName(
-      (window as any).openStore.decodeFragment(window.location.hash).source
-    );
-    
+    const packageManagerName = (window as any).openStore.decodeFragment(
+      window.location.hash
+    ).source;
+    this._currentPackageManager = packageManagerForName(packageManagerName);
+    this._currentPackageInfoAdapter =
+      packageInfoAdapterForPackageManagerName(packageManagerName);
+
     render(
-      html`<openstore-apps-view
+      html`<openstore-packages-view
         .packageManager=${this._currentPackageManager}
-      ></openstore-apps-view>`,
+        .packageInfoAdapter=${this._currentPackageInfoAdapter}
+      ></openstore-packages-view>`,
       content
     );
   },
-  async getSubpage(appIdentifier: string): Promise<any> {
-    const app = (await this._currentPackageManager.info(appIdentifier)) as any;
+  async getSubpage(packageIdentifier: string): Promise<any> {
+    const packageInfo = await this._currentPackageManager.info(
+      packageIdentifier
+    );
 
     return {
-      title: app.name[0],
+      title: this._currentPackageInfoAdapter.packageName(packageInfo),
       isSubpage: true,
 
-      async onNavigatedTo(content) {
+      async onNavigatedTo(content: HTMLElement) {
         const container = document.createDocumentFragment();
         render(
-          html`<openstore-app-view .app=${app}></openstore-app-view>`,
+          html`<openstore-package-detail-view
+            .packageInfo=${packageInfo}
+          ></openstore-package-detail-view>`,
           container
         );
         content.append(...container.children);

@@ -3,12 +3,10 @@ import { QueuedTask } from "components/tasks/model/Task";
 import taskQueue, { TaskQueueObserver } from "components/tasks/model/TaskQueue";
 import { css, CSSResultArray, html, HTMLTemplateResult } from "lit";
 import { repeat } from "lit/directives/repeat.js";
-
-export type Field = {
-  heading: string;
-  value?: FieldValue;
-};
-export type FieldValue = string | HTMLTemplateResult | FieldValue[];
+import {
+  PackageDetailField,
+  PackageDetailFieldValue,
+} from "package-manager/PackageInfoAdapter";
 
 export type Button = {
   title: string;
@@ -20,7 +18,7 @@ export type Button = {
 export abstract class ProductView extends BootstrapBlockElement {
   protected abstract readonly subtitle: string;
   protected abstract shouldCauseRerender(successfulTask: QueuedTask): boolean;
-  protected abstract fields: Field[];
+  protected abstract fields: PackageDetailField[];
   protected abstract buttons: Button[];
 
   private taskQueueObserver: TaskQueueObserver;
@@ -112,7 +110,7 @@ export abstract class ProductView extends BootstrapBlockElement {
 }
 
 function htmlForFieldValue(
-  value?: FieldValue,
+  value?: PackageDetailFieldValue,
   isRoot: boolean = false
 ): HTMLTemplateResult {
   if (!value) return html``;

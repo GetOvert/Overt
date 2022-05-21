@@ -12,12 +12,13 @@ import {
   insertOrReplaceRecords,
   sql,
 } from "util/sql";
-import { IPCBrewCask, SortKey } from "ipc/package-managers/macOS/IPCBrewCask";
+import { IPCBrew, SortKey } from "ipc/package-managers/macOS/IPCBrew";
 import terminal from "../terminal";
 import * as taskQueue from "../taskQueueIPC";
 import { PromptForPasswordTask } from "components/tasks/model/Task";
 import settings from "../settings";
 import path from "path";
+import { getBrewExecutablePath, getQuarantineFlags } from "./brewCask";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
@@ -25,33 +26,31 @@ const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
 if (process.platform === "darwin") {
   cacheDB_addSchema(
     sql`
-      CREATE TABLE IF NOT EXISTS "casks" (
-        "token" TEXT NOT NULL COLLATE NOCASE,
-        "full_token" TEXT COLLATE NOCASE PRIMARY KEY,
+      CREATE TABLE IF NOT EXISTS "formulae" (
+        "name" TEXT NOT NULL COLLATE NOCASE,
+        "full_name" TEXT COLLATE NOCASE PRIMARY KEY,
         "tap" TEXT NOT NULL COLLATE NOCASE,
-        "name" TEXT,
         "version" TEXT,
         "desc" TEXT,
         "homepage" TEXT,
-        "installed" TEXT, -- Version of the cask installed on this machine, or null if not installed
-        "auto_updates" BOOLEAN, -- Whether the cask auto-updates
+        "installed" TEXT, -- Version of the formula installed on this machine, or null if not installed
         "json" TEXT,
         "installed_30d" INTEGER, -- Install count analytics for last 30 days
         "installed_90d" INTEGER, -- Install count analytics for last 90 days
         "installed_365d" INTEGER, -- Install count analytics for last 365 days
-        "updated" TIMESTAMP, -- Last time the cask was updated
-        "added" TIMESTAMP -- Time the cask was added to the Homebrew
+        "updated" TIMESTAMP, -- Last time the formula was updated
+        "added" TIMESTAMP -- Time the formula was added to the Homebrew
       )`
   );
 }
 
 let indexListeners = new Set<() => void>();
 
-type CaskAnalyticsData = {
-  formulae: { [key: string]: { cask: string; count: number } };
+type FormulaAnalyticsData = {
+  formulae: { [key: string]: { formula: string; count: number } };
 };
 
-const brewCask = {
+const brew = {
   addIndexListener(listener: () => void) {
     indexListeners.add(listener);
   },
@@ -59,7 +58,7 @@ const brewCask = {
   async reindexOutdated() {
     const brewProcess = spawn(await getBrewExecutablePath(), [
       "outdated",
-      "--cask",
+      "--formula",
       "--greedy-latest",
     ]);
 
@@ -75,7 +74,7 @@ const brewCask = {
 
     return new Promise((resolve, reject) => {
       brewProcess.on("exit", async (code) => {
-        await brewCask.updateIndex(stdout.split(/\s+/).filter((s) => s));
+        await brew.updateIndex(stdout.split(/\s+/).filter((s) => s));
         resolve();
       });
       brewProcess.on("error", reject);
@@ -89,7 +88,7 @@ const brewCask = {
     try {
       indexExists =
         (await cacheDB())
-          .prepare(sql`SELECT "rowid" FROM "casks" LIMIT 1`)
+          .prepare(sql`SELECT "rowid" FROM "formulae" LIMIT 1`)
           .get() !== undefined;
     } catch (e) {}
 
@@ -103,20 +102,20 @@ const brewCask = {
       (condition === "if-too-old" && indexTooOld) ||
       condition === "always"
     ) {
-      if (wipeIndexFirst) deleteAllRecords(await cacheDB(), "casks");
-      await brewCask.updateIndex();
+      if (wipeIndexFirst) deleteAllRecords(await cacheDB(), "formulae");
+      await brew.updateIndex();
     }
   },
 
-  async updateIndex(caskNames?: string[]): Promise<void> {
-    if (Array.isArray(caskNames) && caskNames.length === 0) return;
+  async updateIndex(formulaNames?: string[]): Promise<void> {
+    if (Array.isArray(formulaNames) && formulaNames.length === 0) return;
 
     (await (async () => {
-      if (!caskNames) {
+      if (!formulaNames) {
         // Updating index for all, so we'd might as well fetch from remote
         // while we're at it.
         try {
-          await (brewCask as any)._runBrewUpdate();
+          await (brew as any)._runBrewUpdate();
         } catch (error) {
           // Bad omen...
           console.error(error);
@@ -126,8 +125,8 @@ const brewCask = {
       const brewProcess = spawn(await getBrewExecutablePath(), [
         "info",
         "--json=v2",
-        "--cask",
-        ...(caskNames ?? ["--all"]),
+        "--formula",
+        ...(formulaNames ?? ["--all"]),
       ]);
 
       let json = "";
@@ -146,23 +145,23 @@ const brewCask = {
 
           const installs30d = await (
             await fetch(
-              "https://formulae.brew.sh/api/analytics/cask-install/homebrew-cask/30d.json"
+              "https://formulae.brew.sh/api/analytics/install/homebrew-core/30d.json"
             )
           ).json();
           const installs90d = await (
             await fetch(
-              "https://formulae.brew.sh/api/analytics/cask-install/homebrew-cask/90d.json"
+              "https://formulae.brew.sh/api/analytics/install/homebrew-core/90d.json"
             )
           ).json();
           const installs365d = await (
             await fetch(
-              "https://formulae.brew.sh/api/analytics/cask-install/homebrew-cask/365d.json"
+              "https://formulae.brew.sh/api/analytics/install/homebrew-core/365d.json"
             )
           ).json();
 
-          (brewCask as any)._rebuildIndexFromCaskInfo(
-            caskNames,
-            JSON.parse(json).casks,
+          (brew as any)._rebuildIndexFromFormulaInfo(
+            formulaNames,
+            JSON.parse(json).formulae,
             installs30d,
             installs90d,
             installs365d
@@ -189,74 +188,71 @@ const brewCask = {
     });
   },
 
-  async _rebuildIndexFromCaskInfo(
-    caskNamesToUpdate: string[] | undefined,
-    casks: any[],
-    installs30d: CaskAnalyticsData,
-    installs90d: CaskAnalyticsData,
-    installs365d: CaskAnalyticsData
+  async _rebuildIndexFromFormulaInfo(
+    formulaNamesToUpdate: string[] | undefined,
+    formulae: any[],
+    installs30d: FormulaAnalyticsData,
+    installs90d: FormulaAnalyticsData,
+    installs365d: FormulaAnalyticsData
   ) {
     console.log(
-      "updating casks: " +
-        (Array.isArray(caskNamesToUpdate)
-          ? caskNamesToUpdate.join(", ")
+      "updating formulae: " +
+        (Array.isArray(formulaNamesToUpdate)
+          ? formulaNamesToUpdate.join(", ")
           : "all")
     );
     insertOrReplaceRecords(
       await cacheDB(),
-      "casks",
+      "formulae",
       [
-        "token",
-        "full_token",
-        "tap",
         "name",
+        "full_name",
+        "tap",
         "version",
         "desc",
         "homepage",
         "installed",
-        "auto_updates",
         "json",
         "installed_30d",
         "installed_90d",
         "installed_365d",
       ],
-      casks.map((cask) => ({
-        ...cask,
-        name: JSON.stringify(cask.name),
-        installed: cask.installed,
-        auto_updates: cask.auto_updates ? 1 : 0,
+      formulae.map((formula) => ({
+        ...formula,
+        version: formula.versions.stable,
+        installed: formula.installed[0]?.version,
 
         installed_30d:
-          installs30d?.formulae?.[cask.full_token]?.[0]?.count?.toString().replaceAll(
+          installs30d?.formulae?.[formula.full_name]?.[0]?.count?.toString().replaceAll(
             /[^\d]/g,
             ""
           ) ?? 0,
         installed_90d:
-          installs90d?.formulae?.[cask.full_token]?.[0]?.count?.toString().replaceAll(
+          installs90d?.formulae?.[formula.full_name]?.[0]?.count?.toString().replaceAll(
             /[^\d]/g,
             ""
           ) ?? 0,
         installed_365d:
-          installs365d?.formulae?.[cask.full_token]?.[0]?.count?.toString().replaceAll(
+          installs365d?.formulae?.[formula.full_name]?.[0]?.count?.toString().replaceAll(
             /[^\d]/g,
             ""
           ) ?? 0,
 
-        json: JSON.stringify(cask),
+        json: JSON.stringify(formula),
       }))
     );
 
-    if (caskNamesToUpdate) {
+    if (formulaNamesToUpdate) {
       deleteRecords(
         await cacheDB(),
-        "casks",
-        caskNamesToUpdate
-          .map((caskName) => {
-            const caskInfo: any = brewCask.info(caskName);
-            if (!caskInfo) return null; // Not in DB anyway
-            if (caskInfo?.installed) return null; // Still installed
+        "formulae",
+        formulaNamesToUpdate
+          .map((formulaName) => {
+            const formulaInfo: any = brew.info(formulaName);
+            if (!formulaInfo) return null; // Not in DB anyway
+            if (formulaInfo?.installed) return null; // Still installed
 
-            return caskInfo.rowid; // Delete from DB
+            return formulaInfo.rowid; // Delete from DB
           })
           .filter((x) => x)
       );
@@ -270,18 +266,17 @@ const brewCask = {
       .prepare(
         sql`
         SELECT
-          casks.json,
-          casks.installed_30d,
-          casks.installed_90d,
-          casks.installed_365d
-        FROM casks
+          formulae.json,
+          formulae.installed_30d,
+          formulae.installed_90d,
+          formulae.installed_365d
+        FROM formulae
         WHERE
           (${keywords
             .map(
               (keyword, index) => sql`
-                (casks.full_token LIKE $pattern${index}
-                  OR casks.name LIKE $pattern${index}
-                  OR casks.desc LIKE $pattern${index})`
+                (formulae.full_name LIKE $pattern${index}
+                  OR formulae.desc LIKE $pattern${index})`
             )
             .join(sql` AND `)})
           ${(() => {
@@ -289,18 +284,17 @@ const brewCask = {
               case "all":
                 return "";
               case "available":
-                return sql`AND casks.installed IS NULL`;
+                return sql`AND formulae.installed IS NULL`;
               case "installed":
-                return sql`AND casks.installed IS NOT NULL`;
+                return sql`AND formulae.installed IS NOT NULL`;
               case "updates":
                 return sql`
-                  AND casks.installed IS NOT NULL
-                  AND casks.installed != casks.version
-                  AND casks.auto_updates = 0
+                  AND formulae.installed IS NOT NULL
+                  AND formulae.installed != formulae.version
                 `;
             }
           })()}
-        ORDER BY casks.${dbKeyForSortKey(sortBy)} DESC
+        ORDER BY formulae.${dbKeyForSortKey(sortBy)} DESC
         LIMIT $l OFFSET $o
       `
       )
@@ -320,23 +314,23 @@ const brewCask = {
       }));
   },
 
-  async info(caskName) {
+  async info(formulaName) {
     const row = (await cacheDB())
       .prepare(
         sql`
         SELECT
-          casks.json,
-          casks.installed_30d,
-          casks.installed_90d,
-          casks.installed_365d
-        FROM casks
+          formulae.json,
+          formulae.installed_30d,
+          formulae.installed_90d,
+          formulae.installed_365d
+        FROM formulae
         WHERE
-          casks.full_token = $caskName
+          formulae.full_name = $formulaName
         LIMIT 1
       `
       )
       .bind({
-        caskName,
+        formulaName,
       })
       .get();
     if (!row) return null;
@@ -350,30 +344,35 @@ const brewCask = {
     };
   },
 
-  async install(caskName) {
+  async install(formulaName) {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
           taskQueue.push(
             {
               type: "prompt-for-password",
-              label: `Authenticate to install ${caskName}`,
-              prompt: `The installer for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
+              label: `Authenticate to install ${formulaName}`,
+              prompt: `The installer for '${formulaName}' requires elevated privileges.\n\nEnter your password to allow this.`,
             } as PromptForPasswordTask,
             ["before"]
           );
         }
         if (
-          data.match(new RegExp(`Cask '${caskName}' is already installed`, "i"))
+          data.match(
+            new RegExp(
+              `${formulaName} .*? is already installed and up-to-date`,
+              "i"
+            )
+          )
         ) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
-        if (data.match(/(?<!')-- openstore-succeeded: cask-install --/)) {
+        if (data.match(/(?<!')-- openstore-succeeded: formula-install --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: cask-install --/)) {
+        if (data.match(/(?<!')-- openstore-failed: formula-install --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -384,32 +383,32 @@ const brewCask = {
           await getBrewExecutablePath(),
           "install",
           ...(await getQuarantineFlags()),
-          "--cask",
-          caskName,
+          "--formula",
+          formulaName,
         ]) +
-          " && echo '-- openstore-succeeded: cask-install --' || echo '-- openstore-failed: cask-install --'\n"
+          " && echo '-- openstore-succeeded: formula-install --' || echo '-- openstore-failed: formula-install --'\n"
       );
     });
   },
 
-  async upgrade(caskName) {
+  async upgrade(formulaName) {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
           taskQueue.push(
             {
               type: "prompt-for-password",
-              label: `Authenticate to update ${caskName}`,
-              prompt: `The updater for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
+              label: `Authenticate to update ${formulaName}`,
+              prompt: `The updater for '${formulaName}' requires elevated privileges.\n\nEnter your password to allow this.`,
             } as PromptForPasswordTask,
             ["before"]
           );
         }
-        if (data.match(/(?<!')-- openstore-succeeded: cask-upgrade --/)) {
+        if (data.match(/(?<!')-- openstore-succeeded: formula-upgrade --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: cask-upgrade --/)) {
+        if (data.match(/(?<!')-- openstore-failed: formula-upgrade --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -420,32 +419,32 @@ const brewCask = {
           await getBrewExecutablePath(),
           "upgrade",
           ...(await getQuarantineFlags()),
-          "--cask",
-          caskName,
+          "--formula",
+          formulaName,
         ]) +
-          " && echo '-- openstore-succeeded: cask-upgrade --' || echo '-- openstore-failed: cask-upgrade --'\n"
+          " && echo '-- openstore-succeeded: formula-upgrade --' || echo '-- openstore-failed: formula-upgrade --'\n"
       );
     });
   },
 
-  async uninstall(caskName) {
+  async uninstall(formulaName) {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
           taskQueue.push(
             {
               type: "prompt-for-password",
-              label: `Authenticate to uninstall ${caskName}`,
-              prompt: `The uninstaller for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
+              label: `Authenticate to uninstall ${formulaName}`,
+              prompt: `The uninstaller for '${formulaName}' requires elevated privileges.\n\nEnter your password to allow this.`,
             } as PromptForPasswordTask,
             ["before"]
           );
         }
-        if (data.match(/(?<!')-- openstore-succeeded: cask-uninstall --/)) {
+        if (data.match(/(?<!')-- openstore-succeeded: formula-uninstall --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: cask-uninstall --/)) {
+        if (data.match(/(?<!')-- openstore-failed: formula-uninstall --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -455,14 +454,14 @@ const brewCask = {
         quote([
           await getBrewExecutablePath(),
           "uninstall",
-          "--cask",
-          caskName,
+          "--formula",
+          formulaName,
         ]) +
-          " && echo '-- openstore-succeeded: cask-uninstall --' || echo '-- openstore-failed: cask-uninstall --'\n"
+          " && echo '-- openstore-succeeded: formula-uninstall --' || echo '-- openstore-failed: formula-uninstall --'\n"
       );
     });
   },
-} as IPCBrewCask;
+} as IPCBrew;
 
 function dbKeyForSortKey(sortKey: SortKey): string {
   switch (sortKey) {
@@ -480,16 +479,4 @@ function dbKeyForSortKey(sortKey: SortKey): string {
   }
 }
 
-export async function getBrewExecutablePath(): Promise<string> {
-  return path.join(await settings.get("homebrewPath"), "bin", "brew");
-}
-
-export async function getQuarantineFlags(): Promise<string[]> {
-  return [
-    `--${
-      (await settings.get("validateCodeSignatures")) ? "" : "no-"
-    }quarantine`,
-  ];
-}
-
-export default brewCask;
+export default brew;

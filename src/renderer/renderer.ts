@@ -35,8 +35,8 @@ import "styles/default.css";
 import "core/nav";
 
 import "components/sidebar/Sidebar";
-import "components/apps/apps-view";
-import "components/apps/AppView";
+import "components/packages/PackagesView";
+import "components/packages/PackageDetailView";
 import "components/tasks/TasksPane";
 import "components/settings/SettingsPane";
 import "components/tasks/TasksButton";
@@ -51,8 +51,8 @@ import "components/modal/PasswordPromptModal";
 
 import taskQueue from "components/tasks/model/TaskQueue";
 import {
-  CaskReindexAllTask,
-  CaskReindexOutdatedTask,
+  ReindexAllTask,
+  ReindexOutdatedTask,
 } from "components/tasks/model/Task";
 
 const accentColor = window.theme.getAccentColor();
@@ -97,12 +97,26 @@ window.addEventListener("load", () => {
   });
 
   taskQueue.push({
-    type: "cask-reindex-all",
-    label: "Rebuild catalog if too old",
+    type: "reindex-all",
+    label: "Rebuild catalog if too old (brew cask)",
+    packageManager: "brew-cask",
     condition: "if-too-old",
-  } as CaskReindexAllTask);
+  } as ReindexAllTask);
   taskQueue.push({
-    type: "cask-reindex-outdated",
-    label: "Check for updates",
-  } as CaskReindexOutdatedTask);
+    type: "reindex-all",
+    label: "Rebuild catalog if too old (brew)",
+    packageManager: "brew",
+    condition: "if-too-old",
+  } as ReindexAllTask);
+
+  taskQueue.push({
+    type: "reindex-outdated",
+    label: "Check for updates (brew cask)",
+    packageManager: "brew-cask",
+  } as ReindexOutdatedTask);
+  taskQueue.push({
+    type: "reindex-outdated",
+    label: "Check for updates (brew)",
+    packageManager: "brew",
+  } as ReindexOutdatedTask);
 });

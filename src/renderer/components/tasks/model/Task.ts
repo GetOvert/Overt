@@ -1,3 +1,5 @@
+import { PackageManager } from "package-manager/SourceRepository";
+
 export type QueuedTask = Task & {
   serial: number;
   state: TaskState;
@@ -29,45 +31,49 @@ export type Task = {
 
 export type TaskType =
   | "prompt-for-password"
-  | "cask-reindex-all"
-  | "cask-reindex-outdated"
-  | "cask-reindex"
-  | "cask-install"
-  | "cask-upgrade"
-  | "cask-uninstall";
+  | "reindex-all"
+  | "reindex-outdated"
+  | "reindex"
+  | "install"
+  | "upgrade"
+  | "uninstall";
 
 export type PromptForPasswordTask = Task & {
   type: "prompt-for-password";
   prompt: string;
 };
-export type CaskReindexAllTask = Task & {
-  type: "cask-reindex-all";
+
+export type PackageManagerTask = Task & {
+  packageManager: string;
+};
+export type ReindexAllTask = PackageManagerTask & {
+  type: "reindex-all";
   condition?: "always" | "if-too-old" | "if-nonexistent";
   wipeIndexFirst?: boolean;
 };
-export type CaskReindexOutdatedTask = Task & {
-  type: "cask-reindex-outdated";
+export type ReindexOutdatedTask = PackageManagerTask & {
+  type: "reindex-outdated";
 };
-export type CaskReindexTask = Task & {
-  type: "cask-reindex";
-  caskIdentifiers: string[];
+export type ReindexTask = PackageManagerTask & {
+  type: "reindex";
+  packageIdentifiers: string[];
 };
-export type CaskInstallTask = Task & {
-  type: "cask-install";
-  caskIdentifier: string;
+export type InstallTask = PackageManagerTask & {
+  type: "install";
+  packageIdentifier: string;
 };
-export type CaskUpgradeTask = Task & {
-  type: "cask-upgrade";
-  caskIdentifier: string;
+export type UpgradeTask = PackageManagerTask & {
+  type: "upgrade";
+  packageIdentifier: string;
 };
-export type CaskUninstallTask = Task & {
-  type: "cask-uninstall";
-  caskIdentifier: string;
+export type UninstallTask = PackageManagerTask & {
+  type: "uninstall";
+  packageIdentifier: string;
 };
-export function caskIdentifiersOfTask(task: Task): string[] | null {
-  return "caskIdentifier" in task
-    ? [(task as any).caskIdentifier]
-    : "caskIdentifiers" in task
-    ? (task as any).caskIdentifiers
+export function packageIdentifiersOfTask(task: Task): string[] | null {
+  return "packageIdentifier" in task
+    ? [(task as any).packageIdentifier]
+    : "packageIdentifiers" in task
+    ? (task as any).packageIdentifiers
     : null;
 }

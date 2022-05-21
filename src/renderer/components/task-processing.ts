@@ -1,14 +1,16 @@
+import { packageManagerForName } from "package-manager/PackageManagerRegistry";
 import PasswordPromptModal from "./modal/PasswordPromptModal";
 import {
-  caskIdentifiersOfTask,
-  CaskInstallTask,
-  CaskReindexAllTask,
-  CaskReindexTask,
-  CaskUninstallTask,
-  CaskUpgradeTask,
+  packageIdentifiersOfTask,
+  InstallTask,
+  ReindexAllTask,
+  ReindexTask,
+  UninstallTask,
+  UpgradeTask,
   PromptForPasswordTask,
   QueuedTask,
   TaskType,
+  PackageManagerTask,
 } from "./tasks/model/Task";
 import taskQueue from "./tasks/model/TaskQueue";
 
@@ -59,25 +61,29 @@ const promptForPasswordProcessor = new TaskProcessor(
 );
 
 const reindexProcessor = new TaskProcessor(
-  ["cask-reindex-all", "cask-reindex-outdated", "cask-reindex"],
+  ["reindex-all", "reindex-outdated", "reindex"],
   async (task: QueuedTask) => {
+    const packageManagerName = (task as unknown as PackageManagerTask)
+      .packageManager;
+    const packageManager = packageManagerForName(packageManagerName);
+
     let success = false;
     switch (task.type) {
-      case "cask-reindex-all":
-        const reindexAll = task as unknown as CaskReindexAllTask;
-        await window.brewCask.rebuildIndex(
+      case "reindex-all":
+        const reindexAll = task as unknown as ReindexAllTask;
+        await packageManager.rebuildIndex(
           reindexAll.condition,
           reindexAll.wipeIndexFirst
         );
         success = true;
         break;
-      case "cask-reindex-outdated":
-        await window.brewCask.reindexOutdated();
+      case "reindex-outdated":
+        await packageManager.reindexOutdated();
         success = true;
         break;
-      case "cask-reindex":
-        await window.brewCask.updateIndex(
-          (task as unknown as CaskReindexTask).caskIdentifiers
+      case "reindex":
+        await packageManager.updateIndex(
+          (task as unknown as ReindexTask).packageIdentifiers
         );
         success = true;
         break;
@@ -87,24 +93,28 @@ const reindexProcessor = new TaskProcessor(
   }
 );
 
-const brewCaskProcessor = new TaskProcessor(
-  ["cask-install", "cask-upgrade", "cask-uninstall"],
+const packageActionsProcessor = new TaskProcessor(
+  ["install", "upgrade", "uninstall"],
   async (task: QueuedTask) => {
+    const packageManagerName = (task as unknown as PackageManagerTask)
+      .packageManager;
+    const packageManager = packageManagerForName(packageManagerName);
+
     let success = false;
     switch (task.type) {
-      case "cask-install":
-        success = await window.brewCask.install(
-          (task as unknown as CaskInstallTask).caskIdentifier
+      case "install":
+        success = await packageManager.install(
+          (task as unknown as InstallTask).packageIdentifier
         );
         break;
-      case "cask-upgrade":
-        success = await window.brewCask.upgrade(
-          (task as unknown as CaskUpgradeTask).caskIdentifier
+      case "upgrade":
+        success = await packageManager.upgrade(
+          (task as unknown as UpgradeTask).packageIdentifier
         );
         break;
-      case "cask-uninstall":
-        success = await window.brewCask.uninstall(
-          (task as unknown as CaskUninstallTask).caskIdentifier
+      case "uninstall":
+        success = await packageManager.uninstall(
+          (task as unknown as UninstallTask).packageIdentifier
         );
         break;
     }
@@ -112,9 +122,10 @@ const brewCaskProcessor = new TaskProcessor(
     taskQueue.remove(task, success ? "succeeded" : "failed");
 
     taskQueue.push({
-      type: "cask-reindex",
-      label: `Index ${caskIdentifiersOfTask(task)}`,
-      caskIdentifiers: caskIdentifiersOfTask(task),
-    } as CaskReindexTask);
+      type: "reindex",
+      label: `Index ${packageIdentifiersOfTask(task)}`,
+      packageManager: packageManagerName,
+      packageIdentifiers: packageIdentifiersOfTask(task),
+    } as ReindexTask);
   }
 );

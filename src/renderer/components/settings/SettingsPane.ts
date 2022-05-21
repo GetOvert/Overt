@@ -3,7 +3,7 @@ import { css, html, HTMLTemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { Tooltip } from "bootstrap";
 import taskQueue from "components/tasks/model/TaskQueue";
-import { CaskReindexAllTask } from "components/tasks/model/Task";
+import { ReindexAllTask } from "components/tasks/model/Task";
 import SourceRepositoriesModal from "components/modal/SourceRepositoriesModal";
 
 @customElement("openstore-settings-pane")
@@ -188,11 +188,12 @@ export class SettingsPane extends BootstrapBlockElement {
   private rebuildIndex() {
     taskQueue.push(
       {
-        type: "cask-reindex-all",
+        packageManager: "brew-cask",
+        type: "reindex-all",
         label: "Rebuild catalog",
         condition: "always",
         wipeIndexFirst: true,
-      } as CaskReindexAllTask,
+      } as ReindexAllTask,
       ["before", "after"]
     );
   }

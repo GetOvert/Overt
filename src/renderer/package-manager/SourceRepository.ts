@@ -4,5 +4,5 @@ export default class SourceRepository {
   url: string;
 }
 
-export const packageMangers = ["brew"];
+export const packageMangers = ["brew"] as const;
 export type PackageManager = typeof packageMangers[number];
