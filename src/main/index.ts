@@ -37,7 +37,9 @@ async function createWindow(): Promise<void> {
     webPreferences: {
       additionalArguments: [
         `OpenStore.accentColor=${accentColor}`,
-        `OpenStore.cachePath=${Buffer.from(app.getPath("cache")).toString('base64')}`,
+        `OpenStore.cachePath=${Buffer.from(app.getPath("cache")).toString(
+          "base64"
+        )}`,
       ],
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
@@ -49,32 +51,25 @@ async function createWindow(): Promise<void> {
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
 
-  const ptyProcess = process.platform === 'win32'
-    ? pty.spawn(
-      'powershell.exe',
-      [],
-      {
-        cwd: process.env.HOMEPATH,
-        env: {
-          ...process.env
-        }
-      }
-    )
-    : pty.spawn(
-      "/bin/sh",
-      [],
-      {
-        name: "xterm-color",
-        cols: 80,
-        rows: 30,
-        cwd: process.env.HOME,
-        env: {
-          ...process.env,
-          PS1: "> ",
-          BASH_SILENCE_DEPRECATION_WARNING: "1", // Silence "move to zsh" suggestion on macOS 10.15+
-        },
-      }
-    );
+  const ptyProcess =
+    process.platform === "win32"
+      ? pty.spawn("powershell.exe", [], {
+          cwd: process.env.HOMEPATH,
+          env: {
+            ...process.env,
+          },
+        })
+      : pty.spawn("/bin/sh", [], {
+          name: "xterm-color",
+          cols: 80,
+          rows: 30,
+          cwd: process.env.HOME,
+          env: {
+            ...process.env,
+            PS1: "> ",
+            BASH_SILENCE_DEPRECATION_WARNING: "1", // Silence "move to zsh" suggestion on macOS 10.15+
+          },
+        });
 
   ipcMain.on("terminal.send", (event: IpcMainEvent, data: string) => {
     ptyProcess.write(data);
@@ -148,7 +143,7 @@ async function createWindow(): Promise<void> {
   });
 
   initAppMenu();
-};
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

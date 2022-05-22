@@ -1,28 +1,15 @@
-import { IPCPackageManager } from "ipc/package-managers/IPCPackageManager";
-import { BrewPackageInfoAdapter } from "ipc/package-managers/macOS/IPCBrew";
-import { BrewCaskPackageInfoAdapter } from "ipc/package-managers/macOS/IPCBrewCask";
-import { PackageInfoAdapter } from "./PackageInfoAdapter";
+import * as macOS from "ipc/package-managers/macOS/macOSPackageManagerRegistry";
+import * as windows from "ipc/package-managers/Windows/WindowsPackageManagerRegistry";
 
-export const allPackageMangers = ["brew", "brew-cask"];
+const platform = window.platform.getNodePlatformString();
 
-export function packageManagerForName(
-  name: string
-): IPCPackageManager<unknown, unknown> {
-  switch (name) {
-    case "brew":
-      return window.brew;
-    case "brew-cask":
-      return window.brewCask;
-  }
-}
-
-export function packageInfoAdapterForPackageManagerName(
-  name: string
-): PackageInfoAdapter<unknown> {
-  switch (name) {
-    case "brew":
-      return new BrewPackageInfoAdapter();
-    case "brew-cask":
-      return new BrewCaskPackageInfoAdapter();
-  }
-}
+export const allPackageMangers =
+  platform === "darwin" ? macOS.allPackageMangers : windows.allPackageMangers;
+export const packageManagerForName =
+  platform === "darwin"
+    ? macOS.packageManagerForName
+    : windows.packageManagerForName;
+export const packageInfoAdapterForPackageManagerName =
+  platform === "darwin"
+    ? macOS.packageInfoAdapterForPackageManagerName
+    : windows.packageInfoAdapterForPackageManagerName;
