@@ -145,17 +145,17 @@ const brew = {
 
           const installs30d = await (
             await fetch(
-              "https://formulae.brew.sh/api/analytics/install/homebrew-core/30d.json"
+              "https://formulae.brew.sh/api/analytics/install-on-request/homebrew-core/30d.json"
             )
           ).json();
           const installs90d = await (
             await fetch(
-              "https://formulae.brew.sh/api/analytics/install/homebrew-core/90d.json"
+              "https://formulae.brew.sh/api/analytics/install-on-request/homebrew-core/90d.json"
             )
           ).json();
           const installs365d = await (
             await fetch(
-              "https://formulae.brew.sh/api/analytics/install/homebrew-core/365d.json"
+              "https://formulae.brew.sh/api/analytics/install-on-request/homebrew-core/365d.json"
             )
           ).json();
 
@@ -223,20 +223,17 @@ const brew = {
         installed: formula.installed[0]?.version,
 
         installed_30d:
-          installs30d?.formulae?.[formula.full_name]?.[0]?.count?.toString().replaceAll(
-            /[^\d]/g,
-            ""
-          ) ?? 0,
+          installs30d?.formulae?.[formula.full_name]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, "") ?? 0,
         installed_90d:
-          installs90d?.formulae?.[formula.full_name]?.[0]?.count?.toString().replaceAll(
-            /[^\d]/g,
-            ""
-          ) ?? 0,
+          installs90d?.formulae?.[formula.full_name]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, "") ?? 0,
         installed_365d:
-          installs365d?.formulae?.[formula.full_name]?.[0]?.count?.toString().replaceAll(
-            /[^\d]/g,
-            ""
-          ) ?? 0,
+          installs365d?.formulae?.[formula.full_name]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, "") ?? 0,
 
         json: JSON.stringify(formula),
       }))
