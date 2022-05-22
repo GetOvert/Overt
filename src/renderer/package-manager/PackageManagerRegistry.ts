@@ -3,6 +3,8 @@ import { BrewPackageInfoAdapter } from "ipc/package-managers/macOS/IPCBrew";
 import { BrewCaskPackageInfoAdapter } from "ipc/package-managers/macOS/IPCBrewCask";
 import { PackageInfoAdapter } from "./PackageInfoAdapter";
 
+export const allPackageMangers = ["brew", "brew-cask"];
+
 export function packageManagerForName(
   name: string
 ): IPCPackageManager<unknown, unknown> {

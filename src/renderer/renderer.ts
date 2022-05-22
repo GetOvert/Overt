@@ -54,6 +54,7 @@ import {
   ReindexAllTask,
   ReindexOutdatedTask,
 } from "components/tasks/model/Task";
+import { allPackageMangers } from "package-manager/PackageManagerRegistry";
 
 const accentColor = window.theme.getAccentColor();
 document.documentElement.style.setProperty("--accent-color", accentColor);
@@ -96,27 +97,19 @@ window.addEventListener("load", () => {
     sort: "installed-30d",
   });
 
-  taskQueue.push({
-    type: "reindex-all",
-    label: "Rebuild catalog if too old (brew cask)",
-    packageManager: "brew-cask",
-    condition: "if-too-old",
-  } as ReindexAllTask);
-  taskQueue.push({
-    type: "reindex-all",
-    label: "Rebuild catalog if too old (brew)",
-    packageManager: "brew",
-    condition: "if-too-old",
-  } as ReindexAllTask);
-
-  taskQueue.push({
-    type: "reindex-outdated",
-    label: "Check for updates (brew cask)",
-    packageManager: "brew-cask",
-  } as ReindexOutdatedTask);
-  taskQueue.push({
-    type: "reindex-outdated",
-    label: "Check for updates (brew)",
-    packageManager: "brew",
-  } as ReindexOutdatedTask);
+  for (const packageManager of allPackageMangers) {
+    taskQueue.push({
+      packageManager,
+      type: "reindex-all",
+      label: `Rebuild catalog if too old (${packageManager})`,
+      condition: "if-too-old",
+    } as ReindexAllTask);
+  }
+  for (const packageManager of allPackageMangers) {
+    taskQueue.push({
+      packageManager,
+      type: "reindex-outdated",
+      label: `Check for updates (${packageManager})`,
+    } as ReindexOutdatedTask);
+  }
 });

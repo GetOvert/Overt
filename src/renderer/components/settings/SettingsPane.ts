@@ -5,6 +5,7 @@ import { Tooltip } from "bootstrap";
 import taskQueue from "components/tasks/model/TaskQueue";
 import { ReindexAllTask } from "components/tasks/model/Task";
 import SourceRepositoriesModal from "components/modal/SourceRepositoriesModal";
+import { allPackageMangers } from "package-manager/PackageManagerRegistry";
 
 @customElement("openstore-settings-pane")
 export class SettingsPane extends BootstrapBlockElement {
@@ -186,15 +187,17 @@ export class SettingsPane extends BootstrapBlockElement {
   }
 
   private rebuildIndex() {
-    taskQueue.push(
-      {
-        packageManager: "brew-cask",
-        type: "reindex-all",
-        label: "Rebuild catalog",
-        condition: "always",
-        wipeIndexFirst: true,
-      } as ReindexAllTask,
-      ["before", "after"]
-    );
+    for (const packageManager of allPackageMangers) {
+      taskQueue.push(
+        {
+          packageManager,
+          type: "reindex-all",
+          label: `Rebuild catalog (${packageManager})`,
+          condition: "always",
+          wipeIndexFirst: true,
+        } as ReindexAllTask,
+        ["before", "after"]
+      );
+    }
   }
 }
