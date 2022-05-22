@@ -29,7 +29,7 @@ const accentColor = ["darwin", "win32"].includes(process.platform)
   ? systemPreferences.getAccentColor()
   : config.fallbackAccentColor;
 
-const createWindow = (): void => {
+async function createWindow(): Promise<void> {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 992,
@@ -37,10 +37,9 @@ const createWindow = (): void => {
     webPreferences: {
       additionalArguments: [
         `OpenStore.accentColor=${accentColor}`,
-        `OpenStore.cachePath=${app.getPath("cache")}`,
+        `OpenStore.cachePath=${Buffer.from(app.getPath("cache")).toString('base64')}`,
       ],
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
-      nodeIntegrationInWorker: true,
     },
   });
 
@@ -50,17 +49,32 @@ const createWindow = (): void => {
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
 
-  const ptyProcess = pty.spawn("/bin/sh", [], {
-    name: "xterm-color",
-    cols: 80,
-    rows: 30,
-    cwd: process.env.HOME,
-    env: {
-      ...process.env,
-      PS1: "> ",
-      BASH_SILENCE_DEPRECATION_WARNING: "1", // Silence "move to zsh" suggestion on macOS 10.15+
-    },
-  });
+  const ptyProcess = process.platform === 'win32'
+    ? pty.spawn(
+      'powershell.exe',
+      [],
+      {
+        cwd: process.env.HOMEPATH,
+        env: {
+          ...process.env
+        }
+      }
+    )
+    : pty.spawn(
+      "/bin/sh",
+      [],
+      {
+        name: "xterm-color",
+        cols: 80,
+        rows: 30,
+        cwd: process.env.HOME,
+        env: {
+          ...process.env,
+          PS1: "> ",
+          BASH_SILENCE_DEPRECATION_WARNING: "1", // Silence "move to zsh" suggestion on macOS 10.15+
+        },
+      }
+    );
 
   ipcMain.on("terminal.send", (event: IpcMainEvent, data: string) => {
     ptyProcess.write(data);

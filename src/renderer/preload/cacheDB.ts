@@ -4,9 +4,12 @@ import fs from "fs";
 import { promisify } from "util";
 
 // Passed in webPreferences.additionalArguments:
-const cachePath = process.argv
-  .filter((arg) => arg.includes("OpenStore.cachePath="))[0]
-  .slice("OpenStore.cachePath=".length);
+const cachePath = Buffer.from(
+  process.argv
+    .filter((arg) => arg.includes("OpenStore.cachePath="))[0]
+    .slice("OpenStore.cachePath=".length),
+  "base64"
+).toString("ascii");
 
 const cacheDir = path.join(cachePath, "OpenStore_v2");
 const oldCacheDirs = [path.join(cachePath, "OpenStore_v1")];
