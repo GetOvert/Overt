@@ -130,7 +130,7 @@ export class BrewPackageInfoAdapter
         ),
       },
       {
-        heading: "Install count",
+        heading: "Install-on-request count",
         value: [
           `30 days: ${(+packageInfo.installed_30d).toLocaleString()}`,
           `90 days: ${(+packageInfo.installed_90d).toLocaleString()}`,
