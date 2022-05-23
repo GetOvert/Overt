@@ -41,24 +41,38 @@ export default class Sidebar extends BootstrapBlockElement {
         <nav class="nav nav-pills nav-fill flex-column">
           <span class="fs-6 fw-bold text-uppercase ms-2 mt-1 mb-2">Source</span>
 
-          <openstore-sidebar-nav-link
-            href=${(window as any).openStore.encodeFragment({
-              source: "brew-cask",
-            })}
-            label="Apps (brew cask)"
-            ?active=${(window as any).openStore.decodeFragment(
-              window.location.hash
-            ).source === "brew-cask"}
-          ></openstore-sidebar-nav-link>
-          <openstore-sidebar-nav-link
-            href=${((window as any).openStore as any).encodeFragment({
-              source: "brew",
-            })}
-            label="Tools & Libraries (brew)"
-            ?active=${(window as any).openStore.decodeFragment(
-              window.location.hash
-            ).source === "brew"}
-          ></openstore-sidebar-nav-link>
+          ${window.platform.getNodePlatformString() === "darwin"
+            ? html`
+                <openstore-sidebar-nav-link
+                  href=${(window as any).openStore.encodeFragment({
+                    source: "brew-cask",
+                  })}
+                  label="Apps (brew cask)"
+                  ?active=${(window as any).openStore.decodeFragment(
+                    window.location.hash
+                  ).source === "brew-cask"}
+                ></openstore-sidebar-nav-link>
+                <openstore-sidebar-nav-link
+                  href=${((window as any).openStore as any).encodeFragment({
+                    source: "brew",
+                  })}
+                  label="Tools & Libraries (brew)"
+                  ?active=${(window as any).openStore.decodeFragment(
+                    window.location.hash
+                  ).source === "brew"}
+                ></openstore-sidebar-nav-link>
+              `
+            : html`
+                <openstore-sidebar-nav-link
+                  href=${(window as any).openStore.encodeFragment({
+                    source: "winget",
+                  })}
+                  label="Windows Package Manager (winget)"
+                  ?active=${(window as any).openStore.decodeFragment(
+                    window.location.hash
+                  ).source === "winget"}
+                ></openstore-sidebar-nav-link>
+              `}
         </nav>
 
         <nav class="nav nav-pills nav-fill flex-column">

@@ -92,7 +92,10 @@ followSystemColorScheme(
 
 window.addEventListener("load", () => {
   (window as any).openStore.updateWindowLocationFragment({
-    source: "brew-cask",
+    source:
+      window.platform.getNodePlatformString() === "darwin"
+        ? "brew-cask"
+        : "winget",
     filter: "all",
     sort: "installed-30d",
   });
