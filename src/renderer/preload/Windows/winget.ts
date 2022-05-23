@@ -12,11 +12,7 @@ import {
   insertOrReplaceRecords,
   sql,
 } from "util/sql";
-import { IPCBrew, SortKey } from "ipc/package-managers/macOS/IPCBrew";
 import terminal from "../terminal";
-import * as taskQueue from "../taskQueueIPC";
-import { PromptForPasswordTask } from "components/tasks/model/Task";
-import settings from "../settings";
 import path from "path";
 import {
   IPCWinget,
@@ -102,34 +98,46 @@ const winget = {
     if (Array.isArray(packageNames) && packageNames.length === 0) return;
 
     (await (async () => {
-      const brewProcess = spawn(await getWingetExecutablePath(), [
+      const wingetProcess = spawn(await getWingetExecutablePath(), [
         "search",
         ...wingetCommonArguments(),
       ]);
 
       // FIXME: Parse properly
 
-      let json = "";
+      let stdout = "";
       let stderr = "";
-      brewProcess.stdout.on("data", (data) => {
-        json += data;
+      wingetProcess.stdout.on("data", (data) => {
+        stdout += data;
       });
-      brewProcess.stderr.on("data", (data) => {
+      wingetProcess.stderr.on("data", (data) => {
         console.error(`stderr: ${data}`);
         stderr += data;
       });
 
       return new Promise((resolve, reject) => {
-        brewProcess.on("exit", async (code) => {
+        wingetProcess.on("exit", async (code) => {
           if (code !== 0) return reject(stderr);
 
-          (winget as any)._rebuildIndexFromPackageInfo(
-            packageNames,
-            JSON.parse(json).winget_packages
-          );
+          // Parse winget search output:
+          // Discard table headers
+          stdout.replace(/.*?^-+$/ms, "");
+          // Read whitespace-separated fields on each line
+          const packages = stdout
+            .split("\n")
+            .map((line) => line.split(/\s+/))
+            .map((fields) => ({
+              name: fields[0],
+              id: fields[1],
+              version: fields[2],
+              source: fields[3],
+              installed_version: null, // TODO: Parse `winget export`
+            }));
+
+          (winget as any)._rebuildIndexFromPackageInfo(packageNames, packages);
           resolve();
         });
-        brewProcess.on("error", reject);
+        wingetProcess.on("error", reject);
       });
     })()) as void;
 
@@ -226,13 +234,14 @@ const winget = {
       .prepare(
         sql`
         SELECT
-          winget_packages.json,
-          winget_packages.installed_30d,
-          winget_packages.installed_90d,
-          winget_packages.installed_365d
+          winget_packages.name,
+          winget_packages.id,
+          winget_packages.version,
+          winget_packages.source,
+          winget_packages.installed_version
         FROM winget_packages
         WHERE
-          winget_packages.full_name = $packageName
+          winget_packages.id = $packageName
         LIMIT 1
       `
       )
@@ -248,17 +257,6 @@ const winget = {
   async install(packageName) {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
-        if (
-          data.match(
-            new RegExp(
-              `${packageName} .*? is already installed and up-to-date`,
-              "i"
-            )
-          )
-        ) {
-          terminal.offReceive(callbackID);
-          return resolve(false);
-        }
         if (data.match(/(?<!')-- openstore-succeeded: winget-install --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
