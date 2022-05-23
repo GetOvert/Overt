@@ -66,6 +66,7 @@
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.0.1",
     "lit": "^2.0.2",
+    "node-fetch": "^3.2.4",
     "node-pty": "^0.10.1",
     "node-stream-zip": "^1.15.0",
     "shell-quote": "^1.7.3",
