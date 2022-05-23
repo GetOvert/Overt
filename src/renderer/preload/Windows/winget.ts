@@ -18,6 +18,8 @@ import {
   IPCWinget,
   WingetPackageInfo,
 } from "ipc/package-managers/Windows/IPCWinget";
+import { downloadWingetManifests } from "./winget-to-json/download";
+import { extractWingetManifests } from "./winget-to-json/extract";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
@@ -29,8 +31,9 @@ if (process.platform === "win32") {
         "name" TEXT NOT NULL COLLATE NOCASE,
         "id" TEXT COLLATE NOCASE PRIMARY KEY,
         "version" TEXT NOT NULL,
-        "source" TEXT NOT NULL,
-        "installed_version" TEXT
+        "desc" TEXT COLLATE NOCASE PRIMARY KEY,
+        "json" TEXT NOT NULL,
+        "installed_version" TEXT,
       )`
   );
 }
@@ -97,49 +100,13 @@ const winget = {
   async updateIndex(packageNames?: string[]): Promise<void> {
     if (Array.isArray(packageNames) && packageNames.length === 0) return;
 
-    (await (async () => {
-      const wingetProcess = spawn(await getWingetExecutablePath(), [
-        "search",
-        ...wingetCommonArguments(),
-      ]);
+    // TODO: Parameterize URL
+    const manifestsPath = await downloadWingetManifests(
+      "https://github.com/microsoft/winget-pkgs/archive/master.zip"
+    );
+    const manifests = extractWingetManifests(manifestsPath);
 
-      // FIXME: Parse properly
-
-      let stdout = "";
-      let stderr = "";
-      wingetProcess.stdout.on("data", (data) => {
-        stdout += data;
-      });
-      wingetProcess.stderr.on("data", (data) => {
-        console.error(`stderr: ${data}`);
-        stderr += data;
-      });
-
-      return new Promise((resolve, reject) => {
-        wingetProcess.on("exit", async (code) => {
-          if (code !== 0) return reject(stderr);
-
-          // Parse winget search output:
-          // Discard table headers
-          stdout.replace(/.*?^-+$/ms, "");
-          // Read whitespace-separated fields on each line
-          const packages = stdout
-            .split("\n")
-            .map((line) => line.split(/\s+/))
-            .map((fields) => ({
-              name: fields[0],
-              id: fields[1],
-              version: fields[2],
-              source: fields[3],
-              installed_version: null, // TODO: Parse `winget export`
-            }));
-
-          (winget as any)._rebuildIndexFromPackageInfo(packageNames, packages);
-          resolve();
-        });
-        wingetProcess.on("error", reject);
-      });
-    })()) as void;
+    (winget as any)._rebuildIndexFromPackageInfo(packageNames, manifests);
 
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
@@ -158,8 +125,16 @@ const winget = {
     insertOrReplaceRecords(
       await cacheDB(),
       "winget_packages",
-      ["name", "id", "version", "source", "installed_version"],
-      packages
+      ["name", "id", "version", "json", "installed_version"],
+      packages.map((package_) => ({
+        name: package_.PackageName,
+        id: package_.PackageIdentifier,
+        version: package_.PackageVersion,
+
+        json: JSON.stringify(package_),
+
+        installed_version: package_.installedVersion,
+      }))
     );
 
     if (packageNamesToUpdate) {
@@ -186,18 +161,15 @@ const winget = {
       .prepare(
         sql`
         SELECT
-          winget_packages.name,
-          winget_packages.id,
-          winget_packages.version,
-          winget_packages.source,
-          winget_packages.installed_version
+          winget_packages.json,
         FROM winget_packages
         WHERE
           (${keywords
             .map(
               (keyword, index) => sql`
-                (winget_packages.name LIKE $pattern${index}
-                  OR winget_packages.id LIKE $pattern${index})`
+                (winget_packages.id LIKE $pattern${index}
+                  OR winget_packages.name LIKE $pattern${index})
+                  OR winget_packages.desc LIKE $pattern${index})`
             )
             .join(sql` AND `)})
           ${(() => {
@@ -205,17 +177,17 @@ const winget = {
               case "all":
                 return "";
               case "available":
-                return sql`AND winget_packages.installed IS NULL`;
+                return sql`AND winget_packages.installedVersion IS NULL`;
               case "installed":
-                return sql`AND winget_packages.installed IS NOT NULL`;
+                return sql`AND winget_packages.installedVersion IS NOT NULL`;
               case "updates":
                 return sql`
-                  AND winget_packages.installed IS NOT NULL
-                  AND winget_packages.installed != winget_packages.version
+                  AND winget_packages.installedVersion IS NOT NULL
+                  AND winget_packages.installedVersion != winget_packages.PackageVersion
                 `;
             }
           })()}
-        ORDER BY winget_packages.id, winget_packages.source DESC
+        ORDER BY winget_packages.id DESC
         LIMIT $l OFFSET $o
       `
       )
@@ -234,11 +206,7 @@ const winget = {
       .prepare(
         sql`
         SELECT
-          winget_packages.name,
-          winget_packages.id,
-          winget_packages.version,
-          winget_packages.source,
-          winget_packages.installed_version
+          winget_packages.json,
         FROM winget_packages
         WHERE
           winget_packages.id = $packageName
@@ -251,7 +219,10 @@ const winget = {
       .get();
     if (!row) return null;
 
-    return row;
+    return {
+      rowid: row.rowid,
+      ...JSON.parse(row.json),
+    };
   },
 
   async install(packageName) {

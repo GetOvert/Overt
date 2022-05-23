@@ -13,37 +13,88 @@ declare global {
 
 export type IPCWinget = IPCPackageManager<WingetPackageInfo, "">;
 
-export type WingetPackageInfo = {
-  name: string;
-  id: string;
-  version: string;
-  source: string;
-  installed_version?: string;
+export type WingetPackageInfo = WingetDefaultLocaleManifest & {
+  installedVersion?: string;
+};
+
+// https://github.com/microsoft/winget-pkgs/blob/master/doc/manifest/schema/1.1.0/defaultLocale.md
+type WingetDefaultLocaleManifest = {
+  /** The package unique identifier */
+  PackageIdentifier: string;
+  /** The package version */
+  PackageVersion: string;
+  /** The package meta-data locale */
+  PackageLocale: string;
+  /** The publisher name */
+  Publisher: string;
+  /** Optional publisher home page */
+  PublisherURL?: string;
+  /** Optional publisher support page */
+  PublisherSupportUrl?: string;
+  /** Optional publisher privacy page */
+  PrivacyUrl?: string;
+  /** Optional author */
+  Author?: string;
+  /** The package name */
+  PackageName: string;
+  /** Optional package home page */
+  PackageURL?: string;
+  /** The package license */
+  License: string;
+  /** Optional package home page */
+  LicenseUrl?: string;
+  /** Optional package copyright */
+  Copyright?: string;
+  /** Optional package copyright page */
+  CopyrightUrl?: string;
+  /** The short package description */
+  ShortDescription: string;
+  /** Optional full package description */
+  Description?: string;
+  /** Optional most common package term */
+  Moniker?: string;
+  /** Optional list of package terms */
+  Tags?: string[];
+  /** Optional package agreements */
+  Agreement?: {
+    /** Optional agreement label */
+    AgreementLabel?: string;
+    /** Optional agreement text */
+    Agreement?: string;
+    /** Optional agreement URL */
+    AgreementUrl?: string;
+  }[];
+  /** Optional release date */
+  ReleaseDate?: string;
+  /** Optional release notes */
+  ReleaseNotes?: string;
+  /** Optional release notes URL */
+  ReleaseNotesUrl?: string;
 };
 
 export class WingetPackageInfoAdapter
   implements PackageInfoAdapter<WingetPackageInfo>
 {
   packageName(packageInfo: WingetPackageInfo): string {
-    return packageInfo.name;
+    return packageInfo.PackageName;
   }
 
   packageIdentifier(packageInfo: WingetPackageInfo): string {
-    return packageInfo.id;
+    return packageInfo.PackageIdentifier;
   }
 
   packageDescription(packageInfo: WingetPackageInfo): string {
-    return "";
+    return packageInfo.ShortDescription;
   }
 
   isPackageInstalled(packageInfo: WingetPackageInfo): boolean {
-    return !!packageInfo.installed_version?.length;
+    return !!packageInfo.installedVersion?.length;
   }
 
   isPackageOutdated(packageInfo: WingetPackageInfo): boolean {
     return (
       this.isPackageInstalled(packageInfo) &&
-      packageInfo.installed_version !== packageInfo.version
+      packageInfo.installedVersion !== packageInfo.PackageVersion
     );
   }
 
@@ -53,9 +104,9 @@ export class WingetPackageInfoAdapter
         heading: "Versions",
         value: html`<dl>
           <dt>Installed:</dt>
-          <dd>${packageInfo.installed_version ?? "None"}</dd>
+          <dd>${packageInfo.installedVersion ?? "None"}</dd>
           <dt>Latest:</dt>
-          <dd>${packageInfo.version}</dd>
+          <dd>${packageInfo.PackageVersion}</dd>
         </dl>`,
       },
     ];
