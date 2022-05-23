@@ -61,7 +61,13 @@ const winget = {
 
     return new Promise((resolve, reject) => {
       wingetProcess.on("exit", async (code) => {
-        await winget.updateIndex(stdout.split(/\s+/).filter((s) => s));
+        const outdatedPackageIDs = discardWingetOutputHeader(stdout)
+          .split("\n")
+          .map((line) => line.split(/\s+/))
+          .filter((fields) => fields.length === 2)
+          .map((fields) => fields[1]);
+
+        await winget.updateIndex(outdatedPackageIDs);
         resolve();
       });
       wingetProcess.on("error", reject);
@@ -121,11 +127,11 @@ const winget = {
 
           // Parse winget search output:
           // Discard table headers
-          stdout.replace(/.*?^-+$/ms, "");
           // Read whitespace-separated fields on each line
-          const packages = stdout
+          const packages = discardWingetOutputHeader(stdout)
             .split("\n")
             .map((line) => line.split(/\s+/))
+            .filter((fields) => fields.length === 4)
             .map((fields) => ({
               name: fields[0],
               id: fields[1],
@@ -272,6 +278,9 @@ const winget = {
           await getWingetExecutablePath(),
           "install",
           packageName,
+          "--id",
+          "--exact",
+
           ...wingetCommonArguments(),
           ...wingetInstallationCommandArguments(),
         ]) +
@@ -298,6 +307,8 @@ const winget = {
           await getWingetExecutablePath(),
           "upgrade",
           packageName,
+          "--id",
+          "--exact",
           ...wingetCommonArguments(),
           ...wingetInstallationCommandArguments(),
         ]) +
@@ -320,19 +331,31 @@ const winget = {
       });
 
       terminal.send(
-        quote([await getWingetExecutablePath(), "uninstall", packageName]) +
+        quote([
+          await getWingetExecutablePath(),
+          "uninstall",
+          packageName,
+          "--id",
+          "--exact",
+          ...wingetCommonArguments(),
+          ...wingetInstallationCommandArguments(),
+        ]) +
           "; if ($?) { echo '-- openstore-succeeded: winget-uninstall --' } else { echo '-- openstore-failed: winget-uninstall --' }\n"
       );
     });
   },
 } as IPCWinget;
 
+function discardWingetOutputHeader(stdout: string): string {
+  return stdout.replace(/.*?-{5,}/ms, "");
+}
+
 function wingetCommonArguments(): string[] {
   return ["--accept-source-agreements"];
 }
 
 function wingetInstallationCommandArguments(): string[] {
-  return ["--id", "--exact", "--accept-package-agreements"];
+  return ["--accept-package-agreements"];
 }
 
 export async function getWingetExecutablePath(): Promise<string> {
