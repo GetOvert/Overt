@@ -145,7 +145,7 @@ const winget = {
           .map((packageName) => {
             const packageInfo: any = winget.info(packageName);
             if (!packageInfo) return null; // Not in DB anyway
-            if (packageInfo?.installed) return null; // Still installed
+            if (packageInfo?.installedVersion) return null; // Still installed
 
             return packageInfo.rowid; // Delete from DB
           })
@@ -183,7 +183,7 @@ const winget = {
               case "updates":
                 return sql`
                   AND winget_packages.installedVersion IS NOT NULL
-                  AND winget_packages.installedVersion != winget_packages.PackageVersion
+                  AND winget_packages.installedVersion != winget_packages.version
                 `;
             }
           })()}
