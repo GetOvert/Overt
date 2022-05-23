@@ -13,7 +13,11 @@ function getManifestContent(path: string) {
 
 function readManifest(path: string, moniker: string): any {
   try {
-    let jsonContent = getManifestContent(path + `/${moniker}.yaml`);
+    let jsonContent = {};
+
+    if (fs.existsSync(path + `/${moniker}.yaml`)) {
+      jsonContent = getManifestContent(path + `/${moniker}.yaml`);
+    }
 
     if (fs.existsSync(path + `/${moniker}.installer.yaml`)) {
       const installerContent = getManifestContent(
