@@ -24,7 +24,7 @@ let lastOffset = 0;
 let lastScrollY = 0;
 
 @customElement("openstore-packages-view")
-export default class AppsView<
+export default class PackagesView<
   PackageManager extends IPCPackageManager<PackageInfo, SortKey>,
   PackageInfo,
   SortKey
