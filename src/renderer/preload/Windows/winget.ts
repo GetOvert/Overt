@@ -61,11 +61,9 @@ const winget = {
 
     return new Promise((resolve, reject) => {
       wingetProcess.on("exit", async (code) => {
-        const outdatedPackageIDs = discardWingetOutputHeader(stdout)
-          .split("\n")
-          .map((line) => line.split(/\s+/))
-          .filter((fields) => fields.length === 2)
-          .map((fields) => fields[1]);
+        const outdatedPackageIDs = parseWingetFields(stdout).map(
+          (fields) => fields[1]
+        );
 
         await winget.updateIndex(outdatedPackageIDs);
         resolve();
@@ -103,13 +101,14 @@ const winget = {
   async updateIndex(packageNames?: string[]): Promise<void> {
     if (Array.isArray(packageNames) && packageNames.length === 0) return;
 
+    for (const packageName of packageNames ?? [null]) {
+      
     (await (async () => {
       const wingetProcess = spawn(await getWingetExecutablePath(), [
         "search",
+        ...(packageName ? [packageName] : []),
         ...wingetCommonArguments(),
       ]);
-
-      // FIXME: Parse properly
 
       let stdout = "";
       let stderr = "";
@@ -128,17 +127,13 @@ const winget = {
           // Parse winget search output:
           // Discard table headers
           // Read whitespace-separated fields on each line
-          const packages = discardWingetOutputHeader(stdout)
-            .split("\n")
-            .map((line) => line.split(/\s+/))
-            .filter((fields) => fields.length === 4)
-            .map((fields) => ({
-              name: fields[0],
-              id: fields[1],
-              version: fields[2],
-              source: fields[3],
-              installed_version: null, // TODO: Parse `winget export`
-            }));
+          const packages = parseWingetFields(stdout).map((fields) => ({
+            name: fields[0],
+            id: fields[1],
+            version: fields[2],
+            source: fields[3],
+            installed_version: null, // TODO: Parse `winget export`
+          }));
 
           (winget as any)._rebuildIndexFromPackageInfo(packageNames, packages);
           resolve();
@@ -146,6 +141,7 @@ const winget = {
         wingetProcess.on("error", reject);
       });
     })()) as void;
+  }
 
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
@@ -211,13 +207,13 @@ const winget = {
               case "all":
                 return "";
               case "available":
-                return sql`AND winget_packages.installed IS NULL`;
+                return sql`AND winget_packages.installed_version IS NULL`;
               case "installed":
-                return sql`AND winget_packages.installed IS NOT NULL`;
+                return sql`AND winget_packages.installed_version IS NOT NULL`;
               case "updates":
                 return sql`
-                  AND winget_packages.installed IS NOT NULL
-                  AND winget_packages.installed != winget_packages.version
+                  AND winget_packages.installed_version IS NOT NULL
+                  AND winget_packages.installed_version != winget_packages.version
                 `;
             }
           })()}
@@ -284,7 +280,7 @@ const winget = {
           ...wingetCommonArguments(),
           ...wingetInstallationCommandArguments(),
         ]) +
-          "; if ($?) { echo '-- openstore-succeeded: winget-install --' } else { echo '-- openstore-failed: winget-install --' }\n"
+          "; if ($?) { echo '-- openstore-succeeded: winget-install --' } else { echo '-- openstore-failed: winget-install --' }\r\n"
       );
     });
   },
@@ -312,7 +308,7 @@ const winget = {
           ...wingetCommonArguments(),
           ...wingetInstallationCommandArguments(),
         ]) +
-          "; if ($?) { echo '-- openstore-succeeded: winget-upgrade --' } else { echo '-- openstore-failed: winget-upgrade --' }\n"
+          "; if ($?) { echo '-- openstore-succeeded: winget-upgrade --' } else { echo '-- openstore-failed: winget-upgrade --' }\r\n"
       );
     });
   },
@@ -340,14 +336,52 @@ const winget = {
           ...wingetCommonArguments(),
           ...wingetInstallationCommandArguments(),
         ]) +
-          "; if ($?) { echo '-- openstore-succeeded: winget-uninstall --' } else { echo '-- openstore-failed: winget-uninstall --' }\n"
+          "; if ($?) { echo '-- openstore-succeeded: winget-uninstall --' } else { echo '-- openstore-failed: winget-uninstall --' }\r\n"
       );
     });
   },
 } as IPCWinget;
 
+function parseWingetFields(stdout: string): string[][] {
+  const columnIndices = calculateWingetColumnHeaderIndices(stdout);
+  const r = discardWingetOutputHeader(stdout)
+    .split(/\r?\n/)
+    .filter((line) => line)
+    .map((line) =>
+      columnIndices.map((columnIndex, i) =>
+        line.slice(columnIndex, columnIndices[i + 1] ?? undefined).trim()
+      )
+    );
+  console.log(r);
+  return r;
+}
+
+function calculateWingetColumnHeaderIndices(stdout: string): number[] {
+  stdout = stdout.replace(/.*?(?=Name)/s, "").split(/\r?\n/, 2)[0];
+
+  let indices = [];
+  let index = 0;
+  while (stdout && stdout[0] !== "\r" && stdout[0] !== "\n") {
+    indices.push(index);
+
+    // Skip header name
+    while (stdout && stdout[0] !== " ") {
+      stdout = stdout.slice(1);
+      ++index;
+    }
+
+    // Skip following spaces
+    while (stdout && stdout[0] === " ") {
+      stdout = stdout.slice(1);
+      ++index;
+    }
+  }
+
+  return indices;
+}
+
 function discardWingetOutputHeader(stdout: string): string {
-  return stdout.replace(/.*?-{5,}/ms, "");
+  return stdout.replace(/.*?-{5,}\s*/s, "");
 }
 
 function wingetCommonArguments(): string[] {
