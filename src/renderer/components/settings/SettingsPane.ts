@@ -181,7 +181,7 @@ export class SettingsPane extends BootstrapBlockElement {
           url: "https://github.com/Homebrew/homebrew-cask-versions.git",
         },
       ],
-      "Sources must specify a package manager, a unique name, and a repository URL.\nAvailable package mangers depend on the host environment.",
+      "Sources consist of a package manager, a unique name, and a repository URL.\nYou can use any supported package manager that you have installed.",
       "Software sources"
     );
   }

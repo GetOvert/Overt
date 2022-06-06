@@ -1,12 +1,13 @@
 import { Modal } from "bootstrap";
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import LightDOMBlockElement from "components/abstract/LightDOMBlockElement";
-import { html, render } from "lit";
+import { css, html, render } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { createRef, Ref, ref } from "lit/directives/ref.js";
 import SourceRepository, {
   packageMangers,
 } from "package-manager/SourceRepository";
+import cloneDeep from "clone-deep";
 
 @customElement("openstore-source-repositories-modal")
 export default class SourceRepositoriesModal extends LightDOMBlockElement {
@@ -29,6 +30,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
   };
   @state()
   private editingItemIndex?: number = null;
+  private editingItemIsNew: boolean = false;
 
   private resolve: (items: SourceRepository[]) => void;
   private reject: (error: any) => void;
@@ -77,6 +79,17 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
 
     modal.show();
   }
+
+  static styles = [
+    css`
+      .list-item-contextual {
+        visibility: hidden;
+      }
+      .list-item-not-being-edited:hover .list-item-contextual {
+        visibility: visible;
+      }
+    `,
+  ];
 
   render() {
     return html`${BootstrapBlockElement.styleLink}
@@ -164,12 +177,24 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                             )}
                           />  
                       </td>
-                        <th style="width: 2.5rem">
+                        <th class="d-flex">
                           <button
                             type="button"
-                            class="btn btn-success fs-4"
+                            class="btn btn-danger fs-4 mx-1"
                             style="width: 2.5rem"
-                            @click=${this.stopEditingItem.bind(this, index)}
+                            @click=${this.cancelItemEditing.bind(this, index)}
+                            aria-label="Done"
+                          >
+                            ✗
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-success fs-4 mx-1"
+                            style="width: 2.5rem"
+                            @click=${this.saveChangesToEditingItem.bind(
+                              this,
+                              index
+                            )}
                             aria-label="Done"
                           >
                             ✓
@@ -177,7 +202,8 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                           </td>
                       </tr>
                     `
-                      : html` <tr>
+                      : this.editingItemIndex === null
+                      ? html` <tr class="list-item-not-being-edited">
                           <td>${item.packageManager}</td>
                           <td>${item.name}</td>
                           <td colspan=${this.editingItemIndex === null ? 1 : 2}>
@@ -188,7 +214,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                                 <th class="d-flex">
                                   <button
                                     type="button"
-                                    class="btn btn-danger fs-4 mx-1"
+                                    class="btn btn-danger fs-4 mx-1 list-item-contextual"
                                     style="width: 2.5rem"
                                     @click=${this.removeItem.bind(this, index)}
                                     aria-label="Remove"
@@ -197,7 +223,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                                   </button>
                                   <button
                                     type="button"
-                                    class="btn btn-primary fs-4 mx-1"
+                                    class="btn btn-primary fs-4 mx-1 list-item-contextual"
                                     style="width: 2.5rem"
                                     @click=${this.editItem.bind(this, index)}
                                     aria-label="Edit"
@@ -208,18 +234,23 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                               `
                             : ""}
                         </tr>`
+                      : ""
                   )}
                 </tbody>
               </table>
 
-              <button
-                type="button"
-                class="btn btn-success fs-4"
-                style="width: 2.5rem"
-                @click=${this.addItem}
-              >
-                +
-              </button>
+              ${this.editingItemIndex === null
+                ? html`
+                    <button
+                      type="button"
+                      class="btn btn-success fs-4"
+                      style="width: 2.5rem"
+                      @click=${this.addItem}
+                    >
+                      +
+                    </button>
+                  `
+                : ""}
             </div>
             <div class="modal-footer">
               <button
@@ -248,15 +279,24 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
       { packageManager: null, name: null, url: null },
     ];
 
-    this.editItem(this.items.length - 1);
+    this.editItem(this.items.length - 1, true);
   }
 
-  private editItem(index: number) {
-    this.editingItem = this.items[index];
+  private editItem(index: number, isNew: boolean = false) {
+    this.editingItem = cloneDeep(this.items[index]);
     this.editingItemIndex = index;
+    this.editingItemIsNew = isNew;
   }
 
-  private stopEditingItem() {
+  private saveChangesToEditingItem() {
+    this.items[this.editingItemIndex] = this.editingItem;
+    this.editingItemIndex = null;
+  }
+
+  private cancelItemEditing() {
+    if (this.editingItemIsNew) {
+      this.items.splice(this.editingItemIndex, 1);
+    }
     this.editingItemIndex = null;
   }
 
