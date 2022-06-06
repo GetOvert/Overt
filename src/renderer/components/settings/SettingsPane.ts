@@ -48,7 +48,7 @@ export class SettingsPane extends BootstrapBlockElement {
       <div
         class="d-flex align-items-center justify-content-between border-bottom mx-2 pb-2"
       >
-        <h2 class="settings-pane-heading text-center mt-2">Options</h2>
+        <h2 class="settings-pane-heading text-center mt-2">Settings</h2>
       </div>
 
       <div class="d-flex flex-column justify-content-around m-2 mt-3">
