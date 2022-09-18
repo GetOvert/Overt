@@ -3,7 +3,7 @@ import { css, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 @customElement("openstore-card")
-class Card extends BootstrapBlockElement {
+export default class Card extends BootstrapBlockElement {
   @property()
   title = "";
   @property()
@@ -20,23 +20,6 @@ class Card extends BootstrapBlockElement {
   static styles = [
     BootstrapBlockElement.styles,
     css`
-      :host,
-      .card {
-        width: 150px;
-      }
-      @media (min-width: 992px) {
-        :host,
-        .card {
-          width: 300px;
-        }
-      }
-      @media (min-width: 1400px) {
-        :host,
-        .card {
-          width: 330px;
-        }
-      }
-
       .card,
       .card * {
         z-index: 2;

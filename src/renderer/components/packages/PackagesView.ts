@@ -1,6 +1,7 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import "components/card/Card";
-import "components/grid/grid";
+import "components/grid/bootstrap-grid";
+import "components/grid/css-grid";
 import { QueuedTask, ReindexAllTask } from "components/tasks/model/Task";
 import taskQueue, { TaskQueueObserver } from "components/tasks/model/TaskQueue";
 import {
@@ -249,7 +250,7 @@ export default class AppsView<
             ? ""
             : "d-none"}"
         >
-          <openstore-row>
+          <openstore-css-grid>
             ${repeat(this._appGenerators, (appGenerator) =>
               asyncAppend(appGenerator, (packageInfo: PackageInfo) => {
                 const name = this.packageInfoAdapter.packageName(packageInfo);
@@ -317,7 +318,7 @@ export default class AppsView<
                 `;
               })
             )}
-          </openstore-row>
+          </openstore-css-grid>
           <openstore-row>
             ${this._canLoadMore
               ? html`
