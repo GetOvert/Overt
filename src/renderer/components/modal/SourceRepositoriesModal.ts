@@ -216,7 +216,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                                     type="button"
                                     class="btn btn-danger fs-4 mx-1 list-item-contextual"
                                     style="width: 2.5rem"
-                                    @click=${this.removeItem.bind(this, index)}
+                                    @click=${() => this.removeItem(index)}
                                     aria-label="Remove"
                                   >
                                     −
@@ -225,7 +225,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                                     type="button"
                                     class="btn btn-primary fs-4 mx-1 list-item-contextual"
                                     style="width: 2.5rem"
-                                    @click=${this.editItem.bind(this, index)}
+                                    @click=${() => this.editItem(index)}
                                     aria-label="Edit"
                                   >
                                     ✎
