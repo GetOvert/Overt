@@ -47,7 +47,14 @@ export default class TasksButton extends BootstrapBlockElement {
     super();
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && this.pane.shown) this.toggleShown();
+      if (event.key === "Escape" && this.pane.shown) this.togglePaneShown();
+    });
+
+    this.addEventListener("togglePaneShown", () => {
+      this.togglePaneShown();
+    });
+    this.addEventListener("showPane", () => {
+      this.showPane();
     });
   }
 
@@ -58,7 +65,7 @@ export default class TasksButton extends BootstrapBlockElement {
 
       <button
         class="openstore-jsnav-toggle-link btn btn-outline-info"
-        @click=${this.toggleShown}
+        @click=${this.togglePaneShown}
       >
         Tasks
         <span class="text-primary ms-2">${this.liveTaskCount}</span>
@@ -75,7 +82,7 @@ export default class TasksButton extends BootstrapBlockElement {
 
   private terminalPaneEnabled = false;
 
-  toggleShown() {
+  togglePaneShown() {
     if (this.pane.shown) {
       this.terminalPaneEnabled =
         !this.terminalPane.classList.contains("d-none");
@@ -96,7 +103,7 @@ export default class TasksButton extends BootstrapBlockElement {
     }
   }
 
-  show() {
-    if (!this.pane.shown) this.toggleShown();
+  showPane() {
+    if (!this.pane.shown) this.togglePaneShown();
   }
 }

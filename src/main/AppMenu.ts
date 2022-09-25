@@ -72,8 +72,9 @@ export function initAppMenu() {
               ]) as Electron.MenuItemConstructorOptions[]),
         ],
       },
+      // { role: 'viewMenu' }
       {
-        label: "Store",
+        label: "View",
         submenu: [
           {
             label: "Back",
@@ -90,18 +91,28 @@ export function initAppMenu() {
             },
           },
           {
-            label: "Search",
+            label: "Focus Search Bar",
             accelerator: "CmdOrCtrl+F",
             click(menuItem, browserWindow) {
               browserWindow.webContents.send("focus_search_bar");
             },
           },
-        ],
-      },
-      // { role: 'viewMenu' }
-      {
-        label: "View",
-        submenu: [
+          { type: "separator" },
+          {
+            label: "Toggle Tasks Pane",
+            accelerator: "CmdOrCtrl+Alt+T",
+            click(menuItem, browserWindow) {
+              browserWindow.webContents.send("toggle_tasks");
+            },
+          },
+          {
+            label: "Toggle Settings Pane",
+            accelerator: "CmdOrCtrl+Alt+,",
+            click(menuItem, browserWindow) {
+              browserWindow.webContents.send("toggle_settings");
+            },
+          },
+          { type: "separator" },
           { role: "resetZoom" },
           { role: "zoomIn" },
           { role: "zoomOut" },

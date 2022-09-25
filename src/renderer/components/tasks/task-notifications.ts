@@ -28,5 +28,5 @@ taskQueue.addObserver(async (task: QueuedTask) => {
 });
 
 function onNotificationClicked() {
-  (document.querySelector("openstore-tasks-button") as TasksButton).show();
+  (document.querySelector("openstore-tasks-button") as TasksButton).showPane();
 }

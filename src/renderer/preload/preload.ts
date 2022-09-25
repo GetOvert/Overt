@@ -28,7 +28,16 @@ ipcRenderer.on("focus_search_bar", () => {
   searchBar.select();
 });
 
+ipcRenderer.on("toggle_settings", () => {
+  const settingsButton = document.querySelector("openstore-settings-button");
+  settingsButton.dispatchEvent(new Event("togglePaneShown"));
+});
 ipcRenderer.on("show_settings", () => {
   const settingsButton = document.querySelector("openstore-settings-button");
   settingsButton.dispatchEvent(new Event("showPane"));
+});
+
+ipcRenderer.on("toggle_tasks", () => {
+  const settingsButton = document.querySelector("openstore-tasks-button");
+  settingsButton.dispatchEvent(new Event("togglePaneShown"));
 });

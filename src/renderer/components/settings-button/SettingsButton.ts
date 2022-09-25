@@ -17,6 +17,9 @@ export default class SettingsButton extends BootstrapBlockElement {
       if (event.key === "Escape" && this.pane.shown) this.togglePaneShown();
     });
 
+    this.addEventListener("togglePaneShown", () => {
+      this.togglePaneShown();
+    });
     this.addEventListener("showPane", () => {
       this.showPane();
     });
