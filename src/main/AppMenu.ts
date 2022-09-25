@@ -13,6 +13,14 @@ export function initAppMenu() {
               submenu: [
                 { role: "about" },
                 { type: "separator" },
+                {
+                  label: "Preferences…",
+                  accelerator: "CmdOrCtrl+,",
+                  click(menuItem, browserWindow) {
+                    browserWindow.webContents.send("show_settings");
+                  },
+                },
+                { type: "separator" },
                 { role: "services" },
                 { type: "separator" },
                 { role: "hide" },
@@ -101,8 +109,6 @@ export function initAppMenu() {
           { role: "toggleDevTools" },
           { type: "separator" },
           { role: "togglefullscreen" },
-          { type: "separator" },
-          { role: "toggleDevTools" },
         ],
       },
       // { role: 'windowMenu' }

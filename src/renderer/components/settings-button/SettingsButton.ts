@@ -14,7 +14,11 @@ export default class SettingsButton extends BootstrapBlockElement {
     super();
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && this.pane.shown) this.toggleShown();
+      if (event.key === "Escape" && this.pane.shown) this.togglePaneShown();
+    });
+
+    this.addEventListener("showPane", () => {
+      this.showPane();
     });
   }
 
@@ -23,7 +27,10 @@ export default class SettingsButton extends BootstrapBlockElement {
   render() {
     return html`${BootstrapBlockElement.styleLink}
 
-      <openstore-icon-button aria-label="Settings" @click=${this.toggleShown}>
+      <openstore-icon-button
+        aria-label="Settings"
+        @click=${this.togglePaneShown}
+      >
         <!-- https://icons.getbootstrap.com/icons/gear-wide-connected/ -->
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -40,12 +47,16 @@ export default class SettingsButton extends BootstrapBlockElement {
       </openstore-icon-button> `;
   }
 
-  toggleShown() {
+  togglePaneShown() {
     this.pane.shown = !this.pane.shown;
 
     const button = this.renderRoot.querySelector(
       "openstore-icon-button"
     ) as IconButton;
     button.active = this.pane.shown;
+  }
+
+  showPane() {
+    if (!this.pane.shown) this.togglePaneShown();
   }
 }
