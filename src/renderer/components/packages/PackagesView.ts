@@ -108,6 +108,7 @@ export default class AppsView<
     const routeParams = ((window as any).openStore as any).decodeFragment(
       window.location.hash
     );
+
     this._appGenerators.push(
       this.provideAppsAsGenerator(
         routeParams.search ?? "",
@@ -118,12 +119,25 @@ export default class AppsView<
         (result) => {
           this._loadedCount += result.length;
           this._canLoadMore = result.length === limit;
+
           window.setTimeout(() => {
-            this._scrollContainer.scrollTo({ top: lastScrollY });
+            console.log(routeParams, lastRouteParams);
+            if (
+              routeParams.source === lastRouteParams.source &&
+              routeParams.search === lastRouteParams.search &&
+              routeParams.sort === lastRouteParams.sort &&
+              routeParams.filter === lastRouteParams.filter
+            ) {
+              this._scrollContainer.scrollTo({ top: lastScrollY });
+            } else {
+              this._scrollContainer.scrollTo({ top: 0 });
+            }
+            lastRouteParams = cloneDeep(routeParams);
           }, 0);
         }
       )
     );
+
     this.requestUpdate();
   }
 
