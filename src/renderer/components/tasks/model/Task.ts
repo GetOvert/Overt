@@ -1,5 +1,3 @@
-import { PackageManager } from "package-manager/SourceRepository";
-
 export type QueuedTask = Task & {
   serial: number;
   state: TaskState;
@@ -36,7 +34,10 @@ export type TaskType =
   | "reindex"
   | "install"
   | "upgrade"
-  | "uninstall";
+  | "uninstall"
+  | "reindex-source-repositories"
+  | "add-source-repository"
+  | "remove-source-repository";
 
 export type PromptForPasswordTask = Task & {
   type: "prompt-for-password";
@@ -77,3 +78,15 @@ export function packageIdentifiersOfTask(task: Task): string[] | null {
     ? (task as any).packageIdentifiers
     : null;
 }
+export type ReindexSourceRepositoriesTask = PackageManagerTask & {
+  type: "reindex-source-repositories";
+};
+export type AddSourceRepositoryTask = PackageManagerTask & {
+  type: "add-source-repository";
+  name: string;
+  url: string;
+};
+export type RemoveSourceRepositoryTask = PackageManagerTask & {
+  type: "remove-source-repository";
+  name: string;
+};

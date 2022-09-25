@@ -25,14 +25,8 @@
               type="search"
               placeholder="Search"
               aria-label="Search"
+              oninput="event.preventDefault(); window.openStore.updateWindowLocationFragment({ ...window.openStore.decodeFragment(window.location.hash), search: event.target.value ?? '', subpage: null });"
             />
-            <button
-              class="btn btn-outline-success"
-              type="submit"
-              onclick="event.preventDefault(); window.openStore.updateWindowLocationFragment({ ...window.openStore.decodeFragment(window.location.hash), search: document.querySelector('#search-bar')?.value ?? '', subpage: null });"
-            >
-              Search
-            </button>
           </form>
 
           <div

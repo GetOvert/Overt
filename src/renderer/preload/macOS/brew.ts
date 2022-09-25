@@ -12,13 +12,16 @@ import {
   insertOrReplaceRecords,
   sql,
 } from "util/sql";
-import { IPCBrew, SortKey } from "ipc/package-managers/macOS/IPCBrew";
+import {
+  BrewPackageInfo,
+  IPCBrew,
+  SortKey,
+} from "ipc/package-managers/macOS/IPCBrew";
 import terminal from "../terminal";
 import * as taskQueue from "../taskQueueIPC";
 import { PromptForPasswordTask } from "components/tasks/model/Task";
-import settings from "../settings";
-import path from "path";
 import { getBrewExecutablePath, getQuarantineFlags } from "./brewCask";
+import { SourceRepository } from "package-manager/SourceRepository";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
@@ -50,12 +53,14 @@ type FormulaAnalyticsData = {
   formulae: { [key: string]: { formula: string; count: number } };
 };
 
-const brew = {
+const brew: IPCBrew = {
+  name: "brew",
+
   addIndexListener(listener: () => void) {
     indexListeners.add(listener);
   },
 
-  async reindexOutdated() {
+  async reindexOutdated(): Promise<void> {
     const brewProcess = spawn(await getBrewExecutablePath(), [
       "outdated",
       "--formula",
@@ -159,7 +164,7 @@ const brew = {
             )
           ).json();
 
-          (brew as any)._rebuildIndexFromFormulaInfo(
+          await (brew as any)._rebuildIndexFromFormulaInfo(
             formulaNames,
             JSON.parse(json).formulae,
             installs30d,
@@ -311,7 +316,7 @@ const brew = {
       }));
   },
 
-  async info(formulaName) {
+  async info(formulaName: string): Promise<BrewPackageInfo> {
     const row = (await cacheDB())
       .prepare(
         sql`
@@ -341,7 +346,7 @@ const brew = {
     };
   },
 
-  async install(formulaName) {
+  async install(formulaName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
@@ -388,7 +393,7 @@ const brew = {
     });
   },
 
-  async upgrade(formulaName) {
+  async upgrade(formulaName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
@@ -424,7 +429,7 @@ const brew = {
     });
   },
 
-  async uninstall(formulaName) {
+  async uninstall(formulaName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
@@ -458,7 +463,122 @@ const brew = {
       );
     });
   },
-} as IPCBrew;
+
+  async reindexSourceRepositories(): Promise<void> {
+    (await (async () => {
+      const brewProcess = spawn(await getBrewExecutablePath(), [
+        "tap-info",
+        "--installed",
+        "--json=v1",
+      ]);
+
+      let json = "";
+      let stderr = "";
+      brewProcess.stdout.on("data", (data) => {
+        json += data;
+      });
+      brewProcess.stderr.on("data", (data) => {
+        console.error(`stderr: ${data}`);
+        stderr += data;
+      });
+
+      return new Promise((resolve, reject) => {
+        brewProcess.on("exit", async (code) => {
+          if (code !== 0) return reject(stderr);
+
+          await (brew as any)._rebuildSourceRepositoryIndexFromTapInfo(
+            JSON.parse(json)
+          );
+          resolve();
+        });
+        brewProcess.on("error", reject);
+      });
+    })()) as void;
+
+    indexListeners.forEach((listener) => listener());
+    indexListeners.clear();
+  },
+
+  async _rebuildSourceRepositoryIndexFromTapInfo(taps: any[]) {
+    console.log("updating taps");
+
+    const db = await cacheDB();
+
+    const brewSourceRepositories = db
+      .prepare(
+        sql`
+          SELECT rowid
+          FROM source_repositories
+          WHERE source_repositories.package_manager = 'brew'
+        `
+      )
+      .all();
+    deleteRecords(
+      db,
+      "source_repositories",
+      brewSourceRepositories.map(({ rowid }) => rowid)
+    );
+
+    insertOrReplaceRecords(
+      db,
+      "source_repositories",
+      ["package_manager", "name", "url"],
+      taps.map(({ name, remote }) => ({
+        package_manager: "brew",
+        name,
+        url: remote,
+      }))
+    );
+  },
+
+  async addSourceRepository(name: string, url: string): Promise<boolean> {
+    const success = await new Promise<boolean>(async (resolve, reject) => {
+      const callbackID = terminal.onReceive((data) => {
+        if (data.match(/(?<!')-- openstore-succeeded: tap --/)) {
+          terminal.offReceive(callbackID);
+          return resolve(true);
+        }
+        if (data.match(/(?<!')-- openstore-failed: tap --/)) {
+          terminal.offReceive(callbackID);
+          return resolve(false);
+        }
+      });
+
+      terminal.send(
+        quote([await getBrewExecutablePath(), "tap", name, url]) +
+          " && echo '-- openstore-succeeded: tap --' || echo '-- openstore-failed: tap --'\n"
+      );
+    });
+
+    brew.reindexSourceRepositories();
+
+    return success;
+  },
+
+  async removeSourceRepository(name: string): Promise<boolean> {
+    const success = await new Promise<boolean>(async (resolve, reject) => {
+      const callbackID = terminal.onReceive((data) => {
+        if (data.match(/(?<!')-- openstore-succeeded: untap --/)) {
+          terminal.offReceive(callbackID);
+          return resolve(true);
+        }
+        if (data.match(/(?<!')-- openstore-failed: untap --/)) {
+          terminal.offReceive(callbackID);
+          return resolve(false);
+        }
+      });
+
+      terminal.send(
+        quote([await getBrewExecutablePath(), "untap", name]) +
+          " && echo '-- openstore-succeeded: untap --' || echo '-- openstore-failed: untap --'\n"
+      );
+    });
+
+    brew.reindexSourceRepositories();
+
+    return success;
+  },
+};
 
 function dbKeyForSortKey(sortKey: SortKey): string {
   switch (sortKey) {

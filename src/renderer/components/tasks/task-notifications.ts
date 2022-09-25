@@ -20,7 +20,7 @@ taskQueue.addObserver(async (task: QueuedTask) => {
           onNotificationClicked;
         break;
       case "succeeded":
-        new Notification(task.label, { body: "✅ Succeeded" }).onclick =
+        new Notification(task.label, { body: "✅ Completed" }).onclick =
           onNotificationClicked;
         break;
     }

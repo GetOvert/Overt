@@ -11,6 +11,8 @@ import {
   QueuedTask,
   TaskType,
   PackageManagerTask,
+  AddSourceRepositoryTask,
+  RemoveSourceRepositoryTask,
 } from "./tasks/model/Task";
 import taskQueue from "./tasks/model/TaskQueue";
 
@@ -61,7 +63,7 @@ const promptForPasswordProcessor = new TaskProcessor(
 );
 
 const reindexProcessor = new TaskProcessor(
-  ["reindex-all", "reindex-outdated", "reindex"],
+  ["reindex-all", "reindex-outdated", "reindex", "reindex-source-repositories"],
   async (task: QueuedTask) => {
     const packageManagerName = (task as unknown as PackageManagerTask)
       .packageManager;
@@ -85,6 +87,10 @@ const reindexProcessor = new TaskProcessor(
         await packageManager.updateIndex(
           (task as unknown as ReindexTask).packageIdentifiers
         );
+        success = true;
+        break;
+      case "reindex-source-repositories":
+        await packageManager.reindexSourceRepositories();
         success = true;
         break;
     }
@@ -127,5 +133,31 @@ const packageActionsProcessor = new TaskProcessor(
       packageManager: packageManagerName,
       packageIdentifiers: packageIdentifiersOfTask(task),
     } as ReindexTask);
+  }
+);
+
+const sourceRepositoryActionsProcessor = new TaskProcessor(
+  ["add-source-repository", "remove-source-repository"],
+  async (task: QueuedTask) => {
+    const packageManagerName = (task as unknown as PackageManagerTask)
+      .packageManager;
+    const packageManager = packageManagerForName(packageManagerName);
+
+    let success = false;
+    switch (task.type) {
+      case "add-source-repository":
+        success = await packageManager.addSourceRepository(
+          (task as unknown as AddSourceRepositoryTask).name,
+          (task as unknown as AddSourceRepositoryTask).url
+        );
+        break;
+      case "remove-source-repository":
+        success = await packageManager.removeSourceRepository(
+          (task as unknown as RemoveSourceRepositoryTask).name
+        );
+        break;
+    }
+
+    taskQueue.remove(task, success ? "succeeded" : "failed");
   }
 );

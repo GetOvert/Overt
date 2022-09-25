@@ -43,6 +43,7 @@ export async function uninstallPackage(
   packageIdentifier: string,
   packageFullName: string
 ) {
+  console.log(arguments);
   taskQueue.push(
     {
       packageManager,
@@ -54,7 +55,7 @@ export async function uninstallPackage(
   );
 }
 
-export async function reindexCaskApp(
+export async function reindexPackage(
   packageManager: string,
   packageIdentifier: string,
   packageFullName: string
@@ -86,4 +87,4 @@ export function getCaskAppFileName(app: any): string | null {
 window.contextMenu.setCallback("install", installPackage);
 window.contextMenu.setCallback("upgrade", upgradePackage);
 window.contextMenu.setCallback("uninstall", uninstallPackage);
-window.contextMenu.setCallback("reindex", reindexCaskApp);
+window.contextMenu.setCallback("reindex", reindexPackage);

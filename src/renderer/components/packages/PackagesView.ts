@@ -1,3 +1,4 @@
+import cloneDeep from "clone-deep";
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import "components/card/Card";
 import "components/grid/bootstrap-grid";
@@ -23,6 +24,7 @@ const fetchedChunkSize = 25;
 let lastOffset = 0;
 
 let lastScrollY = 0;
+let lastRouteParams: any = {};
 
 @customElement("openstore-packages-view")
 export default class AppsView<

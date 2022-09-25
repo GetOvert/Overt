@@ -9,12 +9,14 @@ import terminal from "./terminal";
 import theme from "./theme";
 import "./macOS/preload";
 import "./Windows/preload";
+import sourceRepositories from "./sourceRepositories";
 
 contextBridge.exposeInMainWorld("contextMenu", contextMenu);
 contextBridge.exposeInMainWorld("openExternalLink", openExternalLink);
 contextBridge.exposeInMainWorld("openProduct", openProduct);
 contextBridge.exposeInMainWorld("platform", platform);
 contextBridge.exposeInMainWorld("settings", settings);
+contextBridge.exposeInMainWorld("sourceRepositories", sourceRepositories);
 contextBridge.exposeInMainWorld("taskQueueIPC", taskQueueIPC);
 contextBridge.exposeInMainWorld("terminal", terminal);
 contextBridge.exposeInMainWorld("theme", theme);

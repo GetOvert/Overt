@@ -1,8 +1,14 @@
-export default class SourceRepository {
-  packageManager: PackageManager;
+export type SourceRepository = {
+  packageManager: SourceRepositoryPackageManager;
   name: string;
   url: string;
-}
+};
 
-export const packageMangers = ["brew"] as const;
-export type PackageManager = typeof packageMangers[number];
+export type SourceRepositoryChange = {
+  action: "add" | "remove";
+  sourceRepository: SourceRepository;
+};
+
+export const sourceRepositoryPackageMangers = ["brew"] as const;
+export type SourceRepositoryPackageManager =
+  typeof sourceRepositoryPackageMangers[number];

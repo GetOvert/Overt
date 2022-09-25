@@ -53,6 +53,7 @@ import taskQueue from "components/tasks/model/TaskQueue";
 import {
   ReindexAllTask,
   ReindexOutdatedTask,
+  ReindexSourceRepositoriesTask,
 } from "components/tasks/model/Task";
 import { allPackageMangers } from "package-manager/PackageManagerRegistry";
 
@@ -100,6 +101,13 @@ window.addEventListener("load", () => {
     sort: "installed-30d",
   });
 
+  for (const packageManager of allPackageMangers) {
+    taskQueue.push({
+      packageManager,
+      type: "reindex-source-repositories",
+      label: `Rebuild source list (${packageManager})`,
+    } as ReindexSourceRepositoriesTask);
+  }
   for (const packageManager of allPackageMangers) {
     taskQueue.push({
       packageManager,

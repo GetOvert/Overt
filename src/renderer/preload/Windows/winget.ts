@@ -20,6 +20,7 @@ import {
 } from "ipc/package-managers/Windows/IPCWinget";
 import { downloadWingetManifests } from "./winget-to-json/download";
 import { extractWingetManifests } from "./winget-to-json/extract";
+import { SourceRepository } from "package-manager/SourceRepository";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
@@ -40,12 +41,14 @@ if (process.platform === "win32") {
 
 let indexListeners = new Set<() => void>();
 
-const winget = {
+const winget: IPCWinget = {
+  name: "winget",
+
   addIndexListener(listener: () => void) {
     indexListeners.add(listener);
   },
 
-  async reindexOutdated() {
+  async reindexOutdated(): Promise<void> {
     const wingetProcess = spawn(await getWingetExecutablePath(), [
       "upgrade",
       ...wingetCommonArguments(),
@@ -141,13 +144,16 @@ const winget = {
       deleteRecords(
         await cacheDB(),
         "winget_packages",
-        packageNamesToUpdate
-          .map((packageName) => {
-            const packageInfo: any = winget.info(packageName);
+        (
+          await Promise.all(
+            packageNamesToUpdate.map((packageName) => winget.info(packageName))
+          )
+        )
+          .map((packageInfo) => {
             if (!packageInfo) return null; // Not in DB anyway
             if (packageInfo?.installedVersion) return null; // Still installed
 
-            return packageInfo.rowid; // Delete from DB
+            return (packageInfo as any).rowid; // Delete from DB
           })
           .filter((x) => x)
       );
@@ -201,7 +207,7 @@ const winget = {
       .all();
   },
 
-  async info(packageName) {
+  async info(packageName: string): Promise<WingetPackageInfo> {
     const row = (await cacheDB())
       .prepare(
         sql`
@@ -225,7 +231,7 @@ const winget = {
     };
   },
 
-  async install(packageName) {
+  async install(packageName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/(?<!')-- openstore-succeeded: winget-install --/)) {
@@ -251,7 +257,7 @@ const winget = {
     });
   },
 
-  async upgrade(packageName) {
+  async upgrade(packageName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/(?<!')-- openstore-succeeded: winget-upgrade --/)) {
@@ -277,7 +283,7 @@ const winget = {
     });
   },
 
-  async uninstall(packageName) {
+  async uninstall(packageName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/(?<!')-- openstore-succeeded: winget-uninstall --/)) {
@@ -296,7 +302,22 @@ const winget = {
       );
     });
   },
-} as IPCWinget;
+
+  async reindexSourceRepositories(): Promise<void> {
+    // TODO: unimplemented
+    throw new Error("unimplemented");
+  },
+
+  async addSourceRepository(name: string, url: string): Promise<boolean> {
+    // TODO: unimplemented
+    throw new Error("unimplemented");
+  },
+
+  async removeSourceRepository(name: string): Promise<boolean> {
+    // TODO: unimplemented
+    throw new Error("unimplemented");
+  },
+};
 
 function wingetCommonArguments(): string[] {
   return ["--accept-source-agreements"];

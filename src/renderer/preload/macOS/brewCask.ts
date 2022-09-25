@@ -12,12 +12,18 @@ import {
   insertOrReplaceRecords,
   sql,
 } from "util/sql";
-import { IPCBrewCask, SortKey } from "ipc/package-managers/macOS/IPCBrewCask";
+import {
+  BrewCaskPackageInfo,
+  IPCBrewCask,
+  SortKey,
+} from "ipc/package-managers/macOS/IPCBrewCask";
 import terminal from "../terminal";
 import * as taskQueue from "../taskQueueIPC";
 import { PromptForPasswordTask } from "components/tasks/model/Task";
 import settings from "../settings";
 import path from "path";
+import { SourceRepository } from "package-manager/SourceRepository";
+import brew from "./brew";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
@@ -51,12 +57,14 @@ type CaskAnalyticsData = {
   formulae: { [key: string]: { cask: string; count: number } };
 };
 
-const brewCask = {
+const brewCask: IPCBrewCask = {
+  name: "brew-cask",
+
   addIndexListener(listener: () => void) {
     indexListeners.add(listener);
   },
 
-  async reindexOutdated() {
+  async reindexOutdated(): Promise<void> {
     const brewProcess = spawn(await getBrewExecutablePath(), [
       "outdated",
       "--cask",
@@ -160,7 +168,7 @@ const brewCask = {
             )
           ).json();
 
-          (brewCask as any)._rebuildIndexFromCaskInfo(
+          await (brewCask as any)._rebuildIndexFromCaskInfo(
             caskNames,
             JSON.parse(json).casks,
             installs30d,
@@ -227,20 +235,17 @@ const brewCask = {
         auto_updates: cask.auto_updates ? 1 : 0,
 
         installed_30d:
-          installs30d?.formulae?.[cask.full_token]?.[0]?.count?.toString().replaceAll(
-            /[^\d]/g,
-            ""
-          ) ?? 0,
+          installs30d?.formulae?.[cask.full_token]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, "") ?? 0,
         installed_90d:
-          installs90d?.formulae?.[cask.full_token]?.[0]?.count?.toString().replaceAll(
-            /[^\d]/g,
-            ""
-          ) ?? 0,
+          installs90d?.formulae?.[cask.full_token]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, "") ?? 0,
         installed_365d:
-          installs365d?.formulae?.[cask.full_token]?.[0]?.count?.toString().replaceAll(
-            /[^\d]/g,
-            ""
-          ) ?? 0,
+          installs365d?.formulae?.[cask.full_token]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, "") ?? 0,
 
         json: JSON.stringify(cask),
       }))
@@ -320,7 +325,7 @@ const brewCask = {
       }));
   },
 
-  async info(caskName) {
+  async info(caskName: string): Promise<BrewCaskPackageInfo> {
     const row = (await cacheDB())
       .prepare(
         sql`
@@ -350,7 +355,7 @@ const brewCask = {
     };
   },
 
-  async install(caskName) {
+  async install(caskName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
@@ -392,7 +397,7 @@ const brewCask = {
     });
   },
 
-  async upgrade(caskName) {
+  async upgrade(caskName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
@@ -428,7 +433,7 @@ const brewCask = {
     });
   },
 
-  async uninstall(caskName) {
+  async uninstall(caskName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
@@ -462,7 +467,19 @@ const brewCask = {
       );
     });
   },
-} as IPCBrewCask;
+
+  async reindexSourceRepositories(): Promise<void> {
+    // Handled by brew
+  },
+
+  addSourceRepository(name: string, url: string): Promise<boolean> {
+    return brew.addSourceRepository(name, url);
+  },
+
+  removeSourceRepository(name: string): Promise<boolean> {
+    return brew.removeSourceRepository(name);
+  },
+};
 
 function dbKeyForSortKey(sortKey: SortKey): string {
   switch (sortKey) {

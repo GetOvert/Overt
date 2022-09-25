@@ -101,7 +101,7 @@ export class TasksPane extends BootstrapBlockElement {
       case "failed":
         return "Failed";
       case "succeeded":
-        return "Succeeded";
+        return "Completed";
     }
   }
 

@@ -3,7 +3,11 @@ import { css, html, HTMLTemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import { Tooltip } from "bootstrap";
 import taskQueue from "components/tasks/model/TaskQueue";
-import { ReindexAllTask } from "components/tasks/model/Task";
+import {
+  AddSourceRepositoryTask,
+  ReindexAllTask,
+  RemoveSourceRepositoryTask,
+} from "components/tasks/model/Task";
 import SourceRepositoriesModal from "components/modal/SourceRepositoriesModal";
 import { allPackageMangers } from "package-manager/PackageManagerRegistry";
 
@@ -65,7 +69,7 @@ export class SettingsPane extends BootstrapBlockElement {
           this.validateCodeSignatures
         )}
         ${this.makeButton(
-          "Software Sources",
+          "Sources",
           "Add/remove additional software sources. Reminder: Avoiding malware is your responsibility.",
           "primary",
           this.showSourceRepositories.bind(this)
@@ -168,22 +172,37 @@ export class SettingsPane extends BootstrapBlockElement {
   }
 
   private async showSourceRepositories() {
-    await SourceRepositoriesModal.runModal(
-      [
-        {
-          packageManager: "brew",
-          name: "homebrew/cask",
-          url: "https://github.com/Homebrew/homebrew-cask.git",
-        },
-        {
-          packageManager: "brew",
-          name: "homebrew/cask-versions",
-          url: "https://github.com/Homebrew/homebrew-cask-versions.git",
-        },
-      ],
-      "Sources consist of a package manager, a unique name, and a repository URL.\nYou can use any supported package manager that you have installed.",
-      "Software sources"
+    const sourceRepositoryChanges = await SourceRepositoriesModal.runModal(
+      await window.sourceRepositories.all(),
+      "Each source is associated with a package manager, and has a unique name and repository URL.\nYou can use any supported package manager that is currently installed.",
+      "Sources"
     );
+
+    console.log(sourceRepositoryChanges);
+    for (const {
+      action,
+      sourceRepository: { packageManager, name, url },
+    } of sourceRepositoryChanges) {
+      switch (action) {
+        case "add":
+          taskQueue.push({
+            type: "add-source-repository",
+            label: `Add source ${name} to ${packageManager}`,
+            packageManager,
+            name,
+            url,
+          } as AddSourceRepositoryTask);
+          break;
+        case "remove":
+          taskQueue.push({
+            type: "remove-source-repository",
+            label: `Remove source ${name} from ${packageManager}`,
+            packageManager,
+            name,
+          } as RemoveSourceRepositoryTask);
+          break;
+      }
+    }
   }
 
   private rebuildIndex() {
