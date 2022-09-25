@@ -30,35 +30,45 @@ for (const oldCacheDir of oldCacheDirs) {
 fs.mkdirSync(cacheDir, { recursive: true });
 
 const cacheDBPath = path.join(cacheDir, "OpenStore_Cache.db");
+const cacheMetaPath = path.join(cacheDir, "OpenStore_Cache.json");
 
 let allSchema: string[] = [];
 export function cacheDB_addSchema(schema: string) {
   allSchema.push(schema);
 }
 
-let _cacheDB_ModifiedTimeAtLaunch: number;
-export async function cacheDB_ModifiedTimeAtLaunch() {
-  await cacheDB();
-  return _cacheDB_ModifiedTimeAtLaunch;
+type CacheDBMeta = {
+  lastFullIndexJsTimestamp?: number;
+};
+
+function cacheDB_loadMeta(): CacheDBMeta {
+  try {
+    return JSON.parse(fs.readFileSync(cacheMetaPath).toString());
+  } catch (error) {
+    console.error(error);
+    return {};
+  }
+}
+function cacheDB_saveMeta(meta: CacheDBMeta) {
+  fs.writeFileSync(cacheMetaPath, JSON.stringify(meta));
+}
+
+export function cacheDB_lastFullIndexJsTimestamp(): number {
+  return cacheDB_loadMeta()?.lastFullIndexJsTimestamp ?? new Date().getTime();
+}
+export function cacheDB_updateLastFullIndexJsTimestamp(): void {
+  cacheDB_saveMeta({
+    ...cacheDB_loadMeta(),
+    lastFullIndexJsTimestamp: new Date().getTime(),
+  });
 }
 
 let _cacheDB: Database.Database;
-export async function cacheDB() {
-  if (!_cacheDB) {
-    try {
-      _cacheDB_ModifiedTimeAtLaunch = (
-        await promisify(fs.stat)(cacheDBPath)
-      ).mtime.getTime();
-    } catch (e) {
-      // Presumably the file doesn't exist
-      _cacheDB_ModifiedTimeAtLaunch = new Date().getTime();
-    }
+export function cacheDB() {
+  _cacheDB = new Database(cacheDBPath);
 
-    _cacheDB = new Database(cacheDBPath);
-
-    for (const schema of allSchema) {
-      _cacheDB.prepare(schema).run();
-    }
+  for (const schema of allSchema) {
+    _cacheDB.prepare(schema).run();
   }
 
   return _cacheDB;

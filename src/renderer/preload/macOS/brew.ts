@@ -4,7 +4,8 @@ import { quote } from "shell-quote";
 import {
   cacheDB,
   cacheDB_addSchema,
-  cacheDB_ModifiedTimeAtLaunch,
+  cacheDB_lastFullIndexJsTimestamp,
+  cacheDB_updateLastFullIndexJsTimestamp,
 } from "../cacheDB";
 import {
   deleteAllRecords,
@@ -92,14 +93,14 @@ const brew: IPCBrew = {
     let indexExists = false;
     try {
       indexExists =
-        (await cacheDB())
+        cacheDB()
           .prepare(sql`SELECT "rowid" FROM "formulae" LIMIT 1`)
           .get() !== undefined;
     } catch (e) {}
 
     const nowTime = new Date().getTime();
     const indexTooOld =
-      (nowTime - (await cacheDB_ModifiedTimeAtLaunch())) / 1000 >
+      (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
       rebuildIndexAfterSeconds;
 
     if (
@@ -107,7 +108,7 @@ const brew: IPCBrew = {
       (condition === "if-too-old" && indexTooOld) ||
       condition === "always"
     ) {
-      if (wipeIndexFirst) deleteAllRecords(await cacheDB(), "formulae");
+      if (wipeIndexFirst) deleteAllRecords(cacheDB(), "formulae");
       await brew.updateIndex();
     }
   },
@@ -179,6 +180,8 @@ const brew: IPCBrew = {
 
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
+
+    cacheDB_updateLastFullIndexJsTimestamp();
   },
 
   async _runBrewUpdate(): Promise<void> {
@@ -207,7 +210,7 @@ const brew: IPCBrew = {
           : "all")
     );
     insertOrReplaceRecords(
-      await cacheDB(),
+      cacheDB(),
       "formulae",
       [
         "name",
@@ -246,7 +249,7 @@ const brew: IPCBrew = {
 
     if (formulaNamesToUpdate) {
       deleteRecords(
-        await cacheDB(),
+        cacheDB(),
         "formulae",
         formulaNamesToUpdate
           .map((formulaName) => {
@@ -264,7 +267,7 @@ const brew: IPCBrew = {
   async search(searchString, sortBy, filterBy, limit, offset) {
     const keywords = searchString.split(/\s+/);
 
-    return (await cacheDB())
+    return cacheDB()
       .prepare(
         sql`
         SELECT
@@ -317,7 +320,7 @@ const brew: IPCBrew = {
   },
 
   async info(formulaName: string): Promise<BrewPackageInfo> {
-    const row = (await cacheDB())
+    const row = cacheDB()
       .prepare(
         sql`
         SELECT
@@ -502,7 +505,7 @@ const brew: IPCBrew = {
   async _rebuildSourceRepositoryIndexFromTapInfo(taps: any[]) {
     console.log("updating taps");
 
-    const db = await cacheDB();
+    const db = cacheDB();
 
     const brewSourceRepositories = db
       .prepare(

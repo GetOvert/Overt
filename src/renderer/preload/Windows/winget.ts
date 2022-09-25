@@ -4,7 +4,8 @@ import { quote } from "shell-quote";
 import {
   cacheDB,
   cacheDB_addSchema,
-  cacheDB_ModifiedTimeAtLaunch,
+  cacheDB_lastFullIndexJsTimestamp,
+  cacheDB_updateLastFullIndexJsTimestamp,
 } from "../cacheDB";
 import {
   deleteAllRecords,
@@ -80,14 +81,14 @@ const winget: IPCWinget = {
     let indexExists = false;
     try {
       indexExists =
-        (await cacheDB())
+        cacheDB()
           .prepare(sql`SELECT "rowid" FROM "winget_packages" LIMIT 1`)
           .get() !== undefined;
     } catch (e) {}
 
     const nowTime = new Date().getTime();
     const indexTooOld =
-      (nowTime - (await cacheDB_ModifiedTimeAtLaunch())) / 1000 >
+      (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
       rebuildIndexAfterSeconds;
 
     if (
@@ -95,7 +96,7 @@ const winget: IPCWinget = {
       (condition === "if-too-old" && indexTooOld) ||
       condition === "always"
     ) {
-      if (wipeIndexFirst) deleteAllRecords(await cacheDB(), "winget_packages");
+      if (wipeIndexFirst) deleteAllRecords(cacheDB(), "winget_packages");
       await winget.updateIndex();
     }
   },
@@ -113,6 +114,8 @@ const winget: IPCWinget = {
 
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
+
+    cacheDB_updateLastFullIndexJsTimestamp();
   },
 
   async _rebuildIndexFromPackageInfo(
@@ -126,7 +129,7 @@ const winget: IPCWinget = {
           : "all")
     );
     insertOrReplaceRecords(
-      await cacheDB(),
+      cacheDB(),
       "winget_packages",
       ["name", "id", "version", "json", "installed_version"],
       packages.map((package_) => ({
@@ -142,7 +145,7 @@ const winget: IPCWinget = {
 
     if (packageNamesToUpdate) {
       deleteRecords(
-        await cacheDB(),
+        cacheDB(),
         "winget_packages",
         (
           await Promise.all(
@@ -163,7 +166,7 @@ const winget: IPCWinget = {
   async search(searchString, sortBy, filterBy, limit, offset) {
     const keywords = searchString.split(/\s+/);
 
-    return (await cacheDB())
+    return cacheDB()
       .prepare(
         sql`
         SELECT
@@ -208,7 +211,7 @@ const winget: IPCWinget = {
   },
 
   async info(packageName: string): Promise<WingetPackageInfo> {
-    const row = (await cacheDB())
+    const row = cacheDB()
       .prepare(
         sql`
         SELECT

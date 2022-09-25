@@ -4,7 +4,8 @@ import { quote } from "shell-quote";
 import {
   cacheDB,
   cacheDB_addSchema,
-  cacheDB_ModifiedTimeAtLaunch,
+  cacheDB_lastFullIndexJsTimestamp,
+  cacheDB_updateLastFullIndexJsTimestamp,
 } from "../cacheDB";
 import {
   deleteAllRecords,
@@ -96,14 +97,14 @@ const brewCask: IPCBrewCask = {
     let indexExists = false;
     try {
       indexExists =
-        (await cacheDB())
+        cacheDB()
           .prepare(sql`SELECT "rowid" FROM "casks" LIMIT 1`)
           .get() !== undefined;
     } catch (e) {}
 
     const nowTime = new Date().getTime();
     const indexTooOld =
-      (nowTime - (await cacheDB_ModifiedTimeAtLaunch())) / 1000 >
+      (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
       rebuildIndexAfterSeconds;
 
     if (
@@ -111,7 +112,7 @@ const brewCask: IPCBrewCask = {
       (condition === "if-too-old" && indexTooOld) ||
       condition === "always"
     ) {
-      if (wipeIndexFirst) deleteAllRecords(await cacheDB(), "casks");
+      if (wipeIndexFirst) deleteAllRecords(cacheDB(), "casks");
       await brewCask.updateIndex();
     }
   },
@@ -183,6 +184,8 @@ const brewCask: IPCBrewCask = {
 
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
+
+    cacheDB_updateLastFullIndexJsTimestamp();
   },
 
   async _runBrewUpdate(): Promise<void> {
@@ -211,7 +214,7 @@ const brewCask: IPCBrewCask = {
           : "all")
     );
     insertOrReplaceRecords(
-      await cacheDB(),
+      cacheDB(),
       "casks",
       [
         "token",
@@ -253,7 +256,7 @@ const brewCask: IPCBrewCask = {
 
     if (caskNamesToUpdate) {
       deleteRecords(
-        await cacheDB(),
+        cacheDB(),
         "casks",
         caskNamesToUpdate
           .map((caskName) => {
@@ -271,7 +274,7 @@ const brewCask: IPCBrewCask = {
   async search(searchString, sortBy, filterBy, limit, offset) {
     const keywords = searchString.split(/\s+/);
 
-    return (await cacheDB())
+    return cacheDB()
       .prepare(
         sql`
         SELECT
@@ -326,7 +329,7 @@ const brewCask: IPCBrewCask = {
   },
 
   async info(caskName: string): Promise<BrewCaskPackageInfo> {
-    const row = (await cacheDB())
+    const row = cacheDB()
       .prepare(
         sql`
         SELECT

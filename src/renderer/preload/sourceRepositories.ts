@@ -14,7 +14,7 @@ cacheDB_addSchema(
 
 const sourceRepositories: IPCSourceRepositories = {
   async all(): Promise<SourceRepository[]> {
-    return (await cacheDB())
+    return cacheDB()
       .prepare(
         sql`
           SELECT
