@@ -304,19 +304,19 @@ export default class AppsView<
                             label: "Install",
                             enabled: !isInstalled,
                             callback: "install",
-                            args: [identifier, name],
+                            args: [this.packageManager.name, identifier, name],
                           },
                           {
                             label: "Update",
                             enabled: isInstalled && isOutdated,
                             callback: "upgrade",
-                            args: [identifier, name],
+                            args: [this.packageManager.name, identifier, name],
                           },
                           {
                             label: "Uninstall",
                             enabled: isInstalled,
                             callback: "uninstall",
-                            args: [identifier, name],
+                            args: [this.packageManager.name, identifier, name],
                           },
                           {
                             type: "separator",
@@ -324,7 +324,7 @@ export default class AppsView<
                           {
                             label: "Reindex",
                             callback: "reindex",
-                            args: [identifier, name],
+                            args: [this.packageManager.name, identifier, name],
                           },
                         ])}
                     ></openstore-card>
