@@ -133,7 +133,7 @@ const brew: IPCBrew = {
         "info",
         "--json=v2",
         "--formula",
-        ...(formulaNames ?? ["--all"]),
+        ...(formulaNames ?? ["--eval-all"]),
       ]);
 
       let json = "";

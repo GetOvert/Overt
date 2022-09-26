@@ -137,7 +137,7 @@ const brewCask: IPCBrewCask = {
         "info",
         "--json=v2",
         "--cask",
-        ...(caskNames ?? ["--all"]),
+        ...(caskNames ?? ["--eval-all"]),
       ]);
 
       let json = "";
