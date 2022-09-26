@@ -17,7 +17,7 @@ OpenStore **does**:
 
 - Give you a catalog of 3000+ apps at your fingertips
 - Install, update, and uninstall apps with a single click
-- Let you add your own source repositories (Coming soon)
+- Let you add your own source repositories
 
 <a href="https://getopenstore.app">Website</a> • <a href="https://github.com/GetOpenStore/homebrew-tap#install-openstore">Install</a>
 
