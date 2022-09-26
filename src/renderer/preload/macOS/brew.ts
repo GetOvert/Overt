@@ -21,7 +21,7 @@ import {
 import terminal from "../terminal";
 import * as taskQueue from "../taskQueueIPC";
 import { PromptForPasswordTask } from "components/tasks/model/Task";
-import { getBrewExecutablePath, getQuarantineFlags } from "./brewCask";
+import { getBrewExecutablePath } from "./brewCask";
 import { SourceRepository } from "package-manager/SourceRepository";
 
 // TODO: Make user-configurable?
@@ -387,7 +387,6 @@ const brew: IPCBrew = {
         quote([
           await getBrewExecutablePath(),
           "install",
-          ...(await getQuarantineFlags()),
           "--formula",
           formulaName,
         ]) +
@@ -423,7 +422,6 @@ const brew: IPCBrew = {
         quote([
           await getBrewExecutablePath(),
           "upgrade",
-          ...(await getQuarantineFlags()),
           "--formula",
           formulaName,
         ]) +
