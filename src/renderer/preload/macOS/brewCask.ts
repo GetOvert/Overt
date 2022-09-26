@@ -41,7 +41,8 @@ if (process.platform === "darwin") {
         "desc" TEXT,
         "homepage" TEXT,
         "installed" TEXT, -- Version of the cask installed on this machine, or null if not installed
-        "auto_updates" BOOLEAN, -- Whether the cask auto-updates
+        "outdated" BOOLEAN,
+        "auto_updates" BOOLEAN, -- Whether the cask updates itself (without brew's help)
         "json" TEXT,
         "installed_30d" INTEGER, -- Install count analytics for last 30 days
         "installed_90d" INTEGER, -- Install count analytics for last 90 days
@@ -225,6 +226,7 @@ const brewCask: IPCBrewCask = {
         "desc",
         "homepage",
         "installed",
+        "outdated",
         "auto_updates",
         "json",
         "installed_30d",
@@ -235,6 +237,7 @@ const brewCask: IPCBrewCask = {
         ...cask,
         name: JSON.stringify(cask.name),
         installed: cask.installed,
+        outdated: +cask.outdated,
         auto_updates: cask.auto_updates ? 1 : 0,
 
         installed_30d:
@@ -301,11 +304,7 @@ const brewCask: IPCBrewCask = {
               case "installed":
                 return sql`AND casks.installed IS NOT NULL`;
               case "updates":
-                return sql`
-                  AND casks.installed IS NOT NULL
-                  AND casks.installed != casks.version
-                  AND casks.auto_updates = 0
-                `;
+                return sql`AND casks.outdated`;
             }
           })()}
         ORDER BY casks.${dbKeyForSortKey(sortBy)} DESC

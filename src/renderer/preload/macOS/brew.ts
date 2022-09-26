@@ -38,6 +38,7 @@ if (process.platform === "darwin") {
         "desc" TEXT,
         "homepage" TEXT,
         "installed" TEXT, -- Version of the formula installed on this machine, or null if not installed
+        "outdated" BOOLEAN,
         "json" TEXT,
         "installed_30d" INTEGER, -- Install count analytics for last 30 days
         "installed_90d" INTEGER, -- Install count analytics for last 90 days
@@ -220,6 +221,7 @@ const brew: IPCBrew = {
         "desc",
         "homepage",
         "installed",
+        "outdated",
         "json",
         "installed_30d",
         "installed_90d",
@@ -229,6 +231,7 @@ const brew: IPCBrew = {
         ...formula,
         version: formula.versions.stable,
         installed: formula.installed[0]?.version,
+        outdated: +formula.outdated,
 
         installed_30d:
           installs30d?.formulae?.[formula.full_name]?.[0]?.count
@@ -293,10 +296,7 @@ const brew: IPCBrew = {
               case "installed":
                 return sql`AND formulae.installed IS NOT NULL`;
               case "updates":
-                return sql`
-                  AND formulae.installed IS NOT NULL
-                  AND formulae.installed != formulae.version
-                `;
+                return sql`AND formulae.outdated`;
             }
           })()}
         ORDER BY formulae.${dbKeyForSortKey(sortBy)} DESC

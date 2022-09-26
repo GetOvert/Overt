@@ -1,7 +1,6 @@
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
-import { promisify } from "util";
 
 // Passed in webPreferences.additionalArguments:
 const cachePath = Buffer.from(
@@ -9,10 +8,13 @@ const cachePath = Buffer.from(
     .filter((arg) => arg.includes("OpenStore.cachePath="))[0]
     .slice("OpenStore.cachePath=".length),
   "base64"
-).toString("ascii");
+).toString();
 
-const cacheDir = path.join(cachePath, "OpenStore_v2");
-const oldCacheDirs = [path.join(cachePath, "OpenStore_v1")];
+const cacheDir = path.join(cachePath, "OpenStore_v3");
+const oldCacheDirs = [
+  path.join(cachePath, "OpenStore_v2"),
+  path.join(cachePath, "OpenStore_v1"),
+];
 
 // Try to delete older versions of cache
 for (const oldCacheDir of oldCacheDirs) {
