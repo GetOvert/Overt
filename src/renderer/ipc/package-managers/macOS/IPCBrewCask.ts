@@ -68,6 +68,18 @@ export class BrewCaskPackageInfoAdapter
   packageDetails(packageInfo: BrewCaskPackageInfo): PackageDetailField[] {
     return [
       {
+        heading: "Names",
+        value:
+          packageInfo.name.length > 1
+            ? html`<ul>
+                ${repeat(
+                  packageInfo.name,
+                  (identifier) => html`<li>${identifier}</li>`
+                )}
+              </ul>`
+            : "",
+      },
+      {
         heading: "Description",
         value: packageInfo.desc ?? "No description available.",
       },
