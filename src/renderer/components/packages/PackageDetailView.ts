@@ -32,7 +32,11 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
   }
 
   protected get subtitle(): string {
-    return this.packageInfoAdapter.packageIdentifier(this.packageInfo);
+    const name = this.packageInfoAdapter.packageName(this.packageInfo);
+    const identifier = this.packageInfoAdapter.packageIdentifier(
+      this.packageInfo
+    );
+    return identifier !== name ? identifier : "";
   }
 
   protected shouldCauseRerender(successfulTask: QueuedTask): boolean {

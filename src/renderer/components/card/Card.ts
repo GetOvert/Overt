@@ -68,9 +68,10 @@ export default class Card extends BootstrapBlockElement {
               ${this.subtitle || this.status
                 ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
                     ${this.subtitle}
+                    ${this.subtitle && this.status ? " • " : ""}
                     ${this.status
                       ? html`<span class="text-${this.statusColor}">
-                          (${this.status})
+                          ${this.status}
                         </span>`
                       : ""}
                   </h3>`

@@ -283,7 +283,7 @@ export default class AppsView<
                   <openstore-col class="mx-2">
                     <openstore-card
                       .title=${name}
-                      .subtitle=${identifier}
+                      .subtitle=${identifier !== name ? identifier : ""}
                       .status=${isInstalled
                         ? isOutdated
                           ? "update available"
