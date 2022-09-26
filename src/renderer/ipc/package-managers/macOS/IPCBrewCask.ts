@@ -69,15 +69,7 @@ export class BrewCaskPackageInfoAdapter
     return [
       {
         heading: "Names",
-        value:
-          packageInfo.name.length > 1
-            ? html`<ul>
-                ${repeat(
-                  packageInfo.name,
-                  (identifier) => html`<li>${identifier}</li>`
-                )}
-              </ul>`
-            : "",
+        value: packageInfo.name.length > 1 ? packageInfo.name : "",
       },
       {
         heading: "Description",
@@ -98,18 +90,13 @@ export class BrewCaskPackageInfoAdapter
       },
       {
         heading: "Versions",
-        value: html`<dl>
-          <dt>Installed:</dt>
-          <dd>${packageInfo.installed ?? "None"}</dd>
-          <dt>Latest:</dt>
-          <dd>${packageInfo.version}</dd>
-          <dt>Updates:</dt>
-          <dd>
-            ${packageInfo.auto_updates
-              ? "Via built-in updater"
-              : "Via OpenStore"}
-          </dd>
-        </dl>`,
+        value: {
+          Installed: packageInfo.installed ?? "None",
+          Latest: packageInfo.version,
+          Updates: packageInfo.auto_updates
+            ? "Via built-in updater"
+            : "Via OpenStore",
+        },
       },
       {
         heading: "Requirements",
@@ -142,29 +129,22 @@ export class BrewCaskPackageInfoAdapter
         value:
           packageInfo.conflicts_with &&
           Object.keys(packageInfo.conflicts_with).length
-            ? html`<ul>
-                ${repeat(
-                  Object.entries(packageInfo.conflicts_with).flatMap(
-                    ([, identifiers]) => identifiers
-                  ),
-                  (identifier) => html`<li>${identifier}</li>`
-                )}
-              </ul>`
+            ? Object.entries(packageInfo.conflicts_with).flatMap(
+                ([, identifiers]: [string, string[]]) => identifiers
+              )
             : null,
       },
       {
         heading: "Identifiers",
-        value: [packageInfo.full_token, ...(packageInfo.aliases ?? [])].join(
-          ", "
-        ),
+        value: [packageInfo.full_token, ...(packageInfo.aliases ?? [])],
       },
       {
         heading: "Install count",
-        value: [
-          `30 days: ${(+packageInfo.installed_30d).toLocaleString()}`,
-          `90 days: ${(+packageInfo.installed_90d).toLocaleString()}`,
-          `365 days: ${(+packageInfo.installed_365d).toLocaleString()}`,
-        ],
+        value: {
+          "30 days": (+packageInfo.installed_30d).toLocaleString(),
+          "90 days": (+packageInfo.installed_90d).toLocaleString(),
+          "365 days": (+packageInfo.installed_365d).toLocaleString(),
+        },
       },
     ];
   }

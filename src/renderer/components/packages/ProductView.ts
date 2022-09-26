@@ -97,11 +97,15 @@ export abstract class ProductView extends BootstrapBlockElement {
         ${repeat(
           this.fields,
           ({ heading }) => heading,
-          ({ heading, value }) =>
-            value
-              ? html`<h3 style="font-weight: 500">${heading}</h3>
-                  ${htmlForFieldValue(value, true)}`
-              : ""
+          ({ heading, value }) => {
+            const valueHTML = htmlForFieldValue(value, true);
+            return valueHTML
+              ? html`
+                  <h3 style="font-weight: 500">${heading}</h3>
+                  ${valueHTML}
+                `
+              : "";
+          }
         )}
         </div>
       </div>
@@ -112,10 +116,12 @@ export abstract class ProductView extends BootstrapBlockElement {
 function htmlForFieldValue(
   value?: PackageDetailFieldValue,
   isRoot: boolean = false
-): HTMLTemplateResult {
-  if (!value) return html``;
+): HTMLTemplateResult | null {
+  if (!value) return null;
 
   if (Array.isArray(value)) {
+    if (!value.length) return null;
+
     return html`
       <ul>
         ${repeat(
@@ -126,6 +132,20 @@ function htmlForFieldValue(
     `;
   }
 
+  if (typeof value === "object" && !isLitTemplateResult(value)) {
+    return html`
+      <dl>
+        ${repeat(
+          Object.entries(value),
+          ([key, subvalue]) => html`
+            <dt>${key}:</dt>
+            <dd>${subvalue}</dd>
+          `
+        )}
+      </dl>
+    `;
+  }
+
   if (typeof value === "string") {
     return isRoot
       ? html` <p style="white-space: pre-wrap">${value}</p> `
@@ -133,4 +153,8 @@ function htmlForFieldValue(
   }
 
   return value;
+}
+
+function isLitTemplateResult(value: object): value is HTMLTemplateResult {
+  return value["_$litType$"] !== undefined;
 }

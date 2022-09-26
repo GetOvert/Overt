@@ -19,4 +19,5 @@ export type PackageDetailField = {
 export type PackageDetailFieldValue =
   | string
   | HTMLTemplateResult
-  | PackageDetailFieldValue[];
+  | PackageDetailFieldValue[]
+  | { [fieldLabel: string]: PackageDetailFieldValue };

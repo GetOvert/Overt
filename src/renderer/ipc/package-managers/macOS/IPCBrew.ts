@@ -29,6 +29,7 @@ export type BrewPackageInfo = {
   dependencies?: string[];
   recommended_dependencies?: string[];
   optional_dependencies?: string[];
+  conflicts_with?: string[];
   aliases?: string[];
   outdated: boolean;
   deprecated: boolean;
@@ -117,59 +118,54 @@ export class BrewPackageInfoAdapter
       },
       {
         heading: "Versions",
-        value: html`<dl>
-          <dt>Installed:</dt>
-          <dd>${packageInfo.installed?.[0]?.version ?? "None"}</dd>
-          <dt>Latest stable:</dt>
-          <dd>${packageInfo.versions?.stable ?? "None"}</dd>
-        </dl>`,
+        value: {
+          Installed: packageInfo.installed?.[0]?.version ?? "None",
+          "Latest stable": packageInfo.versions?.stable ?? "None",
+        },
       },
       {
         heading: "Dependencies",
-        value: packageInfo.dependencies?.length
-          ? html`<ul>
-              ${repeat(
-                packageInfo.dependencies,
-                (dependencyIdentifier) => html`<li>${dependencyIdentifier}</li>`
-              )}
-            </ul>`
-          : null,
+        value: packageInfo.dependencies,
       },
       {
         heading: "Recommended dependencies",
-        value: packageInfo.recommended_dependencies?.length
-          ? html`<ul>
-              ${repeat(
-                packageInfo.recommended_dependencies,
-                (dependencyIdentifier) => html`<li>${dependencyIdentifier}</li>`
-              )}
-            </ul>`
-          : null,
+        value: packageInfo.recommended_dependencies,
       },
       {
         heading: "Optional dependencies",
-        value: packageInfo.optional_dependencies?.length
-          ? html`<ul>
-              ${repeat(
-                packageInfo.optional_dependencies,
-                (dependencyIdentifier) => html`<li>${dependencyIdentifier}</li>`
-              )}
-            </ul>`
-          : null,
+        value: packageInfo.optional_dependencies,
+      },
+      {
+        heading: "Conflicts with",
+        value:
+          packageInfo.conflicts_with &&
+          Object.keys(packageInfo.conflicts_with).length
+            ? html`<ul>
+                ${repeat(
+                  Object.entries(packageInfo.conflicts_with).flatMap(
+                    ([, identifiers]) => identifiers
+                  ),
+                  (identifier) => html`<li>${identifier}</li>`
+                )}
+              </ul>`
+            : null,
       },
       {
         heading: "Identifiers",
-        value: [packageInfo.full_name, ...(packageInfo.aliases ?? [])].join(
-          ", "
-        ),
+        value: html`<ul>
+          ${repeat(
+            [packageInfo.full_name, ...(packageInfo.aliases ?? [])],
+            (identifier) => html`<li>${identifier}</li>`
+          )}
+        </ul>`,
       },
       {
         heading: "Install-on-request count",
-        value: [
-          `30 days: ${(+packageInfo.installed_30d).toLocaleString()}`,
-          `90 days: ${(+packageInfo.installed_90d).toLocaleString()}`,
-          `365 days: ${(+packageInfo.installed_365d).toLocaleString()}`,
-        ],
+        value: {
+          "30 days": (+packageInfo.installed_30d).toLocaleString(),
+          "90 days": (+packageInfo.installed_90d).toLocaleString(),
+          "365 days": (+packageInfo.installed_365d).toLocaleString(),
+        },
       },
     ];
   }
