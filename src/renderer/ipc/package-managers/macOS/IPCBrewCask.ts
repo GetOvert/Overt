@@ -144,8 +144,10 @@ export class BrewCaskPackageInfoAdapter
           Object.keys(packageInfo.conflicts_with).length
             ? html`<ul>
                 ${repeat(
-                  packageInfo.conflicts_with.cask ?? [],
-                  (appIdentifier) => html`<li>${appIdentifier}</li>`
+                  Object.entries(packageInfo.conflicts_with).flatMap(
+                    ([, identifiers]) => identifiers
+                  ),
+                  (identifier) => html`<li>${identifier}</li>`
                 )}
               </ul>`
             : null,
