@@ -45,7 +45,7 @@ function cacheDB_loadMeta(): CacheDBMeta {
   try {
     return JSON.parse(fs.readFileSync(cacheMetaPath).toString());
   } catch (error) {
-    console.error(error);
+    if (error.code !== "ENOENT") console.error(error);
     return {};
   }
 }
