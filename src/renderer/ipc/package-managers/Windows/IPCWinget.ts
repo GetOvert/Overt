@@ -98,6 +98,14 @@ export class WingetPackageInfoAdapter
     );
   }
 
+  isPackageDeprecated(packageInfo: WingetPackageInfo): boolean {
+    return false;
+  }
+
+  isPackageDisabled(packageInfo: WingetPackageInfo): boolean {
+    return false;
+  }
+
   packageDetails(packageInfo: WingetPackageInfo): PackageDetailField[] {
     return [
       {

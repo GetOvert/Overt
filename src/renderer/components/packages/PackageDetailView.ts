@@ -53,7 +53,9 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
       {
         title: "Install",
         color: "success",
-        shown: !this.packageInfoAdapter.isPackageInstalled(this.packageInfo),
+        shown:
+          !this.packageInfoAdapter.isPackageInstalled(this.packageInfo) &&
+          !this.packageInfoAdapter.isPackageDisabled(this.packageInfo),
         onClick: () =>
           installPackage(
             this.packageManagerName,
@@ -75,7 +77,8 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
         color: "success",
         shown:
           this.packageInfoAdapter.isPackageInstalled(this.packageInfo) &&
-          this.packageInfoAdapter.isPackageOutdated(this.packageInfo),
+          this.packageInfoAdapter.isPackageOutdated(this.packageInfo) &&
+          !this.packageInfoAdapter.isPackageDisabled(this.packageInfo),
         onClick: () =>
           upgradePackage(
             this.packageManagerName,

@@ -27,6 +27,7 @@ export type BrewCaskPackageInfo = {
   depends_on?: any; // TODO: Better typing
   conflicts_with?: any; // TODO: Better typing
   aliases?: string[];
+  outdated: boolean;
   installed_30d?: string; // TODO: Better typing
   installed_90d?: string; // TODO: Better typing
   installed_365d?: string; // TODO: Better typing
@@ -53,9 +54,15 @@ export class BrewCaskPackageInfoAdapter
   }
 
   isPackageOutdated(packageInfo: BrewCaskPackageInfo): boolean {
-    return (
-      !packageInfo.auto_updates && packageInfo.installed !== packageInfo.version
-    );
+    return packageInfo.outdated;
+  }
+
+  isPackageDeprecated(packageInfo: BrewCaskPackageInfo): boolean {
+    return false;
+  }
+
+  isPackageDisabled(packageInfo: BrewCaskPackageInfo): boolean {
+    return false;
   }
 
   packageDetails(packageInfo: BrewCaskPackageInfo): PackageDetailField[] {

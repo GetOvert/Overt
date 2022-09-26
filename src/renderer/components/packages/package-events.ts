@@ -29,7 +29,7 @@ export async function upgradePackage(
 ) {
   taskQueue.push(
     {
-      packageManager: "brew-cask",
+      packageManager: packageManager,
       label: `Update ${packageFullName}`,
       type: "upgrade",
       packageIdentifier,

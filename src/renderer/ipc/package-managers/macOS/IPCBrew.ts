@@ -30,6 +30,13 @@ export type BrewPackageInfo = {
   recommended_dependencies?: string[];
   optional_dependencies?: string[];
   aliases?: string[];
+  outdated: boolean;
+  deprecated: boolean;
+  deprecation_date?: string | null;
+  deprecation_reason?: string | null;
+  disabled: boolean;
+  disable_date?: string | null;
+  disable_reason?: string | null;
   installed_30d?: string; // TODO: Better typing
   installed_90d?: string; // TODO: Better typing
   installed_365d?: string; // TODO: Better typing
@@ -56,14 +63,41 @@ export class BrewPackageInfoAdapter
   }
 
   isPackageOutdated(packageInfo: BrewPackageInfo): boolean {
-    // FIXME: This is only a heuristic
-    return !Object.values(packageInfo.versions).includes(
-      packageInfo.installed[0]?.version
-    );
+    return packageInfo.outdated;
+  }
+
+  isPackageDeprecated(packageInfo: BrewPackageInfo): boolean {
+    return packageInfo.deprecated;
+  }
+
+  isPackageDisabled(packageInfo: BrewPackageInfo): boolean {
+    return packageInfo.disabled;
   }
 
   packageDetails(packageInfo: BrewPackageInfo): PackageDetailField[] {
     return [
+      {
+        heading: "Status",
+        value: packageInfo.disabled
+          ? html`<dl class="text-danger">
+              <dt>
+                Disabled${packageInfo.disable_date
+                  ? ` ${packageInfo.disable_date}`
+                  : ""}:
+              </dt>
+              <dd>${packageInfo.disable_reason}</dd>
+            </dl>`
+          : packageInfo.deprecated
+          ? html`<dl class="text-danger">
+              <dt>
+                Deprecated${packageInfo.deprecation_date
+                  ? ` ${packageInfo.deprecation_date}`
+                  : ""}:
+              </dt>
+              <dd>${packageInfo.deprecation_reason}</dd>
+            </dl>`
+          : null,
+      },
       {
         heading: "Description",
         value: packageInfo.desc ?? "No description available.",
@@ -102,7 +136,7 @@ export class BrewPackageInfoAdapter
           : null,
       },
       {
-        heading: "Recommended ependencies",
+        heading: "Recommended dependencies",
         value: packageInfo.recommended_dependencies?.length
           ? html`<ul>
               ${repeat(

@@ -6,6 +6,8 @@ export type PackageInfoAdapter<PackageInfo> = {
   packageDescription(packageInfo: PackageInfo): string;
   isPackageInstalled(packageInfo: PackageInfo): boolean;
   isPackageOutdated(packageInfo: PackageInfo): boolean;
+  isPackageDeprecated(packageInfo: PackageInfo): boolean;
+  isPackageDisabled(packageInfo: PackageInfo): boolean;
 
   packageDetails(packageInfo: PackageInfo): PackageDetailField[];
 };
