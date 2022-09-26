@@ -123,7 +123,6 @@ export default class AppsView<
           this._canLoadMore = result.length === limit;
 
           window.setTimeout(() => {
-            console.log(routeParams, lastRouteParams);
             if (
               routeParams.source === lastRouteParams.source &&
               routeParams.search === lastRouteParams.search &&

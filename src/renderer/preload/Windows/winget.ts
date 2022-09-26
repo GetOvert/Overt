@@ -123,7 +123,7 @@ const winget: IPCWinget = {
     packages: WingetPackageInfo[]
   ) {
     console.log(
-      "updating packages: " +
+      "indexing packages: " +
         (Array.isArray(packageNamesToUpdate)
           ? packageNamesToUpdate.join(", ")
           : "all")

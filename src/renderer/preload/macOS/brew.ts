@@ -205,7 +205,7 @@ const brew: IPCBrew = {
     installs365d: FormulaAnalyticsData
   ) {
     console.log(
-      "updating formulae: " +
+      "indexing formulae: " +
         (Array.isArray(formulaNamesToUpdate)
           ? formulaNamesToUpdate.join(", ")
           : "all")
@@ -503,7 +503,7 @@ const brew: IPCBrew = {
   },
 
   async _rebuildSourceRepositoryIndexFromTapInfo(taps: any[]) {
-    console.log("updating taps");
+    console.log("indexing taps");
 
     const db = cacheDB();
 

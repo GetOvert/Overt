@@ -209,7 +209,7 @@ const brewCask: IPCBrewCask = {
     installs365d: CaskAnalyticsData
   ) {
     console.log(
-      "updating casks: " +
+      "indexing casks: " +
         (Array.isArray(caskNamesToUpdate)
           ? caskNamesToUpdate.join(", ")
           : "all")

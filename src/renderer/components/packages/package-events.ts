@@ -43,7 +43,6 @@ export async function uninstallPackage(
   packageIdentifier: string,
   packageFullName: string
 ) {
-  console.log(arguments);
   taskQueue.push(
     {
       packageManager,

@@ -178,7 +178,6 @@ export class SettingsPane extends BootstrapBlockElement {
       "Sources"
     );
 
-    console.log(sourceRepositoryChanges);
     for (const {
       action,
       sourceRepository: { packageManager, name, url },

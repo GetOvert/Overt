@@ -24,7 +24,7 @@ for (const oldCacheDir of oldCacheDirs) {
       fs.rmSync(oldCacheDir, { recursive: true });
     }
   } catch (e) {
-    console.error(`Couldn't delete older cache dir: ${e}`);
+    console.error(`Couldn't delete old cache dir: ${e}`);
   }
 }
 
