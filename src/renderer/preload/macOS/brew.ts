@@ -52,7 +52,7 @@ if (process.platform === "darwin") {
 let indexListeners = new Set<() => void>();
 
 type FormulaAnalyticsData = {
-  formulae: { [key: string]: { formula: string; count: number } };
+  formulae: { [key: string]: [{ formula: string; count: number }] };
 };
 
 const brew: IPCBrew = {

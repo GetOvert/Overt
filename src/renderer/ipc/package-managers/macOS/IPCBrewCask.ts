@@ -80,7 +80,7 @@ export class BrewCaskPackageInfoAdapter
         value: html`<p>
           <a
             href=${packageInfo.homepage}
-            @click=${(e) => {
+            @click=${(e: Event) => {
               e.preventDefault();
               window.openExternalLink.open(packageInfo.homepage);
             }}
@@ -110,7 +110,7 @@ export class BrewCaskPackageInfoAdapter
                 ${Object.keys(packageInfo.depends_on.macos ?? {}).map(
                   (operator) =>
                     packageInfo.depends_on.macos[operator].map(
-                      (version) =>
+                      (version: string) =>
                         html`<li>
                           macOS
                           ${(() =>

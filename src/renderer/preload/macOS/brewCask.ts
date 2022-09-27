@@ -56,7 +56,7 @@ if (process.platform === "darwin") {
 let indexListeners = new Set<() => void>();
 
 type CaskAnalyticsData = {
-  formulae: { [key: string]: { cask: string; count: number } };
+  formulae: { [key: string]: [{ cask: string; count: number }] };
 };
 
 const brewCask: IPCBrewCask = {

@@ -156,5 +156,5 @@ function htmlForFieldValue(
 }
 
 function isLitTemplateResult(value: object): value is HTMLTemplateResult {
-  return value["_$litType$"] !== undefined;
+  return (value as any)["_$litType$"] !== undefined;
 }

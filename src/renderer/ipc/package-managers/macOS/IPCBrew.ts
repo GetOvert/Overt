@@ -108,7 +108,7 @@ export class BrewPackageInfoAdapter
         value: html`<p>
           <a
             href=${packageInfo.homepage}
-            @click=${(e) => {
+            @click=${(e: Event) => {
               e.preventDefault();
               window.openExternalLink.open(packageInfo.homepage);
             }}

@@ -73,9 +73,9 @@ export async function reindexPackage(
 // TODO: Deprecate in favor of general (not cask-specific) solution
 export function getCaskAppFileName(app: any): string | null {
   return app.artifacts
-    ?.filter((artifact) => Array.isArray(artifact))
+    ?.filter((artifact: any) => Array.isArray(artifact))
     ?.map(
-      (candidateArray) =>
+      (candidateArray: string[]) =>
         candidateArray.filter(
           (fileName) =>
             typeof fileName.endsWith === "function" && fileName.endsWith(".app")
