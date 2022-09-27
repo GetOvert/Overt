@@ -41,10 +41,11 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
 
   protected shouldCauseRerender(successfulTask: QueuedTask): boolean {
     return (
-      ["reindex-all", "reindex"].includes(successfulTask.type) &&
-      packageIdentifiersOfTask(successfulTask)?.includes(
-        this.packageInfoAdapter.packageIdentifier(this.packageInfo)
-      )
+      (["reindex-all", "reindex"].includes(successfulTask.type) &&
+        packageIdentifiersOfTask(successfulTask)?.includes(
+          this.packageInfoAdapter.packageIdentifier(this.packageInfo)
+        )) ??
+      false
     );
   }
 
@@ -73,8 +74,10 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
         shown:
           this.packageInfoAdapter.isPackageInstalled(this.packageInfo) &&
           !!getCaskAppFileName(this.packageInfo),
-        onClick: () =>
-          window.openProduct.openApp(getCaskAppFileName(this.packageInfo)),
+        onClick: async () => {
+          const appFileName = getCaskAppFileName(this.packageInfo);
+          if (appFileName) await window.openProduct.openApp(appFileName);
+        },
       },
       {
         title: "Update",

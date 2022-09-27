@@ -16,14 +16,14 @@ export default class PasswordPromptModal extends LightDOMBlockElement {
   @property()
   modalTitle = "Authentication required";
 
-  private resolve: (password: string) => void;
-  private reject: (error: any) => void;
+  private resolve?: (password: string) => void;
+  private reject?: (error: any) => void;
 
   static async runModal(
     prompt: string,
     title: string = "Authentication required"
   ): Promise<string> {
-    const modalContainer = document.querySelector("#modalContainer");
+    const modalContainer = document.querySelector("#modalContainer")!;
     modalContainer.innerHTML = `
       <openstore-password-prompt-modal
         modalPrompt="${prompt.replace('"', "&quot;")}"
@@ -119,9 +119,9 @@ export default class PasswordPromptModal extends LightDOMBlockElement {
     this.resolve?.(this.passwordField.value!.value);
 
     // Prevent reject being called in onDismiss()
-    this.resolve = this.reject = null;
+    this.resolve = this.reject = undefined;
 
-    Modal.getInstance(this.modalRoot.value!).hide();
+    Modal.getInstance(this.modalRoot.value!)?.hide();
   }
 
   private onDismiss() {

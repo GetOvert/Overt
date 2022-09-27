@@ -7,7 +7,7 @@ import { customElement } from "lit/decorators.js";
 @customElement("openstore-settings-button")
 export default class SettingsButton extends BootstrapBlockElement {
   get pane(): FloatingPane {
-    return document.querySelector("#openstore-settings-pane");
+    return document.querySelector("#openstore-settings-pane")!;
   }
 
   constructor() {

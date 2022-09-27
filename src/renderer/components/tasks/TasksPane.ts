@@ -51,7 +51,7 @@ export class TasksPane extends BootstrapBlockElement {
   }
 
   get terminalButton(): TerminalButton {
-    return this.renderRoot.querySelector("openstore-terminal-button");
+    return this.renderRoot.querySelector("openstore-terminal-button")!;
   }
 
   render() {

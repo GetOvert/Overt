@@ -14,6 +14,7 @@ export function packageManagerForName(
     case "brew-cask":
       return window.brewCask;
   }
+  throw new Error(`Unknown package manager: ${name}`);
 }
 
 export function packageInfoAdapterForPackageManagerName(
@@ -25,4 +26,5 @@ export function packageInfoAdapterForPackageManagerName(
     case "brew-cask":
       return new BrewCaskPackageInfoAdapter();
   }
+  throw new Error(`Unknown package manager: ${name}`);
 }

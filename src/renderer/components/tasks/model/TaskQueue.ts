@@ -42,6 +42,7 @@ export class TaskQueue {
       this._liveQueue.find(
         (task) => task.state === "pending" && taskTypes.includes(task.type)
       ) ?? null;
+    if (!task) return null;
 
     this.update(task, "running");
 
@@ -68,7 +69,7 @@ export class TaskQueue {
   }
 
   update(taskOrTaskSerial: QueuedTask | number, state: LiveTaskState) {
-    const task: QueuedTask =
+    const task =
       typeof taskOrTaskSerial === "number"
         ? this._tasksBySerial.get(taskOrTaskSerial)
         : taskOrTaskSerial;
@@ -80,7 +81,7 @@ export class TaskQueue {
   }
 
   remove(taskOrTaskSerial: QueuedTask | number, state: DeadTaskState) {
-    const task: QueuedTask =
+    const task =
       typeof taskOrTaskSerial === "number"
         ? this._tasksBySerial.get(taskOrTaskSerial)
         : taskOrTaskSerial;

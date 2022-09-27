@@ -30,7 +30,7 @@ class TaskProcessor {
     if (this._processing) return;
     this._processing = true;
 
-    let task: QueuedTask;
+    let task: QueuedTask | null = null;
     try {
       while ((task = taskQueue.nextOfTypes(this._taskTypes))) {
         await this._process(task);

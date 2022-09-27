@@ -49,7 +49,7 @@ export type PackageManagerTask = Task & {
 };
 export type ReindexAllTask = PackageManagerTask & {
   type: "reindex-all";
-  condition?: "always" | "if-too-old" | "if-nonexistent";
+  condition: "always" | "if-too-old" | "if-nonexistent";
   wipeIndexFirst?: boolean;
 };
 export type ReindexOutdatedTask = PackageManagerTask & {

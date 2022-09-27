@@ -49,7 +49,7 @@ export default class AppsView<
 
   private _scrollContainerRef: Ref<HTMLElement> = createRef();
   get _scrollContainer(): HTMLElement {
-    return this._scrollContainerRef.value;
+    return this._scrollContainerRef.value!;
   }
 
   constructor() {

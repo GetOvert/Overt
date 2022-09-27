@@ -27,7 +27,7 @@ export async function downloadWingetManifests(url: string): Promise<string> {
           path.join(tmpdir, "archive.zip")
         );
         // For some reason, attempting to use a pipe here fails.
-        response.body.pipe(archiveFile);
+        response.body!.pipe(archiveFile);
 
         archiveFile.on("finish", async () => {
           archiveFile.close();

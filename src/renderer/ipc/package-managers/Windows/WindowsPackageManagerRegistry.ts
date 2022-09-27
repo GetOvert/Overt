@@ -11,6 +11,7 @@ export function packageManagerForName(
     case "winget":
       return window.winget;
   }
+  throw new Error(`Unknown package manager: ${name}`);
 }
 
 export function packageInfoAdapterForPackageManagerName(
@@ -20,4 +21,5 @@ export function packageInfoAdapterForPackageManagerName(
     case "winget":
       return new WingetPackageInfoAdapter();
   }
+  throw new Error(`Unknown package manager: ${name}`);
 }

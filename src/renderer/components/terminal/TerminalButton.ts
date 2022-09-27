@@ -6,7 +6,7 @@ import { customElement, state } from "lit/decorators.js";
 @customElement("openstore-terminal-button")
 export default class TerminalButton extends BootstrapBlockElement {
   get pane(): FloatingPane {
-    return document.querySelector("#openstore-terminal-pane");
+    return document.querySelector("#openstore-terminal-pane")!;
   }
 
   constructor() {
@@ -29,7 +29,7 @@ export default class TerminalButton extends BootstrapBlockElement {
   toggleShown() {
     this.pane.shown = !this.pane.shown;
 
-    const button = this.renderRoot.querySelector("button");
+    const button = this.renderRoot.querySelector("button")!;
 
     if (this.pane.shown) button.classList.add("active");
     else button.classList.remove("active");

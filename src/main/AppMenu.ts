@@ -17,7 +17,7 @@ export function initAppMenu() {
                   label: "Preferences…",
                   accelerator: "CmdOrCtrl+,",
                   click(menuItem, browserWindow) {
-                    browserWindow.webContents.send("show_settings");
+                    browserWindow?.webContents.send("show_settings");
                   },
                 },
                 { type: "separator" },
@@ -80,21 +80,21 @@ export function initAppMenu() {
             label: "Back",
             accelerator: "CmdOrCtrl+[",
             click(menuItem, browserWindow) {
-              browserWindow.webContents.goBack();
+              browserWindow?.webContents.goBack();
             },
           },
           {
             label: "Forward",
             accelerator: "CmdOrCtrl+]",
             click(menuItem, browserWindow) {
-              browserWindow.webContents.goForward();
+              browserWindow?.webContents.goForward();
             },
           },
           {
             label: "Focus Search Bar",
             accelerator: "CmdOrCtrl+F",
             click(menuItem, browserWindow) {
-              browserWindow.webContents.send("focus_search_bar");
+              browserWindow?.webContents.send("focus_search_bar");
             },
           },
           { type: "separator" },
@@ -102,14 +102,14 @@ export function initAppMenu() {
             label: "Toggle Tasks Pane",
             accelerator: "CmdOrCtrl+Alt+T",
             click(menuItem, browserWindow) {
-              browserWindow.webContents.send("toggle_tasks");
+              browserWindow?.webContents.send("toggle_tasks");
             },
           },
           {
             label: "Toggle Settings Pane",
             accelerator: "CmdOrCtrl+Alt+,",
             click(menuItem, browserWindow) {
-              browserWindow.webContents.send("toggle_settings");
+              browserWindow?.webContents.send("toggle_settings");
             },
           },
           { type: "separator" },

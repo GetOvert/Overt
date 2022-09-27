@@ -7,7 +7,7 @@ const terminal = new Terminal();
 const fitAddon = new FitAddon();
 terminal.loadAddon(fitAddon);
 
-terminal.open(document.querySelector("#terminal"));
+terminal.open(document.querySelector("#terminal")!);
 
 ((window as any).openStore as any).fitTerminal = () => {
   fitAddon.fit();

@@ -18,7 +18,7 @@ export interface IPCPackageManager<PackageInfo, SortKey> {
     limit: number,
     offset: number
   ): Promise<PackageInfo[]>;
-  info(packageName: string): Promise<PackageInfo>;
+  info(packageName: string): Promise<PackageInfo | null>;
 
   install(packageName: string): Promise<boolean>;
   upgrade(packageName: string): Promise<boolean>;

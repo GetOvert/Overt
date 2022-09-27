@@ -319,7 +319,7 @@ const brew: IPCBrew = {
       }));
   },
 
-  async info(formulaName: string): Promise<BrewPackageInfo> {
+  async info(formulaName: string): Promise<BrewPackageInfo | null> {
     const row = cacheDB()
       .prepare(
         sql`

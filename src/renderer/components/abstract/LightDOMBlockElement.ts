@@ -26,7 +26,7 @@ export default abstract class LightDOMBlockElement extends LitElement {
       }
     } else {
       if (cssResultGroup instanceof CSSResult) {
-        cssResultGroup = cssResultGroup.styleSheet;
+        cssResultGroup = cssResultGroup.styleSheet!;
       }
 
       for (const rule of cssResultGroup.cssRules) {

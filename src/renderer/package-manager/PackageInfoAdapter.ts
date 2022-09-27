@@ -17,6 +17,8 @@ export type PackageDetailField = {
   value?: PackageDetailFieldValue;
 };
 export type PackageDetailFieldValue =
+  | undefined
+  | null
   | string
   | HTMLTemplateResult
   | PackageDetailFieldValue[]

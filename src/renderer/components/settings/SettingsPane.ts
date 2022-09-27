@@ -117,7 +117,7 @@ export class SettingsPane extends BootstrapBlockElement {
           if ((event.target as HTMLElement).tagName === "LABEL") {
             // Prevent checkbox gaining focus
             event.preventDefault();
-            (event.target as HTMLLabelElement).control.click();
+            (event.target as HTMLLabelElement).control!.click();
           }
         }}
       >

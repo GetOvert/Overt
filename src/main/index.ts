@@ -56,7 +56,7 @@ async function createWindow(): Promise<void> {
       ? pty.spawn("powershell.exe", [], {
           cwd: process.env.HOMEPATH,
           env: {
-            ...process.env,
+            ...(process.env as { [key: string]: string }),
           },
         })
       : pty.spawn("/bin/sh", [], {

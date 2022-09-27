@@ -24,20 +24,17 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
   @property()
   modalTitle: string;
 
-  itemChanges?: SourceRepositoryChange[] = [];
+  itemChanges: SourceRepositoryChange[] = [];
 
   @state()
-  private editingItem: SourceRepository = {
-    packageManager: null,
-    name: null,
-    url: null,
+  private editing?: {
+    item: SourceRepository;
+    index: number;
+    isNew: boolean;
   };
-  @state()
-  private editingItemIndex?: number = null;
-  private editingItemIsNew: boolean = false;
 
-  private resolve: (items: SourceRepositoryChange[]) => void;
-  private reject: (error: any) => void;
+  private resolve?: (items: SourceRepositoryChange[]) => void;
+  private reject?: (error: any) => void;
 
   static async runModal(
     items: SourceRepository[],
@@ -160,7 +157,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                   </thead>
                   <tbody>
                     ${this.items.map((item, index) =>
-                      this.editingItemIndex === index
+                      this.editing?.index === index
                         ? html`
                       <tr>
                         <td>
@@ -171,7 +168,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                             ${sourceRepositoryPackageMangers.map(
                               (packageManager) => html`
                                 <option
-                                  ?selected=${this.editingItem
+                                  ?selected=${this.editing?.item
                                     .packageManager === packageManager}
                                 >
                                   ${packageManager}
@@ -184,7 +181,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                           <input
                             type="text"
                             class="form-control form-control-sm"
-                            value=${this.editingItem.name}
+                            value=${this.editing?.item.name}
                             @change=${this.setEditingItemProperty.bind(
                               this,
                               "name"
@@ -196,7 +193,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                         <input
                             type="text"
                             class="form-control form-control-sm"
-                            value=${this.editingItem.url}
+                            value=${this.editing?.item.url}
                             @change=${this.setEditingItemProperty.bind(
                               this,
                               "url"
@@ -228,16 +225,14 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                           </td>
                       </tr>
                     `
-                        : this.editingItemIndex === null
+                        : this.editing === undefined
                         ? html` <tr class="list-item-not-being-edited">
                             <td>${item.packageManager}</td>
                             <td>${item.name}</td>
-                            <td
-                              colspan=${this.editingItemIndex === null ? 1 : 2}
-                            >
+                            <td colspan=${this.editing === undefined ? 1 : 2}>
                               ${item.url}
                             </td>
-                            ${this.editingItemIndex === null
+                            ${this.editing === undefined
                               ? html`
                                   <th class="d-flex">
                                     <button
@@ -267,7 +262,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                   </tbody>
                 </table>
               </div>
-              ${this.editingItemIndex === null
+              ${this.editing === undefined
                 ? html`
                     <div class="modal-footer">
                       <button
@@ -290,7 +285,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                         type="submit"
                         class="btn btn-primary"
                         @click=${this.confirm}
-                        ?disabled=${this.editingItemIndex !== null}
+                        ?disabled=${this.editing !== undefined}
                       >
                         OK
                       </button>
@@ -308,8 +303,8 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
       ...this.items,
       {
         packageManager: sourceRepositoryPackageMangers[0],
-        name: null,
-        url: null,
+        name: "",
+        url: "",
       },
     ];
 
@@ -317,32 +312,38 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
   }
 
   private editItem(index: number, isNew: boolean = false) {
-    this.editingItem = cloneDeep(this.items[index]);
-    this.editingItemIndex = index;
-    this.editingItemIsNew = isNew;
+    this.editing = {
+      item: cloneDeep(this.items[index]),
+      index,
+      isNew,
+    };
   }
 
   private saveChangesToEditingItem() {
-    if (!this.editingItemIsNew) {
+    if (!this.editing) return;
+
+    if (!this.editing.isNew) {
       this.itemChanges.push({
-        sourceRepository: cloneDeep(this.items[this.editingItemIndex]),
+        sourceRepository: cloneDeep(this.items[this.editing.index]),
         action: "remove",
       });
     }
     this.itemChanges.push({
-      sourceRepository: cloneDeep(this.editingItem),
+      sourceRepository: cloneDeep(this.editing.item),
       action: "add",
     });
 
-    this.items[this.editingItemIndex] = this.editingItem;
-    this.editingItemIndex = null;
+    this.items[this.editing.index] = this.editing.item;
+    this.editing = undefined;
   }
 
   private cancelItemEditing() {
-    if (this.editingItemIsNew) {
-      this.items.splice(this.editingItemIndex, 1);
+    if (!this.editing) return;
+
+    if (this.editing.isNew) {
+      this.items.splice(this.editing.index, 1);
     }
-    this.editingItemIndex = null;
+    this.editing = undefined;
   }
 
   private removeItem(index: number) {
@@ -358,10 +359,10 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
   }
 
   private setEditingItemProperty(
-    propertyName: keyof typeof this.editingItem,
+    propertyName: keyof SourceRepository,
     event: Event
   ) {
-    this.editingItem[propertyName] = (event.target as any).value;
+    this.editing!.item[propertyName] = (event.target as any).value;
   }
 
   private confirm(event: Event) {
@@ -370,9 +371,9 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
     this.resolve?.(this.itemChanges);
 
     // Prevent repeated call in onDismiss()
-    this.resolve = this.reject = null;
+    this.resolve = this.reject = undefined;
 
-    Modal.getInstance(this.modalRoot.value!).hide();
+    Modal.getInstance(this.modalRoot.value!)?.hide();
   }
 
   private onDismiss() {

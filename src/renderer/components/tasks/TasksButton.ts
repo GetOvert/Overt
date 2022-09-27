@@ -33,10 +33,10 @@ export default class TasksButton extends BootstrapBlockElement {
   }
 
   get pane(): FloatingPane {
-    return document.querySelector("#openstore-tasks-pane");
+    return document.querySelector("#openstore-tasks-pane")!;
   }
   get terminalPane(): FloatingPane {
-    return document.querySelector("#openstore-terminal-pane");
+    return document.querySelector("#openstore-terminal-pane")!;
   }
   get terminalButton(): TerminalButton {
     return (this.pane.querySelector("openstore-tasks-pane") as TasksPane)
@@ -93,7 +93,7 @@ export default class TasksButton extends BootstrapBlockElement {
 
     this.pane.shown = !this.pane.shown;
 
-    const button = this.renderRoot.querySelector("button");
+    const button = this.renderRoot.querySelector("button")!;
 
     if (this.pane.shown) button.classList.add("active");
     else button.classList.remove("active");

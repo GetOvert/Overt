@@ -327,7 +327,7 @@ const brewCask: IPCBrewCask = {
       }));
   },
 
-  async info(caskName: string): Promise<BrewCaskPackageInfo> {
+  async info(caskName: string): Promise<BrewCaskPackageInfo | null> {
     const row = cacheDB()
       .prepare(
         sql`

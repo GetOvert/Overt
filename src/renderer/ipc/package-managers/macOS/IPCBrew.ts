@@ -162,9 +162,9 @@ export class BrewPackageInfoAdapter
       {
         heading: "Install-on-request count",
         value: {
-          "30 days": (+packageInfo.installed_30d).toLocaleString(),
-          "90 days": (+packageInfo.installed_90d).toLocaleString(),
-          "365 days": (+packageInfo.installed_365d).toLocaleString(),
+          "30 days": (+packageInfo.installed_30d!).toLocaleString(),
+          "90 days": (+packageInfo.installed_90d!).toLocaleString(),
+          "365 days": (+packageInfo.installed_365d!).toLocaleString(),
         },
       },
     ];

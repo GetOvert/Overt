@@ -210,7 +210,7 @@ const winget: IPCWinget = {
       .all();
   },
 
-  async info(packageName: string): Promise<WingetPackageInfo> {
+  async info(packageName: string): Promise<WingetPackageInfo | null> {
     const row = cacheDB()
       .prepare(
         sql`
@@ -332,7 +332,7 @@ function wingetInstallationCommandArguments(): string[] {
 
 export async function getWingetExecutablePath(): Promise<string> {
   return path.join(
-    process.env.LOCALAPPDATA,
+    process.env.LOCALAPPDATA!,
     "Microsoft",
     "WindowsApps",
     "winget.exe"
