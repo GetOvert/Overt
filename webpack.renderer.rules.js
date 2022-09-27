@@ -10,12 +10,8 @@ module.exports = [
     },
   },
   {
-    test: /(?<!\.lit)\.css$/,
+    test: /\.css$/,
     use: [{ loader: "style-loader" }, { loader: "css-loader" }],
-  },
-  {
-    test: /\.lit\.css$/,
-    use: [{ loader: "lit-css-loader", options: { include: ["**/*.lit.css"] } }],
   },
   {
     test: /\.svg$/,
