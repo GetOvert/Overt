@@ -23,11 +23,11 @@ version="$(git describe --tags --abbrev=0)"
 # Strip off 'v'
 version="${version:1}"
 
-arm64_sha256="$(openssl sha256 -binary "out/make/zip/darwin/arm64/OpenStore-darwin-arm64-$version.zip" | xxd -p -c 256)"
-x86_64_sha256="$(openssl sha256 -binary "out/make/zip/darwin/x64/OpenStore-darwin-x64-$version.zip" | xxd -p -c 256)"
+arm64_sha256="$(openssl sha256 -binary "out/make/zip/darwin/arm64/Overt-darwin-arm64-$version.zip" | xxd -p -c 256)"
+x86_64_sha256="$(openssl sha256 -binary "out/make/zip/darwin/x64/Overt-darwin-x64-$version.zip" | xxd -p -c 256)"
 
-tap_repo="$(brew --repo getopenstore/tap)"
-cask_definition_file="$tap_repo/Casks/openstore.rb"
+tap_repo="$(brew --repo getovert/tap)"
+cask_definition_file="$tap_repo/Casks/overt.rb"
 
 # I'm sorry
 xcrun perl -pi -0 -e "s/(version\s*)\"[^\"]*\"/\$1\"$version\"/" "$cask_definition_file"

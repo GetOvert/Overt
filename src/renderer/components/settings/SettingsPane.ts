@@ -59,13 +59,13 @@ export class SettingsPane extends BootstrapBlockElement {
         ${this.makeCheckbox(
           "sendNativeNotifications",
           "Send Notifications",
-          "When enabled, OpenStore will send you desktop notifications when major tasks are started or completed. Enabled by default.",
+          "When enabled, Overt will send you desktop notifications when major tasks are started or completed. Enabled by default.",
           this.sendNativeNotifications
         )}
         ${this.makeCheckbox(
           "validateCodeSignatures",
           "Validate Code Signatures",
-          "When enabled, macOS will validate the digital signature of apps installed through OpenStore. This blocks both malware and unsigned legitimate software from running. Enabled by default.",
+          "When enabled, macOS will validate the digital signature of apps installed through Overt. This blocks both malware and unsigned legitimate software from running. Enabled by default.",
           this.validateCodeSignatures
         )}
         ${this.makeButton(
@@ -93,7 +93,7 @@ export class SettingsPane extends BootstrapBlockElement {
 
         ${this.makeButton(
           "Rebuild Catalog",
-          "Replace OpenStore's catalog with a fresh copy from the package manager. This may take a minute or two.",
+          "Replace Overt's catalog with a fresh copy from the package manager. This may take a minute or two.",
           "secondary",
           this.rebuildIndex.bind(this)
         )}

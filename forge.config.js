@@ -4,8 +4,8 @@ module.exports = {
       name: "@electron-forge/publisher-github",
       config: {
         repository: {
-          owner: "GetOpenStore",
-          name: "OpenStore",
+          owner: "GetOvert",
+          name: "Overt",
         },
       },
     },
@@ -13,10 +13,10 @@ module.exports = {
 
   // https://electron.github.io/electron-packager/main/interfaces/electronpackager.options.html
   packagerConfig: {
-    icon: "./icons/openstore-app-icon",
-    appBundleId: "app.getopenstore.OpenStore",
+    icon: "./icons/overt-app-icon",
+    appBundleId: "app.getovert.Overt",
     appCategoryType: "public.app-category.utilities",
-    appCopyright: "© 2022 OpenStore Contributors",
+    appCopyright: "© 2022 Overt Contributors",
     osxSign: {
       // Name of certificate to sign with
       identity: process.env.CODESIGN_IDENTITY,
@@ -41,7 +41,7 @@ module.exports = {
     {
       name: "@electron-forge/maker-squirrel",
       config: {
-        name: "openstore",
+        name: "overt",
       },
     },
     {

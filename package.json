@@ -1,6 +1,6 @@
 {
-  "name": "openstore",
-  "productName": "OpenStore",
+  "name": "overt",
+  "productName": "Overt",
   "version": "0.2.1",
   "description": "An open app store",
   "main": ".webpack/main",

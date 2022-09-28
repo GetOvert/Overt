@@ -1,17 +1,17 @@
 {
-	"folders": [
-		{
-			"name": "openstore",
-			"path": "."
-		},
-		{
-			"name": "main",
-			"path": "src/main"
-		},
-		{
-			"name": "renderer",
-			"path": "src/renderer"
-		}
-	],
-	"settings": {}
+  "folders": [
+    {
+      "name": "overt",
+      "path": "."
+    },
+    {
+      "name": "main",
+      "path": "src/main"
+    },
+    {
+      "name": "renderer",
+      "path": "src/renderer"
+    }
+  ],
+  "settings": {}
 }

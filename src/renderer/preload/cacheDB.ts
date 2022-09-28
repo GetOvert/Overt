@@ -5,13 +5,14 @@ import fs from "fs";
 // Passed in webPreferences.additionalArguments:
 const cachePath = Buffer.from(
   process.argv
-    .filter((arg) => arg.includes("OpenStore.cachePath="))[0]
-    .slice("OpenStore.cachePath=".length),
+    .filter((arg) => arg.includes("Overt.cachePath="))[0]
+    .slice("Overt.cachePath=".length),
   "base64"
 ).toString();
 
-const cacheDir = path.join(cachePath, "OpenStore_v3");
+const cacheDir = path.join(cachePath, "Overt_v4");
 const oldCacheDirs = [
+  path.join(cachePath, "OpenStore_v3"),
   path.join(cachePath, "OpenStore_v2"),
   path.join(cachePath, "OpenStore_v1"),
 ];
@@ -31,8 +32,8 @@ for (const oldCacheDir of oldCacheDirs) {
 // Set up cache (for current version)
 fs.mkdirSync(cacheDir, { recursive: true });
 
-const cacheDBPath = path.join(cacheDir, "OpenStore_Cache.db");
-const cacheMetaPath = path.join(cacheDir, "OpenStore_Cache.json");
+const cacheDBPath = path.join(cacheDir, "Overt_Cache.db");
+const cacheMetaPath = path.join(cacheDir, "Overt_Cache.json");
 
 let allSchema: string[] = [];
 export function cacheDB_addSchema(schema: string) {

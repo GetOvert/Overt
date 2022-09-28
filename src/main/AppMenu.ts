@@ -149,7 +149,7 @@ export function initAppMenu() {
             click: async () => {
               const { shell } = require("electron");
               await shell.openExternal(
-                "https://github.com/GetOpenStore/OpenStore/wiki"
+                "https://github.com/GetOvert/Overt/wiki"
               );
             },
           },
@@ -158,7 +158,7 @@ export function initAppMenu() {
             click: async () => {
               const { shell } = require("electron");
               await shell.openExternal(
-                "https://github.com/GetOpenStore/OpenStore/discussions"
+                "https://github.com/GetOvert/Overt/discussions"
               );
             },
           },

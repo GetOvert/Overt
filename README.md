@@ -1,25 +1,25 @@
 <div align="center">
-  <img src="icons/openstore-app-icon.png" alt="Openstore app icon" width="20%">
+  <img src="icons/overt-app-icon.png" alt="Overt app icon" width="20%">
 </div>
 
-# OpenStore <small>_beta_</small>
+# Overt <small>_beta_</small>
 
 ## An open app store for macOS
 
-OpenStore helps you find, install, and manage your favorite apps.
+Overt helps you find, install, and manage your favorite apps.
 
-OpenStore **doesn't**:
+Overt **doesn't**:
 
 - Restrict app features
 - Process payments
 
-OpenStore **does**:
+Overt **does**:
 
 - Give you a catalog of 3000+ apps at your fingertips
 - Install, update, and uninstall apps with a single click
 - Let you add your own source repositories
 
-<a href="https://getopenstore.app">Website</a> • <a href="https://github.com/GetOpenStore/homebrew-tap#install-openstore">Install</a>
+<a href="https://getovert.app">Website</a> • <a href="https://github.com/GetOvert/homebrew-tap#install-overt">Install</a>
 
 ## Tech
 
@@ -31,11 +31,11 @@ OpenStore **does**:
 - [electron-store](https://github.com/sindresorhus/electron-store)
 - Other wonderful libraries
 
-In its current state, OpenStore can be accurately described as a GUI client for Homebrew. However, it may be extended in the future to work with other package managers, such as Chocolatey.
+In its current state, Overt can be accurately described as a GUI client for Homebrew. However, it may be extended in the future to work with other package managers, such as Chocolatey.
 
 ### Development
 
-To develop OpenStore, use [Visual Studio Code](https://code.visualstudio.com/) (available on OpenStore!) with the following extensions:
+To develop Overt, use [Visual Studio Code](https://code.visualstudio.com/) (available on Overt!) with the following extensions:
 
 - [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) — you should set this up to run on file save for JS, TS, and HTML
 - [Inline HTML](https://marketplace.visualstudio.com/items?itemName=pushqrdx.inline-html) — highlights and allows Prettier to format Lit's `html` and `css` template literals
@@ -49,4 +49,4 @@ To package a release, use `npm run make-for-arm64` for arm64 ("Apple silicon") a
 
 ## Bugs and feature requests
 
-If you encounter a bug or would like to request a feature, please check the [issues page](https://github.com/GetOpenStore/OpenStore/issues) for a similar report, or open a new issue if you can't find one. Also, please understand that some feature requests may be declined or put on the backburner.
+If you encounter a bug or would like to request a feature, please check the [issues page](https://github.com/GetOvert/Overt/issues) for a similar report, or open a new issue if you can't find one. Also, please understand that some feature requests may be declined or put on the backburner.

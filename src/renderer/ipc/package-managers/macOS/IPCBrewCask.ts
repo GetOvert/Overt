@@ -95,7 +95,7 @@ export class BrewCaskPackageInfoAdapter
           Latest: packageInfo.version,
           Updates: packageInfo.auto_updates
             ? "Via built-in updater"
-            : "Via OpenStore",
+            : "Via Overt",
         },
       },
       {

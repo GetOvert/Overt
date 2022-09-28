@@ -36,8 +36,8 @@ async function createWindow(): Promise<void> {
     height: 600,
     webPreferences: {
       additionalArguments: [
-        `OpenStore.accentColor=${accentColor}`,
-        `OpenStore.cachePath=${Buffer.from(app.getPath("cache")).toString(
+        `Overt.accentColor=${accentColor}`,
+        `Overt.cachePath=${Buffer.from(app.getPath("cache")).toString(
           "base64"
         )}`,
       ],
