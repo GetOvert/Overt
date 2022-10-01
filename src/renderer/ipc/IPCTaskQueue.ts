@@ -1,4 +1,4 @@
-import { Task } from "components/tasks/model/Task";
+import { TaskBase } from "components/tasks/model/Task";
 
 declare global {
   interface Window {
@@ -7,5 +7,5 @@ declare global {
 }
 
 export interface IPCTaskQueue {
-  onTaskQueueCreated(push: (task: Task) => void): Promise<void>;
+  onTaskQueueCreated(push: (task: TaskBase) => void): Promise<void>;
 }

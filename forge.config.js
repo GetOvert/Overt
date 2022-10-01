@@ -36,6 +36,12 @@ module.exports = {
       // (https://github.com/electron/electron-notarize#safety-when-using-appleidpassword)
       appleIdPassword: process.env.NOTARIZE_PASSWORD,
     },
+    protocols: [
+      {
+        name: "Overt",
+        schemes: ["overt"],
+      },
+    ],
   },
   makers: [
     {
@@ -50,7 +56,9 @@ module.exports = {
     },
     {
       name: "@electron-forge/maker-deb",
-      config: {},
+      config: {
+        mimeType: ["x-scheme-handler/overt"],
+      },
     },
     {
       name: "@electron-forge/maker-rpm",

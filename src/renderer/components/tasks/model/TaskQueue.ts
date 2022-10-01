@@ -40,7 +40,8 @@ export class TaskQueue {
   nextOfTypes(taskTypes: TaskType[]): QueuedTask | null {
     const task =
       this._liveQueue.find(
-        (task) => task.state === "pending" && taskTypes.includes(task.type)
+        ({ task, state }) =>
+          state === "pending" && taskTypes.includes(task.type)
       ) ?? null;
     if (!task) return null;
 
@@ -55,10 +56,10 @@ export class TaskQueue {
     state: LiveTaskState = "pending"
   ) {
     const queuedTask: QueuedTask = {
+      task,
       serial: this._lastSerial++,
       state,
       notify,
-      ...task,
     };
 
     this._liveQueue.push(queuedTask);

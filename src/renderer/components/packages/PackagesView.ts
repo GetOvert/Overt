@@ -76,7 +76,9 @@ export default class AppsView<
   private taskQueueChanged(updatedTask: QueuedTask) {
     if (
       updatedTask.state === "succeeded" &&
-      ["reindex-all", "reindex-outdated", "reindex"].includes(updatedTask.type)
+      ["reindex-all", "reindex-outdated", "reindex"].includes(
+        updatedTask.task.type
+      )
     ) {
       this._reset();
       this._loadApps(lastOffset + fetchedChunkSize);
@@ -84,7 +86,7 @@ export default class AppsView<
 
     if (
       updatedTask.state === "running" &&
-      updatedTask.type === "reindex-all" &&
+      updatedTask.task.type === "reindex-all" &&
       (updatedTask as unknown as ReindexAllTask).wipeIndexFirst
     ) {
       this._reset();
@@ -93,7 +95,7 @@ export default class AppsView<
 
   private get _currentlyIndexing(): boolean {
     return !!taskQueue.liveTasks.find(
-      (task) =>
+      ({ task }) =>
         task.type === "reindex-all" &&
         ((task as unknown as ReindexAllTask).wipeIndexFirst ||
           this._loadedCount === 0)

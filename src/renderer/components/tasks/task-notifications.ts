@@ -2,26 +2,33 @@ import { isDeadTaskState, isLiveTaskState, QueuedTask } from "./model/Task";
 import taskQueue from "./model/TaskQueue";
 import TasksButton from "./TasksButton";
 
-taskQueue.addObserver(async (task: QueuedTask) => {
+taskQueue.addObserver(async (queuedTask: QueuedTask) => {
   if (!(await window.settings.get("sendNativeNotifications"))) return;
 
-  if (isLiveTaskState(task.state) && task.notify.includes("before")) {
-    switch (task.state) {
+  if (
+    isLiveTaskState(queuedTask.state) &&
+    queuedTask.notify.includes("before")
+  ) {
+    switch (queuedTask.state) {
       case "running":
-        new Notification(task.label, { body: "⏱ Started" }).onclick =
+        new Notification(queuedTask.task.label, { body: "⏱ Started" }).onclick =
           onNotificationClicked;
         break;
     }
   }
-  if (isDeadTaskState(task.state) && task.notify.includes("after")) {
-    switch (task.state) {
+  if (
+    isDeadTaskState(queuedTask.state) &&
+    queuedTask.notify.includes("after")
+  ) {
+    switch (queuedTask.state) {
       case "failed":
-        new Notification(task.label, { body: "❌ Failed" }).onclick =
+        new Notification(queuedTask.task.label, { body: "❌ Failed" }).onclick =
           onNotificationClicked;
         break;
       case "succeeded":
-        new Notification(task.label, { body: "✅ Completed" }).onclick =
-          onNotificationClicked;
+        new Notification(queuedTask.task.label, {
+          body: "✅ Completed",
+        }).onclick = onNotificationClicked;
         break;
     }
   }

@@ -39,7 +39,7 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
     return identifier !== name ? identifier : "";
   }
 
-  protected shouldCauseRerender(successfulTask: QueuedTask): boolean {
+  protected shouldCauseRerender({ task: successfulTask }: QueuedTask): boolean {
     return (
       (["reindex-all", "reindex"].includes(successfulTask.type) &&
         packageIdentifiersOfTask(successfulTask)?.includes(

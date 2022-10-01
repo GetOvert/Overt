@@ -1,4 +1,5 @@
-export type QueuedTask = Task & {
+export type QueuedTask = {
+  task: Task;
   serial: number;
   state: TaskState;
   notify: TaskNotifyPoints;
@@ -22,55 +23,94 @@ export function isDeadTaskState(
 
 export type TaskNotifyPoints = ("before" | "after")[];
 
-export type Task = {
+export type Task =
+  | PromptForPasswordTask
+  | ConfirmActionTask
+  | ReindexAllTask
+  | ReindexOutdatedTask
+  | ReindexTask
+  | InstallTask
+  | UpgradeTask
+  | UninstallTask
+  | ReindexSourceRepositoriesTask
+  | AddSourceRepositoryTask
+  | RemoveSourceRepositoryTask;
+
+export type TaskType = Task["type"];
+
+export type PackageManagerTask =
+  | ReindexAllTask
+  | ReindexOutdatedTask
+  | ReindexTask
+  | InstallTask
+  | UpgradeTask
+  | UninstallTask
+  | ReindexSourceRepositoriesTask
+  | AddSourceRepositoryTask
+  | RemoveSourceRepositoryTask;
+
+export type TaskBase = {
   label: string;
-  type: TaskType;
+  type: string;
 };
 
-export type TaskType =
-  | "prompt-for-password"
-  | "reindex-all"
-  | "reindex-outdated"
-  | "reindex"
-  | "install"
-  | "upgrade"
-  | "uninstall"
-  | "reindex-source-repositories"
-  | "add-source-repository"
-  | "remove-source-repository";
-
-export type PromptForPasswordTask = Task & {
+export type PromptForPasswordTask = TaskBase & {
   type: "prompt-for-password";
   prompt: string;
 };
 
-export type PackageManagerTask = Task & {
+export type ConfirmActionTask = TaskBase & {
+  type: "confirm-action";
+  action: Task;
+  notify?: TaskNotifyPoints;
+
+  promptTitle: string;
+  prompt: string;
+  confirmButtonTitle: string;
+  cancelButtonTitle: string;
+};
+
+export type PackageManagerTaskBase = TaskBase & {
   packageManager: string;
 };
-export type ReindexAllTask = PackageManagerTask & {
+
+export type ReindexAllTask = PackageManagerTaskBase & {
   type: "reindex-all";
   condition: "always" | "if-too-old" | "if-nonexistent";
   wipeIndexFirst?: boolean;
 };
-export type ReindexOutdatedTask = PackageManagerTask & {
+export type ReindexOutdatedTask = PackageManagerTaskBase & {
   type: "reindex-outdated";
 };
-export type ReindexTask = PackageManagerTask & {
+export type ReindexTask = PackageManagerTaskBase & {
   type: "reindex";
   packageIdentifiers: string[];
 };
-export type InstallTask = PackageManagerTask & {
+export type InstallTask = PackageManagerTaskBase & {
   type: "install";
   packageIdentifier: string;
 };
-export type UpgradeTask = PackageManagerTask & {
+export type UpgradeTask = PackageManagerTaskBase & {
   type: "upgrade";
   packageIdentifier: string;
 };
-export type UninstallTask = PackageManagerTask & {
+export type UninstallTask = PackageManagerTaskBase & {
   type: "uninstall";
   packageIdentifier: string;
 };
+export type ReindexSourceRepositoriesTask = PackageManagerTaskBase & {
+  type: "reindex-source-repositories";
+};
+export type AddSourceRepositoryTask = PackageManagerTaskBase & {
+  type: "add-source-repository";
+  name: string;
+  url: string;
+};
+export type RemoveSourceRepositoryTask = PackageManagerTaskBase & {
+  type: "remove-source-repository";
+  name: string;
+};
+
 export function packageIdentifiersOfTask(task: Task): string[] | null {
   return "packageIdentifier" in task
     ? [(task as any).packageIdentifier]
@@ -78,15 +118,45 @@ export function packageIdentifiersOfTask(task: Task): string[] | null {
     ? (task as any).packageIdentifiers
     : null;
 }
-export type ReindexSourceRepositoriesTask = PackageManagerTask & {
-  type: "reindex-source-repositories";
-};
-export type AddSourceRepositoryTask = PackageManagerTask & {
-  type: "add-source-repository";
-  name: string;
-  url: string;
-};
-export type RemoveSourceRepositoryTask = PackageManagerTask & {
-  type: "remove-source-repository";
-  name: string;
-};
+
+export function describeTask(task: Task): string {
+  switch (task.type) {
+    case "prompt-for-password":
+      return `ask for password with prompt "${task.prompt}"`;
+    case "confirm-action":
+      return `confirm action "${describeTask(task.action)}"`;
+    case "reindex-all":
+      const condition = (() => {
+        switch (task.condition) {
+          case "always":
+            return "";
+          case "if-too-old":
+            return " if it is too old";
+          case "if-nonexistent":
+            return "if it doesn't exist yet";
+        }
+      })();
+      const wipeIndexfirst = task.wipeIndexFirst
+        ? ", deleting the old catalog first"
+        : "";
+      return `rebuild the Overt catalog${condition}`;
+    case "reindex-outdated":
+      return `check for package updates`;
+    case "reindex":
+      return `index ${task.packageIdentifiers
+        .map((id) => `"${id}"`)
+        .join(", ")} via ${task.packageManager}`;
+    case "install":
+      return `install “${task.packageIdentifier}” via ${task.packageManager}`;
+    case "upgrade":
+      return `update “${task.packageIdentifier}” via ${task.packageManager}`;
+    case "uninstall":
+      return `uninstall “${task.packageIdentifier}” via ${task.packageManager}`;
+    case "reindex-source-repositories":
+      return `rebuild source list for ${task.packageManager}`;
+    case "add-source-repository":
+      return `add a ${task.packageManager} source called “${task.name}”, which is located at ${task.url}`;
+    case "remove-source-repository":
+      return `remove the ${task.packageManager} source called “${task.name}”`;
+  }
+}

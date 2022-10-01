@@ -69,11 +69,13 @@ export class TasksPane extends BootstrapBlockElement {
             <ul class="task-list mt-1 ps-2 pe-4">
               ${repeat(
                 this.tasks,
-                (task) => html`
+                (queuedTask) => html`
                   <openstore-tasks-pane-task
-                    .label=${task.label}
-                    .statusDescription=${this.statusDescriptionForTask(task)}
-                    .statusColor=${this.statusColorForTask(task)}
+                    .label=${queuedTask.task.label}
+                    .statusDescription=${this.statusDescriptionForTask(
+                      queuedTask
+                    )}
+                    .statusColor=${this.statusColorForTask(queuedTask)}
                     class="my-2"
                   ></openstore-tasks-pane-task>
                 `

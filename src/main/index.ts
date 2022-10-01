@@ -29,9 +29,14 @@ const accentColor = ["darwin", "win32"].includes(process.platform)
   ? systemPreferences.getAccentColor()
   : config.fallbackAccentColor;
 
+let mainWindow: BrowserWindow;
+
 async function createWindow(): Promise<void> {
+  // Register ourselves as a URL scheme handler
+  app.setAsDefaultProtocolClient("overt");
+
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 992,
     height: 600,
     webPreferences: {
@@ -150,10 +155,12 @@ async function createWindow(): Promise<void> {
 // Some APIs can only be used after this event occurs.
 app.on("ready", createWindow);
 
+// TODO: Windows code to prevent another instance from opening when a URL is handled
+app.on("open-url", (event, url) => {
+  mainWindow.webContents.send("handle_url", url);
+});
+
 // Quit when all windows are closed.
 app.on("window-all-closed", () => {
   app.quit();
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.

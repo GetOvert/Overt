@@ -4,13 +4,13 @@ import openExternalLink from "./openExternalLink";
 import openProduct from "./openProduct";
 import platform from "./platform";
 import settings from "./settings";
+import sourceRepositories from "./sourceRepositories";
 import taskQueueIPC from "./taskQueueIPC";
 import terminal from "./terminal";
 import theme from "./theme";
+import url from "./url";
 import "./macOS/preload";
 import "./Windows/preload";
-import sourceRepositories from "./sourceRepositories";
-import SettingsButton from "components/settings-button/SettingsButton";
 
 contextBridge.exposeInMainWorld("contextMenu", contextMenu);
 contextBridge.exposeInMainWorld("openExternalLink", openExternalLink);
@@ -21,6 +21,7 @@ contextBridge.exposeInMainWorld("sourceRepositories", sourceRepositories);
 contextBridge.exposeInMainWorld("taskQueueIPC", taskQueueIPC);
 contextBridge.exposeInMainWorld("terminal", terminal);
 contextBridge.exposeInMainWorld("theme", theme);
+contextBridge.exposeInMainWorld("url", url);
 
 ipcRenderer.on("focus_search_bar", () => {
   const searchBar = document.querySelector("#search-bar") as HTMLInputElement;

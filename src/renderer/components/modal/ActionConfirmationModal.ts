@@ -1,39 +1,50 @@
 import { Modal } from "bootstrap";
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import LightDOMBlockElement from "components/abstract/LightDOMBlockElement";
-import { html, render } from "lit";
+import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { createRef, Ref, ref } from "lit/directives/ref.js";
 
-@customElement("openstore-password-prompt-modal")
-export default class PasswordPromptModal extends LightDOMBlockElement {
+@customElement("openstore-action-confirmation-modal")
+export default class ActionConfirmationModal extends LightDOMBlockElement {
   get customElementName(): string {
-    return "openstore-password-prompt-modal";
+    return "openstore-action-confirmation-modal";
   }
 
   @property()
   modalPrompt: string;
   @property()
-  modalTitle = "Authentication required";
+  modalTitle: string;
 
-  private resolve?: (password: string) => void;
+  @property()
+  confirmButtonTitle: string;
+  @property()
+  cancelButtonTitle: string;
+
+  private resolve?: (shouldContinue: boolean) => void;
   private reject?: (error: any) => void;
 
   static async runModal(
     prompt: string,
-    title: string = "Authentication required"
-  ): Promise<string> {
+    title: string,
+    confirmButtonTitle: string,
+    cancelButtonTitle: string
+  ): Promise<boolean> {
     const modalContainer = document.querySelector("#modalContainer")!;
     modalContainer.innerHTML = `
-      <openstore-password-prompt-modal
+      <openstore-action-confirmation-modal
         modalPrompt="${prompt.replaceAll('"', "&quot;")}"
         modalTitle="${title.replaceAll('"', "&quot;")}"
-      ></openstore-password-prompt-modal>
+        confirmButtonTitle="${confirmButtonTitle.replaceAll('"', "&quot;")}"
+        cancelButtonTitle="${cancelButtonTitle.replaceAll('"', "&quot;")}"
+      ></openstore-action-confirmation-modal>
     `;
-    return (modalContainer.lastElementChild as PasswordPromptModal)._runModal();
+    return (
+      modalContainer.lastElementChild as ActionConfirmationModal
+    )._runModal();
   }
 
-  private async _runModal(): Promise<string> {
+  private async _runModal(): Promise<boolean> {
     return new Promise((resolve, reject) => {
       this.resolve = resolve;
       this.reject = reject;
@@ -41,7 +52,6 @@ export default class PasswordPromptModal extends LightDOMBlockElement {
   }
 
   private modalRoot: Ref<HTMLElement> = createRef();
-  private passwordField: Ref<HTMLInputElement> = createRef();
 
   protected firstUpdated(
     changedProperties: Map<string | number | symbol, unknown>
@@ -54,7 +64,6 @@ export default class PasswordPromptModal extends LightDOMBlockElement {
     );
 
     modal.show();
-    this.passwordField.value!.focus();
   }
 
   render() {
@@ -62,15 +71,15 @@ export default class PasswordPromptModal extends LightDOMBlockElement {
       <div
         ${ref(this.modalRoot)}
         class="modal"
-        id="passwordPromptModal"
+        id="actionConfirmationModal"
         tabindex="-1"
-        aria-labelledby="passwordPromptModalLabel"
+        aria-labelledby="actionConfirmationModalLabel"
         aria-hidden="true"
       >
         <div class="modal-dialog modal-sm">
           <form class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title h6" id="passwordPromptModalLabel">
+              <h5 class="modal-title h6" id="actionConfirmationModalLabel">
                 ${this.modalTitle}
               </h5>
               <button
@@ -83,14 +92,6 @@ export default class PasswordPromptModal extends LightDOMBlockElement {
             </div>
             <div class="modal-body">
               <p style="white-space: pre-wrap">${this.modalPrompt}</p>
-              <input
-                ${ref(this.passwordField)}
-                id="password"
-                type="password"
-                class="form-control form-control-sm"
-                placeholder="••••••••"
-                aria-label="Password"
-              />
             </div>
             <div class="modal-footer">
               <button
@@ -98,14 +99,14 @@ export default class PasswordPromptModal extends LightDOMBlockElement {
                 class="btn btn-secondary"
                 data-bs-dismiss="modal"
               >
-                Cancel
+                ${this.cancelButtonTitle}
               </button>
               <button
                 type="submit"
                 class="btn btn-primary"
                 @click=${this.confirm}
               >
-                OK
+                ${this.confirmButtonTitle}
               </button>
             </div>
           </form>
@@ -116,16 +117,17 @@ export default class PasswordPromptModal extends LightDOMBlockElement {
   private confirm(event: Event) {
     event.preventDefault();
 
-    this.resolve?.(this.passwordField.value!.value);
+    this.resolve?.(true);
 
-    // Prevent reject being called in onDismiss()
+    // Prevent repeated call in onDismiss()
     this.resolve = this.reject = undefined;
 
     Modal.getInstance(this.modalRoot.value!)?.hide();
   }
 
   private onDismiss() {
-    this.reject?.(undefined);
+    this.resolve?.(false);
+
     this.remove();
   }
 }
