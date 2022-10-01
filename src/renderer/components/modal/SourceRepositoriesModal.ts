@@ -159,72 +159,81 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                     ${this.items.map((item, index) =>
                       this.editing?.index === index
                         ? html`
-                      <tr>
-                        <td>
-                          <select class="form-select form-select-sm" @change=${this.setEditingItemProperty.bind(
-                            this,
-                            "packageManager"
-                          )}>
-                            ${sourceRepositoryPackageMangers.map(
-                              (packageManager) => html`
-                                <option
-                                  ?selected=${this.editing?.item
-                                    .packageManager === packageManager}
+                            <tr>
+                              <td>
+                                <select
+                                  class="form-select form-select-sm"
+                                  @change=${this.setEditingItemProperty.bind(
+                                    this,
+                                    "packageManager"
+                                  )}
                                 >
-                                  ${packageManager}
-                                </option>
-                              `
-                            )}
-                          </select>
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            class="form-control form-control-sm"
-                            value=${this.editing?.item.name}
-                            @change=${this.setEditingItemProperty.bind(
-                              this,
-                              "name"
-                            )}
-                          />
-                        </td>
-                        <td>
-                      
-                        <input
-                            type="text"
-                            class="form-control form-control-sm"
-                            value=${this.editing?.item.url}
-                            @change=${this.setEditingItemProperty.bind(
-                              this,
-                              "url"
-                            )}
-                          />  
-                      </td>
-                        <th class="d-flex">
-                          <button
-                            type="button"
-                            class="btn btn-danger fs-4 mx-1"
-                            style="width: 2.5rem"
-                            @click=${this.cancelItemEditing.bind(this, index)}
-                            aria-label="Done"
-                          >
-                            ✗
-                          </button>
-                          <button
-                            type="button"
-                            class="btn btn-success fs-4 mx-1"
-                            style="width: 2.5rem"
-                            @click=${this.saveChangesToEditingItem.bind(
-                              this,
-                              index
-                            )}
-                            aria-label="Done"
-                          >
-                            ✓
-                          </button>
-                          </td>
-                      </tr>
-                    `
+                                  ${sourceRepositoryPackageMangers.map(
+                                    (packageManager) => html`
+                                      <option
+                                        ?selected=${this.editing?.item
+                                          .packageManager === packageManager}
+                                      >
+                                        ${packageManager}
+                                      </option>
+                                    `
+                                  )}
+                                </select>
+                              </td>
+                              <td>
+                                <input
+                                  type="text"
+                                  class="form-control form-control-sm"
+                                  style="width: 10.95rem"
+                                  value=${this.editing?.item.name}
+                                  @change=${this.setEditingItemProperty.bind(
+                                    this,
+                                    "name"
+                                  )}
+                                />
+                              </td>
+                              <td>
+                                <input
+                                  type="text"
+                                  class="form-control form-control-sm"
+                                  style="width: 21.4rem"
+                                  value=${this.editing?.item.url}
+                                  @change=${this.setEditingItemProperty.bind(
+                                    this,
+                                    "url"
+                                  )}
+                                />
+                              </td>
+                              <th>
+                                <div class="d-flex">
+                                  <button
+                                    type="button"
+                                    class="btn btn-danger fs-4 mx-1"
+                                    style="width: 2.5rem"
+                                    @click=${this.cancelItemEditing.bind(
+                                      this,
+                                      index
+                                    )}
+                                    aria-label="Done"
+                                  >
+                                    ✗
+                                  </button>
+                                  <button
+                                    type="button"
+                                    class="btn btn-success fs-4 mx-1"
+                                    style="width: 2.5rem"
+                                    @click=${this.saveChangesToEditingItem.bind(
+                                      this,
+                                      index
+                                    )}
+                                    aria-label="Done"
+                                  >
+                                    ✓
+                                  </button>
+                                </div>
+                              </th>
+                            </tr>
+                          `
                         : this.editing === undefined
                         ? html` <tr class="list-item-not-being-edited">
                             <td>${item.packageManager}</td>
@@ -234,25 +243,27 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                             </td>
                             ${this.editing === undefined
                               ? html`
-                                  <th class="d-flex">
-                                    <button
-                                      type="button"
-                                      class="btn btn-danger fs-4 mx-1 list-item-contextual"
-                                      style="width: 2.5rem"
-                                      @click=${() => this.removeItem(index)}
-                                      aria-label="Remove"
-                                    >
-                                      −
-                                    </button>
-                                    <button
-                                      type="button"
-                                      class="btn btn-primary fs-4 mx-1 list-item-contextual"
-                                      style="width: 2.5rem"
-                                      @click=${() => this.editItem(index)}
-                                      aria-label="Edit"
-                                    >
-                                      ✎
-                                    </button>
+                                  <th>
+                                    <div class="d-flex">
+                                      <button
+                                        type="button"
+                                        class="btn btn-danger fs-4 mx-1 list-item-contextual"
+                                        style="width: 2.5rem"
+                                        @click=${() => this.removeItem(index)}
+                                        aria-label="Remove"
+                                      >
+                                        −
+                                      </button>
+                                      <button
+                                        type="button"
+                                        class="btn btn-primary fs-4 mx-1 list-item-contextual"
+                                        style="width: 2.5rem"
+                                        @click=${() => this.editItem(index)}
+                                        aria-label="Edit"
+                                      >
+                                        ✎
+                                      </button>
+                                    </div>
                                   </th>
                                 `
                               : ""}
