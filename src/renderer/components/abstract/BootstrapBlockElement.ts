@@ -2,16 +2,13 @@ import { css, CSSResultArray, html, HTMLTemplateResult, LitElement } from "lit";
 import { bootstrap, reboot } from "styles/bootstrap";
 
 export default class BootstrapBlockElement extends LitElement {
-  constructor() {
-    super();
-    this.classList.add("d-block");
-  }
-
   static styles: CSSResultArray = [
     reboot,
     bootstrap,
     css`
       :host {
+        display: block;
+
         --bs-body-font-size: 0.9rem;
       }
       .h1,

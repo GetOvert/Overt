@@ -34,6 +34,10 @@ export class TasksPane extends BootstrapBlockElement {
   static styles = [
     BootstrapBlockElement.styles,
     css`
+      :host {
+        display: flex;
+        flex-direction: column;
+      }
       .task-pane-heading {
         font-size: 1.2rem;
         font-weight: normal;
@@ -66,7 +70,7 @@ export class TasksPane extends BootstrapBlockElement {
 
       ${this.tasks.length
         ? html`
-            <ul class="task-list mt-1 ps-2 pe-4">
+            <ul class="task-list my-1 px-2">
               ${repeat(
                 this.tasks,
                 (queuedTask) => html`
