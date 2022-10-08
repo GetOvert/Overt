@@ -40,6 +40,10 @@ export class SettingsPane extends BootstrapBlockElement {
   static styles = [
     BootstrapBlockElement.styles,
     css`
+      :host {
+        display: flex;
+        flex-direction: column;
+      }
       .settings-pane-heading {
         font-size: 1.2rem;
         font-weight: normal;
@@ -55,7 +59,7 @@ export class SettingsPane extends BootstrapBlockElement {
         <h2 class="settings-pane-heading text-center mt-2">Settings</h2>
       </div>
 
-      <div class="d-flex flex-column justify-content-around m-2 mt-3">
+      <div class="d-flex flex-column overflow-auto m-2 mt-3">
         ${this.makeCheckbox(
           "sendNativeNotifications",
           "Send Notifications",
@@ -74,6 +78,8 @@ export class SettingsPane extends BootstrapBlockElement {
           "primary",
           this.showSourceRepositories.bind(this)
         )}
+
+        <hr class="mt-2" />
 
         <label
           class="mb-3"
