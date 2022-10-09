@@ -1,8 +1,9 @@
 import { Modal } from "bootstrap";
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import LightDOMBlockElement from "components/abstract/LightDOMBlockElement";
-import { html } from "lit";
+import { html, HTMLTemplateResult, nothing, render } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 import { createRef, Ref, ref } from "lit/directives/ref.js";
 
 @customElement("openstore-action-confirmation-modal")
@@ -13,6 +14,10 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
 
   @property()
   modalPrompt: string;
+  @property()
+  modalPromptCannedMessage: HTMLTemplateResult | typeof nothing;
+  @property()
+  modalLinkURL: string | null;
   @property()
   modalTitle: string;
 
@@ -26,19 +31,28 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
 
   static async runModal(
     prompt: string,
+    promptCannedMessage: HTMLTemplateResult | typeof nothing,
+    url: string | null,
     title: string,
     confirmButtonTitle: string,
     cancelButtonTitle: string
   ): Promise<boolean> {
-    const modalContainer = document.querySelector("#modalContainer")!;
-    modalContainer.innerHTML = `
-      <openstore-action-confirmation-modal
-        modalPrompt="${prompt.replaceAll('"', "&quot;")}"
-        modalTitle="${title.replaceAll('"', "&quot;")}"
-        confirmButtonTitle="${confirmButtonTitle.replaceAll('"', "&quot;")}"
-        cancelButtonTitle="${cancelButtonTitle.replaceAll('"', "&quot;")}"
-      ></openstore-action-confirmation-modal>
-    `;
+    const modalContainer = document.querySelector(
+      "#modalContainer"
+    ) as HTMLElement;
+    render(
+      html`
+        <openstore-action-confirmation-modal
+          .modalPrompt=${prompt}
+          .modalPromptCannedMessage=${promptCannedMessage}
+          .modalLinkURL=${ifDefined(url)}
+          .modalTitle=${title}
+          .confirmButtonTitle=${confirmButtonTitle}
+          .cancelButtonTitle=${cancelButtonTitle}
+        ></openstore-action-confirmation-modal>
+      `,
+      modalContainer
+    );
     return (
       modalContainer.lastElementChild as ActionConfirmationModal
     )._runModal();
@@ -76,7 +90,7 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
         aria-labelledby="actionConfirmationModalLabel"
         aria-hidden="true"
       >
-        <div class="modal-dialog modal-sm">
+        <div class="modal-dialog">
           <form class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title h6" id="actionConfirmationModalLabel">
@@ -92,8 +106,38 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
             </div>
             <div class="modal-body">
               <p style="white-space: pre-wrap">${this.modalPrompt}</p>
+              ${this.modalPromptCannedMessage}
             </div>
             <div class="modal-footer">
+              ${this.modalLinkURL &&
+              html`<a
+                href=${this.modalLinkURL}
+                class="btn btn-outline-info me-auto"
+                @click=${this.openModalLinkURL}
+                >Go to site
+
+                <!-- https://icons.getbootstrap.com/icons/box-arrow-up-right/ -->
+                <svg
+                  aria-label="External link"
+                  style="transform: scale(0.8) translateY(-2px)"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  fill="currentColor"
+                  class="bi bi-box-arrow-up-right"
+                  viewBox="0 0 16 16"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"
+                  />
+                  <path
+                    fill-rule="evenodd"
+                    d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"
+                  />
+                </svg>
+              </a>`}
+
               <button
                 type="button"
                 class="btn btn-secondary"
@@ -114,6 +158,13 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
       </div> `;
   }
 
+  private openModalLinkURL(event: Event) {
+    event.preventDefault();
+
+    if (!this.modalLinkURL) return;
+    window.openExternalLink.open(this.modalLinkURL);
+  }
+
   private confirm(event: Event) {
     event.preventDefault();
 
@@ -128,6 +179,9 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
   private onDismiss() {
     this.resolve?.(false);
 
-    this.remove();
+    const modalContainer = document.querySelector(
+      "#modalContainer"
+    ) as HTMLElement;
+    render("", modalContainer);
   }
 }

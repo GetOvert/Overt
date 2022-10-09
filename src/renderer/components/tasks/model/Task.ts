@@ -1,8 +1,15 @@
+import { html, HTMLTemplateResult } from "lit";
+
 export type QueuedTask = {
   task: Task;
   serial: number;
   state: TaskState;
   notify: TaskNotifyPoints;
+
+  private: {
+    resolve: (deadTask: QueuedTask & { state: DeadTaskState }) => unknown;
+    reject: (error: Error) => unknown;
+  };
 };
 
 export type TaskState = LiveTaskState | DeadTaskState;
@@ -66,6 +73,8 @@ export type ConfirmActionTask = TaskBase & {
 
   promptTitle: string;
   prompt: string;
+  promptCannedMessage?: HTMLTemplateResult;
+  url: string | null;
   confirmButtonTitle: string;
   cancelButtonTitle: string;
 };
@@ -119,6 +128,15 @@ export function packageIdentifiersOfTask(task: Task): string[] | null {
     : null;
 }
 
+export function urlInTask(task: Task): string | null {
+  switch (task.type) {
+    case "add-source-repository":
+      return task.url;
+    default:
+      return null;
+  }
+}
+
 export function describeTask(task: Task): string {
   switch (task.type) {
     case "prompt-for-password":
@@ -139,7 +157,7 @@ export function describeTask(task: Task): string {
       const wipeIndexfirst = task.wipeIndexFirst
         ? ", deleting the old catalog first"
         : "";
-      return `rebuild the Overt catalog${condition}`;
+      return `rebuild the Overt catalog${condition}${wipeIndexfirst}`;
     case "reindex-outdated":
       return `check for package updates`;
     case "reindex":
@@ -158,5 +176,14 @@ export function describeTask(task: Task): string {
       return `add a ${task.packageManager} source called “${task.name}”, which is located at ${task.url}`;
     case "remove-source-repository":
       return `remove the ${task.packageManager} source called “${task.name}”`;
+  }
+}
+
+export function promptCannedMessageForTask(
+  task: Task
+): HTMLTemplateResult | undefined {
+  switch (task.type) {
+    case "add-source-repository":
+      return html`<strong>Only continue if you trust this source.</strong>`;
   }
 }

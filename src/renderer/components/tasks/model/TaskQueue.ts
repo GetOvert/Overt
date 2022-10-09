@@ -54,19 +54,26 @@ export class TaskQueue {
     task: Task,
     notify: TaskNotifyPoints = [],
     state: LiveTaskState = "pending"
-  ) {
-    const queuedTask: QueuedTask = {
-      task,
-      serial: this._lastSerial++,
-      state,
-      notify,
-    };
+  ): Promise<QueuedTask & { state: DeadTaskState }> {
+    return new Promise((resolve, reject) => {
+      const queuedTask: QueuedTask = {
+        task,
+        serial: this._lastSerial++,
+        state,
+        notify,
 
-    this._liveQueue.push(queuedTask);
-    this._liveAndDeadQueue.push(queuedTask);
-    this._tasksBySerial.set(queuedTask.serial, queuedTask);
+        private: {
+          resolve,
+          reject,
+        },
+      };
 
-    this.notifyObservers(queuedTask);
+      this._liveQueue.push(queuedTask);
+      this._liveAndDeadQueue.push(queuedTask);
+      this._tasksBySerial.set(queuedTask.serial, queuedTask);
+
+      this.notifyObservers(queuedTask);
+    });
   }
 
   update(taskOrTaskSerial: QueuedTask | number, state: LiveTaskState) {
@@ -93,10 +100,16 @@ export class TaskQueue {
     );
     if (taskIndex === -1) return;
 
-    task.state = state;
-
+    // Dequeue the task
     this._liveQueue.splice(taskIndex, 1);
 
+    // Update the task's state
+    task.state = state;
+
+    // Resolve the promise returned from `push`
+    task.private.resolve(task as typeof task & { state: DeadTaskState });
+
+    // Notify task event observers
     this.notifyObservers(task);
   }
 }

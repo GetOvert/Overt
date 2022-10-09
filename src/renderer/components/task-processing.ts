@@ -1,3 +1,4 @@
+import { html } from "lit";
 import { packageManagerForName } from "package-manager/PackageManagerRegistry";
 import ActionConfirmationModal from "./modal/ActionConfirmationModal";
 import PasswordPromptModal from "./modal/PasswordPromptModal";
@@ -61,6 +62,8 @@ const confirmationProcessor = new TaskProcessor(
   async (task) => {
     const shouldContinue = await ActionConfirmationModal.runModal(
       task.prompt,
+      html`Do you want to allow this? ${task.promptCannedMessage}`,
+      task.url,
       task.promptTitle,
       task.confirmButtonTitle,
       task.cancelButtonTitle
