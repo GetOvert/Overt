@@ -267,7 +267,7 @@ const brew: IPCBrew = {
     }
   },
 
-  async search(searchString, sortBy, filterBy, limit, offset) {
+  search(searchString, sortBy, filterBy, limit, offset) {
     const keywords = searchString.split(/\s+/);
 
     return cacheDB()
@@ -319,7 +319,7 @@ const brew: IPCBrew = {
       }));
   },
 
-  async info(formulaName: string): Promise<BrewPackageInfo | null> {
+  info(formulaName: string): BrewPackageInfo | null {
     const row = cacheDB()
       .prepare(
         sql`

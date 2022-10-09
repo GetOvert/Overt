@@ -147,11 +147,8 @@ const winget: IPCWinget = {
       deleteRecords(
         cacheDB(),
         "winget_packages",
-        (
-          await Promise.all(
-            packageNamesToUpdate.map((packageName) => winget.info(packageName))
-          )
-        )
+        packageNamesToUpdate
+          .map((packageName) => winget.info(packageName))
           .map((packageInfo) => {
             if (!packageInfo) return null; // Not in DB anyway
             if (packageInfo?.installedVersion) return null; // Still installed
@@ -163,7 +160,7 @@ const winget: IPCWinget = {
     }
   },
 
-  async search(searchString, sortBy, filterBy, limit, offset) {
+  search(searchString, sortBy, filterBy, limit, offset) {
     const keywords = searchString.split(/\s+/);
 
     return cacheDB()
@@ -210,7 +207,7 @@ const winget: IPCWinget = {
       .all();
   },
 
-  async info(packageName: string): Promise<WingetPackageInfo | null> {
+  info(packageName: string): WingetPackageInfo | null {
     const row = cacheDB()
       .prepare(
         sql`

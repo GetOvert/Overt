@@ -18,6 +18,7 @@ export type Button = {
 export abstract class ProductView extends BootstrapBlockElement {
   protected abstract readonly subtitle: string;
   protected abstract shouldCauseRerender(successfulTask: QueuedTask): boolean;
+  protected abstract canLinkToPackageName(packageName: string): boolean;
   protected abstract fields: PackageDetailField[];
   protected abstract buttons: Button[];
 
@@ -97,8 +98,12 @@ export abstract class ProductView extends BootstrapBlockElement {
         ${repeat(
           this.fields,
           ({ heading }) => heading,
-          ({ heading, value }) => {
-            const valueHTML = htmlForFieldValue(value, true);
+          ({ heading, value, valuesArePackageNames }) => {
+            const valueHTML = this.htmlForFieldValue(
+              value,
+              valuesArePackageNames ?? false,
+              true
+            );
             return valueHTML
               ? html`
                   <h3 style="font-weight: 500">${heading}</h3>
@@ -111,50 +116,78 @@ export abstract class ProductView extends BootstrapBlockElement {
       </div>
     `;
   }
-}
 
-function htmlForFieldValue(
-  value?: PackageDetailFieldValue,
-  isRoot: boolean = false
-): HTMLTemplateResult | null {
-  if (!value) return null;
+  private htmlForFieldValue(
+    value: PackageDetailFieldValue | undefined,
+    valuesArePackageNames: boolean,
+    isRoot: boolean = false
+  ): HTMLTemplateResult | null {
+    if (!value) return null;
 
-  if (Array.isArray(value)) {
-    if (!value.length) return null;
+    if (Array.isArray(value)) {
+      if (!value.length) return null;
 
-    return html`
-      <ul>
-        ${repeat(
-          value,
-          (subvalue) => html`<li>${htmlForFieldValue(subvalue)}</li>`
-        )}
-      </ul>
-    `;
+      return html`
+        <ul>
+          ${repeat(
+            value,
+            (subvalue) =>
+              html`<li>
+                ${this.htmlForFieldValue(subvalue, valuesArePackageNames)}
+              </li>`
+          )}
+        </ul>
+      `;
+    }
+
+    if (typeof value === "object" && !this.isLitTemplateResult(value)) {
+      return html`
+        <dl>
+          ${repeat(
+            Object.entries(value),
+            ([key, subvalue]) => html`
+              <dt>${key}:</dt>
+              <dd>${subvalue}</dd>
+            `
+          )}
+        </dl>
+      `;
+    }
+
+    if (typeof value === "string") {
+      if (valuesArePackageNames && this.canLinkToPackageName(value)) {
+        const href = ((window as any).openStore as any).encodeFragment({
+          subpage: value,
+        });
+
+        value = html`<a
+          href=${href}
+          data-orig-href=${href}
+          @click=${this.linkClicked}
+          >${value}</a
+        >`;
+      }
+
+      return isRoot
+        ? html` <p style="white-space: pre-wrap">${value}</p> `
+        : html`${value}`;
+    }
+
+    return value;
   }
 
-  if (typeof value === "object" && !isLitTemplateResult(value)) {
-    return html`
-      <dl>
-        ${repeat(
-          Object.entries(value),
-          ([key, subvalue]) => html`
-            <dt>${key}:</dt>
-            <dd>${subvalue}</dd>
-          `
-        )}
-      </dl>
-    `;
+  private linkClicked(event: Event) {
+    event.preventDefault();
+
+    const a = event.target as HTMLAnchorElement;
+    if (a.dataset.origHref) {
+      ((window as any).openStore as any).updateWindowLocationFragment(
+        a.dataset.origHref
+      );
+    }
   }
 
-  if (typeof value === "string") {
-    return isRoot
-      ? html` <p style="white-space: pre-wrap">${value}</p> `
-      : html`${value}`;
+  private isLitTemplateResult(value: object): value is HTMLTemplateResult {
+    return (value as any)["_$litType$"] !== undefined;
   }
-
-  return value;
-}
-
-function isLitTemplateResult(value: object): value is HTMLTemplateResult {
-  return (value as any)["_$litType$"] !== undefined;
 }

@@ -274,7 +274,7 @@ const brewCask: IPCBrewCask = {
     }
   },
 
-  async search(searchString, sortBy, filterBy, limit, offset) {
+  search(searchString, sortBy, filterBy, limit, offset) {
     const keywords = searchString.split(/\s+/);
 
     return cacheDB()
@@ -327,7 +327,7 @@ const brewCask: IPCBrewCask = {
       }));
   },
 
-  async info(caskName: string): Promise<BrewCaskPackageInfo | null> {
+  info(caskName: string): BrewCaskPackageInfo | null {
     const row = cacheDB()
       .prepare(
         sql`

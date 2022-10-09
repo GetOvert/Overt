@@ -17,8 +17,8 @@ export interface IPCPackageManager<PackageInfo, SortKey> {
     filterBy: FilterKey,
     limit: number,
     offset: number
-  ): Promise<PackageInfo[]>;
-  info(packageName: string): Promise<PackageInfo | null>;
+  ): PackageInfo[];
+  info(packageName: string): PackageInfo | null;
 
   install(packageName: string): Promise<boolean>;
   upgrade(packageName: string): Promise<boolean>;

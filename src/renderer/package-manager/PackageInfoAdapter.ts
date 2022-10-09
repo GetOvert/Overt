@@ -15,6 +15,8 @@ export type PackageInfoAdapter<PackageInfo> = {
 export type PackageDetailField = {
   heading: string;
   value?: PackageDetailFieldValue;
+
+  valuesArePackageNames?: boolean;
 };
 export type PackageDetailFieldValue =
   | undefined

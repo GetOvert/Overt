@@ -179,7 +179,7 @@ export default class AppsView<
     offset: number,
     completedCallback: (result: PackageInfo[]) => void
   ): AsyncGenerator<PackageInfo, void, undefined> {
-    const result = await this.packageManager.search(
+    const result = this.packageManager.search(
       searchString,
       sortBy,
       filterBy,
@@ -398,9 +398,7 @@ export default class AppsView<
     );
   },
   async getSubpage(packageIdentifier: string): Promise<any> {
-    const packageInfo = await this._currentPackageManager.info(
-      packageIdentifier
-    );
+    const packageInfo = this._currentPackageManager.info(packageIdentifier);
 
     return {
       title: this._currentPackageInfoAdapter.packageName(packageInfo),

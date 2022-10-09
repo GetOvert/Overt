@@ -126,14 +126,17 @@ export class BrewPackageInfoAdapter
       {
         heading: "Dependencies",
         value: packageInfo.dependencies,
+        valuesArePackageNames: true,
       },
       {
         heading: "Recommended dependencies",
         value: packageInfo.recommended_dependencies,
+        valuesArePackageNames: true,
       },
       {
         heading: "Optional dependencies",
         value: packageInfo.optional_dependencies,
+        valuesArePackageNames: true,
       },
       {
         heading: "Conflicts with",
@@ -149,6 +152,7 @@ export class BrewPackageInfoAdapter
                 )}
               </ul>`
             : null,
+            valuesArePackageNames: true,
       },
       {
         heading: "Identifiers",

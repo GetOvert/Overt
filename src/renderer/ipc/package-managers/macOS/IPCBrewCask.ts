@@ -123,6 +123,7 @@ export class BrewCaskPackageInfoAdapter
                 )}
               </ul>`
             : null,
+        valuesArePackageNames: true,
       },
       {
         heading: "Conflicts with",
@@ -133,6 +134,7 @@ export class BrewCaskPackageInfoAdapter
                 ([, identifiers]: [string, string[]]) => identifiers
               )
             : null,
+        valuesArePackageNames: true,
       },
       {
         heading: "Identifiers",

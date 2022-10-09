@@ -3,13 +3,15 @@ import {
   packageIdentifiersOfTask,
   QueuedTask,
 } from "components/tasks/model/Task";
-import { IPCPackageManager } from "ipc/package-managers/IPCPackageManager";
 import { customElement, property } from "lit/decorators.js";
 import {
   PackageDetailField,
   PackageInfoAdapter,
 } from "package-manager/PackageInfoAdapter";
-import { packageInfoAdapterForPackageManagerName } from "package-manager/PackageManagerRegistry";
+import {
+  packageInfoAdapterForPackageManagerName,
+  packageManagerForName,
+} from "package-manager/PackageManagerRegistry";
 import {
   getCaskAppFileName,
   installPackage,
@@ -47,6 +49,10 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
         )) ??
       false
     );
+  }
+
+  protected canLinkToPackageName(packageName: string): boolean {
+    return !!packageManagerForName(this.packageManagerName).info(packageName);
   }
 
   protected get fields(): PackageDetailField[] {
