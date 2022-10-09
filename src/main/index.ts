@@ -30,6 +30,7 @@ const accentColor = ["darwin", "win32"].includes(process.platform)
   : config.fallbackAccentColor;
 
 let mainWindow: BrowserWindow;
+let initialURLToHandle: string | undefined;
 
 async function createWindow(): Promise<void> {
   // Register ourselves as a URL scheme handler
@@ -48,10 +49,24 @@ async function createWindow(): Promise<void> {
       ],
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
+    show: false,
+  });
+
+  // https://www.electronjs.org/docs/latest/api/browser-window#using-the-ready-to-show-event
+  mainWindow.once("ready-to-show", () => {
+    mainWindow.show();
   });
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+
+  mainWindow.webContents.on("did-finish-load", () => {
+    if (initialURLToHandle) {
+      // App was launched to handle a URL that we couldn't handle below,
+      // since the main window wasn't initialized yet
+      mainWindow.webContents.send("handle_url", initialURLToHandle);
+    }
+  });
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
@@ -157,7 +172,12 @@ app.on("ready", createWindow);
 
 // TODO: Windows code to prevent another instance from opening when a URL is handled
 app.on("open-url", (event, url) => {
-  mainWindow.webContents.send("handle_url", url);
+  if (mainWindow) {
+    mainWindow.webContents.send("handle_url", url);
+  } else {
+    // We'll handle it above, once the main window has been initialized
+    initialURLToHandle = url;
+  }
 });
 
 // Quit when all windows are closed.
