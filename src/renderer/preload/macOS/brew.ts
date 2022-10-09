@@ -233,18 +233,15 @@ const brew: IPCBrew = {
         installed: formula.installed[0]?.version,
         outdated: +formula.outdated,
 
-        installed_30d:
-          installs30d?.formulae?.[formula.full_name]?.[0]?.count
-            ?.toString()
-            .replaceAll(/[^\d]/g, "") ?? 0,
-        installed_90d:
-          installs90d?.formulae?.[formula.full_name]?.[0]?.count
-            ?.toString()
-            .replaceAll(/[^\d]/g, "") ?? 0,
-        installed_365d:
-          installs365d?.formulae?.[formula.full_name]?.[0]?.count
-            ?.toString()
-            .replaceAll(/[^\d]/g, "") ?? 0,
+        installed_30d: installs30d?.formulae?.[formula.full_name]?.[0]?.count
+          ?.toString()
+          .replaceAll(/[^\d]/g, ""),
+        installed_90d: installs90d?.formulae?.[formula.full_name]?.[0]?.count
+          ?.toString()
+          .replaceAll(/[^\d]/g, ""),
+        installed_365d: installs365d?.formulae?.[formula.full_name]?.[0]?.count
+          ?.toString()
+          .replaceAll(/[^\d]/g, ""),
 
         json: JSON.stringify(formula),
       }))
@@ -343,9 +340,9 @@ const brew: IPCBrew = {
     return {
       rowid: row.rowid,
       ...JSON.parse(row.json),
-      installed_30d: row.installed_30d ?? 0,
-      installed_90d: row.installed_90d ?? 0,
-      installed_365d: row.installed_365d ?? 0,
+      installed_30d: row.installed_30d,
+      installed_90d: row.installed_90d,
+      installed_365d: row.installed_365d,
     };
   },
 

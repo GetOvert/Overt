@@ -28,9 +28,9 @@ export type BrewCaskPackageInfo = {
   conflicts_with?: any; // TODO: Better typing
   aliases?: string[];
   outdated: boolean;
-  installed_30d?: string; // TODO: Better typing
-  installed_90d?: string; // TODO: Better typing
-  installed_365d?: string; // TODO: Better typing
+  installed_30d: string | null; // TODO: Better typing
+  installed_90d: string | null; // TODO: Better typing
+  installed_365d: string | null; // TODO: Better typing
   // TODO: There are more fields that aren't here yet
 };
 
@@ -142,11 +142,14 @@ export class BrewCaskPackageInfoAdapter
       },
       {
         heading: "Install count",
-        value: {
-          "30 days": (+packageInfo.installed_30d!).toLocaleString(),
-          "90 days": (+packageInfo.installed_90d!).toLocaleString(),
-          "365 days": (+packageInfo.installed_365d!).toLocaleString(),
-        },
+        value:
+          packageInfo.installed_30d !== null
+            ? {
+                "30 days": (+packageInfo.installed_30d!).toLocaleString(),
+                "90 days": (+packageInfo.installed_90d!).toLocaleString(),
+                "365 days": (+packageInfo.installed_365d!).toLocaleString(),
+              }
+            : null,
       },
     ];
   }

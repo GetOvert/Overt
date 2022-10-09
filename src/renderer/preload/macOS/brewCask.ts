@@ -240,18 +240,15 @@ const brewCask: IPCBrewCask = {
         outdated: +cask.outdated,
         auto_updates: cask.auto_updates ? 1 : 0,
 
-        installed_30d:
-          installs30d?.formulae?.[cask.full_token]?.[0]?.count
-            ?.toString()
-            .replaceAll(/[^\d]/g, "") ?? 0,
-        installed_90d:
-          installs90d?.formulae?.[cask.full_token]?.[0]?.count
-            ?.toString()
-            .replaceAll(/[^\d]/g, "") ?? 0,
-        installed_365d:
-          installs365d?.formulae?.[cask.full_token]?.[0]?.count
-            ?.toString()
-            .replaceAll(/[^\d]/g, "") ?? 0,
+        installed_30d: installs30d?.formulae?.[cask.full_token]?.[0]?.count
+          ?.toString()
+          .replaceAll(/[^\d]/g, ""),
+        installed_90d: installs90d?.formulae?.[cask.full_token]?.[0]?.count
+          ?.toString()
+          .replaceAll(/[^\d]/g, ""),
+        installed_365d: installs365d?.formulae?.[cask.full_token]?.[0]?.count
+          ?.toString()
+          .replaceAll(/[^\d]/g, ""),
 
         json: JSON.stringify(cask),
       }))
@@ -351,9 +348,9 @@ const brewCask: IPCBrewCask = {
     return {
       rowid: row.rowid,
       ...JSON.parse(row.json),
-      installed_30d: row.installed_30d ?? 0,
-      installed_90d: row.installed_90d ?? 0,
-      installed_365d: row.installed_365d ?? 0,
+      installed_30d: row.installed_30d,
+      installed_90d: row.installed_90d,
+      installed_365d: row.installed_365d,
     };
   },
 

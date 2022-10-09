@@ -38,9 +38,9 @@ export type BrewPackageInfo = {
   disabled: boolean;
   disable_date?: string | null;
   disable_reason?: string | null;
-  installed_30d?: string; // TODO: Better typing
-  installed_90d?: string; // TODO: Better typing
-  installed_365d?: string; // TODO: Better typing
+  installed_30d: string | null; // TODO: Better typing
+  installed_90d: string | null; // TODO: Better typing
+  installed_365d: string | null; // TODO: Better typing
   // TODO: There are more fields that aren't here yet
 };
 
@@ -152,7 +152,7 @@ export class BrewPackageInfoAdapter
                 )}
               </ul>`
             : null,
-            valuesArePackageNames: true,
+        valuesArePackageNames: true,
       },
       {
         heading: "Identifiers",
@@ -165,11 +165,14 @@ export class BrewPackageInfoAdapter
       },
       {
         heading: "Install-on-request count",
-        value: {
-          "30 days": (+packageInfo.installed_30d!).toLocaleString(),
-          "90 days": (+packageInfo.installed_90d!).toLocaleString(),
-          "365 days": (+packageInfo.installed_365d!).toLocaleString(),
-        },
+        value:
+          packageInfo.installed_30d !== null
+            ? {
+                "30 days": (+packageInfo.installed_30d!).toLocaleString(),
+                "90 days": (+packageInfo.installed_90d!).toLocaleString(),
+                "365 days": (+packageInfo.installed_365d!).toLocaleString(),
+              }
+            : null,
       },
     ];
   }
