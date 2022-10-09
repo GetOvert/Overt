@@ -70,7 +70,7 @@ export class TasksPane extends BootstrapBlockElement {
 
       ${this.tasks.length
         ? html`
-            <ul class="task-list my-1 px-2">
+            <ul class="task-list my-1 ps-2 pe-0">
               ${repeat(
                 this.tasks,
                 (queuedTask) => html`
