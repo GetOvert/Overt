@@ -1,7 +1,7 @@
 import { Modal } from "bootstrap";
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import LightDOMBlockElement from "components/abstract/LightDOMBlockElement";
-import { css, html, render } from "lit";
+import { css, html, PropertyValues, render } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { createRef, Ref, ref } from "lit/directives/ref.js";
 import {
@@ -69,7 +69,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
   private modalRoot: Ref<HTMLElement> = createRef();
 
   protected firstUpdated(
-    changedProperties: Map<string | number | symbol, unknown>
+    changedProperties: PropertyValues<this>
   ): void {
     const modal = Modal.getOrCreateInstance(this.modalRoot.value!);
 

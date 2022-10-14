@@ -87,6 +87,10 @@ export class WingetPackageInfoAdapter
     return packageInfo.ShortDescription;
   }
 
+  packageWebsiteURL(packageInfo: WingetPackageInfo): string | undefined {
+    return packageInfo.PackageURL;
+  }
+
   isPackageInstalled(packageInfo: WingetPackageInfo): boolean {
     return !!packageInfo.installedVersion?.length;
   }
@@ -106,17 +110,19 @@ export class WingetPackageInfoAdapter
     return false;
   }
 
-  packageDetails(packageInfo: WingetPackageInfo): PackageDetailField[] {
+  packageDetails(packageInfo: WingetPackageInfo): PackageDetailField[][] {
     return [
-      {
-        heading: "Versions",
-        value: html`<dl>
-          <dt>Installed:</dt>
-          <dd>${packageInfo.installedVersion ?? "None"}</dd>
-          <dt>Latest:</dt>
-          <dd>${packageInfo.PackageVersion}</dd>
-        </dl>`,
-      },
+      [
+        {
+          heading: "Versions",
+          value: html`<dl>
+            <dt>Installed:</dt>
+            <dd>${packageInfo.installedVersion ?? "None"}</dd>
+            <dt>Latest:</dt>
+            <dd>${packageInfo.PackageVersion}</dd>
+          </dl>`,
+        },
+      ],
     ];
   }
 }

@@ -1,7 +1,7 @@
 import { Modal } from "bootstrap";
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import LightDOMBlockElement from "components/abstract/LightDOMBlockElement";
-import { html, render } from "lit";
+import { html, PropertyValues, render } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { createRef, Ref, ref } from "lit/directives/ref.js";
 
@@ -44,7 +44,7 @@ export default class PasswordPromptModal extends LightDOMBlockElement {
   private passwordField: Ref<HTMLInputElement> = createRef();
 
   protected firstUpdated(
-    changedProperties: Map<string | number | symbol, unknown>
+    changedProperties: PropertyValues<this>
   ): void {
     const modal = Modal.getOrCreateInstance(this.modalRoot.value!);
 

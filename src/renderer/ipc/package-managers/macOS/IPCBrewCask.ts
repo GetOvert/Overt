@@ -49,6 +49,10 @@ export class BrewCaskPackageInfoAdapter
     return packageInfo.desc;
   }
 
+  packageWebsiteURL(packageInfo: BrewCaskPackageInfo): string | undefined {
+    return packageInfo.homepage;
+  }
+
   isPackageInstalled(packageInfo: BrewCaskPackageInfo): boolean {
     return !!packageInfo.installed;
   }
@@ -65,92 +69,83 @@ export class BrewCaskPackageInfoAdapter
     return false;
   }
 
-  packageDetails(packageInfo: BrewCaskPackageInfo): PackageDetailField[] {
+  packageDetails(packageInfo: BrewCaskPackageInfo): PackageDetailField[][] {
     return [
-      {
-        heading: "Names",
-        value: packageInfo.name.length > 1 ? packageInfo.name : "",
-      },
-      {
-        heading: "Description",
-        value: packageInfo.desc ?? "No description available.",
-      },
-      {
-        heading: "Website",
-        value: html`<p>
-          <a
-            href=${packageInfo.homepage}
-            @click=${(e: Event) => {
-              e.preventDefault();
-              window.openExternalLink.open(packageInfo.homepage);
-            }}
-            >${packageInfo.homepage}</a
-          >
-        </p>`,
-      },
-      {
-        heading: "Versions",
-        value: {
-          Installed: packageInfo.installed ?? "None",
-          Latest: packageInfo.version,
-          Updates: packageInfo.auto_updates
-            ? "Via built-in updater"
-            : "Via Overt",
+      [
+        {
+          heading: "Versions",
+          value: {
+            Installed: packageInfo.installed ?? "None",
+            Latest: packageInfo.version,
+            Updates: packageInfo.auto_updates
+              ? "Via built-in updater"
+              : "Via Overt",
+          },
         },
-      },
-      {
-        heading: "Requirements",
-        value:
-          packageInfo.depends_on && Object.keys(packageInfo.depends_on).length
-            ? html`<ul>
-                ${repeat(
-                  packageInfo.depends_on.cask ?? [],
-                  (appIdentifier) => html`<li>${appIdentifier}</li>`
-                )}
-                ${Object.keys(packageInfo.depends_on.macos ?? {}).map(
-                  (operator) =>
-                    packageInfo.depends_on.macos[operator].map(
-                      (version: string) =>
-                        html`<li>
-                          macOS
-                          ${(() =>
-                            ({ ">=": "≥", "<=": "≤", "==": "=", "!=": "≠" }[
-                              operator
-                            ] ?? operator))()}
-                          ${version}
-                        </li>`
-                    )
-                )}
-              </ul>`
-            : null,
-        valuesArePackageNames: true,
-      },
-      {
-        heading: "Conflicts with",
-        value:
-          packageInfo.conflicts_with &&
-          Object.keys(packageInfo.conflicts_with).length
-            ? Object.entries(packageInfo.conflicts_with).flatMap(
-                ([, identifiers]: [string, string[]]) => identifiers
-              )
-            : null,
-        valuesArePackageNames: true,
-      },
-      {
-        heading: "Identifiers",
-        value: [packageInfo.full_token, ...(packageInfo.aliases ?? [])],
-      },
-      {
-        heading: "Install count",
-        value:
-          packageInfo.installed_30d !== null
-            ? {
-                "30 days": (+packageInfo.installed_30d!).toLocaleString(),
-                "90 days": (+packageInfo.installed_90d!).toLocaleString(),
-                "365 days": (+packageInfo.installed_365d!).toLocaleString(),
-              }
-            : null,
-      },
+        {
+          heading: "Install count",
+          value:
+            packageInfo.installed_30d !== null
+              ? {
+                  "30 days": (+packageInfo.installed_30d!).toLocaleString(),
+                  "90 days": (+packageInfo.installed_90d!).toLocaleString(),
+                  "365 days": (+packageInfo.installed_365d!).toLocaleString(),
+                }
+              : null,
+        },
+      ],
+      [
+        {
+          heading: "Known as",
+          value: packageInfo.name.length > 1 ? packageInfo.name : "",
+        },
+        {
+          heading: "Identifiers",
+          value: [packageInfo.full_token, ...(packageInfo.aliases ?? [])],
+        },
+        {
+          heading: "Requirements",
+          value:
+            packageInfo.depends_on && Object.keys(packageInfo.depends_on).length
+              ? html`<ul>
+                  ${repeat(
+                    packageInfo.depends_on.cask ?? [],
+                    (appIdentifier) => html`<li>${appIdentifier}</li>`
+                  )}
+                  ${repeat(
+                    packageInfo.depends_on.formula ?? [],
+                    (appIdentifier) => html`<li>${appIdentifier}</li>`
+                  )}
+                  ${Object.keys(packageInfo.depends_on.macos ?? {}).map(
+                    (operator) =>
+                      packageInfo.depends_on.macos[operator].map(
+                        (version: string) =>
+                          html`<li>
+                            macOS
+                            ${(() =>
+                              ({ ">=": "≥", "<=": "≤", "==": "=", "!=": "≠" }[
+                                operator
+                              ] ?? operator))()}
+                            ${version}
+                          </li>`
+                      )
+                  )}
+                </ul>`
+              : null,
+          valuesArePackageNames: true,
+        },
+        {
+          heading: "Conflicts with",
+          value:
+            packageInfo.conflicts_with &&
+            Object.keys(packageInfo.conflicts_with).length
+              ? Object.entries(packageInfo.conflicts_with).flatMap(
+                  ([, identifiers]: [string, string[]]) => identifiers
+                )
+              : null,
+          valuesArePackageNames: true,
+        },
+      ],
     ];
   }
 }

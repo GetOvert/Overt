@@ -1,7 +1,6 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
-import { css, html, HTMLTemplateResult } from "lit";
+import { css, html, HTMLTemplateResult, PropertyValues } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { Tooltip } from "bootstrap";
 import taskQueue from "components/tasks/model/TaskQueue";
 import {
   AddSourceRepositoryTask,
@@ -21,7 +20,7 @@ export class SettingsPane extends BootstrapBlockElement {
   sendNativeNotifications: boolean;
 
   protected updated(
-    changedProperties: Map<string | number | symbol, unknown>
+    changedProperties: PropertyValues<this>
   ): void {
     this.addPopperTooltips();
     this.fetchSettingsValues();
@@ -158,13 +157,6 @@ export class SettingsPane extends BootstrapBlockElement {
         ${label}
       </button>
     `;
-  }
-
-  private popperTooltips: any;
-  private addPopperTooltips() {
-    this.popperTooltips = Array.from(
-      this.renderRoot.querySelectorAll('[data-bs-toggle="tooltip"]')
-    ).map((tooltipHost) => new Tooltip(tooltipHost));
   }
 
   private onCheckboxClicked(event: Event) {

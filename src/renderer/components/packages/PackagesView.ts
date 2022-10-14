@@ -9,7 +9,7 @@ import {
   FilterKey,
   IPCPackageManager,
 } from "ipc/package-managers/IPCPackageManager";
-import { css, html, HTMLTemplateResult, render } from "lit";
+import { css, html, HTMLTemplateResult, PropertyValues, render } from "lit";
 import { asyncAppend } from "lit-html/directives/async-append.js";
 import { customElement, property, state } from "lit/decorators.js";
 import { Ref, createRef, ref } from "lit/directives/ref.js";
@@ -145,7 +145,7 @@ export default class AppsView<
   }
 
   protected firstUpdated(
-    changedProperties: Map<string | number | symbol, unknown>
+    changedProperties: PropertyValues<this>
   ): void {
     this._scrollContainer.addEventListener(
       "scroll",
@@ -157,7 +157,7 @@ export default class AppsView<
   }
 
   protected updated(
-    changedProperties: Map<string | number | symbol, unknown>
+    changedProperties: PropertyValues<this>
   ): void {
     if (changedProperties.has("offset")) {
       this._scrollContainer.scrollTo({ top: lastScrollY });

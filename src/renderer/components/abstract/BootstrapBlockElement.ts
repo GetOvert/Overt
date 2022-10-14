@@ -1,3 +1,4 @@
+import { Tooltip } from "bootstrap";
 import { css, CSSResultArray, html, HTMLTemplateResult, LitElement } from "lit";
 import { bootstrap, reboot } from "styles/bootstrap";
 
@@ -80,5 +81,19 @@ export default class BootstrapBlockElement extends LitElement {
 
   getRootNode(options?: GetRootNodeOptions): ShadowRoot {
     return super.getRootNode(options) as ShadowRoot;
+  }
+
+  protected popperTooltips: Tooltip[] = [];
+  protected addPopperTooltips() {
+    this.popperTooltips = Array.from(
+      this.renderRoot.querySelectorAll('[data-bs-toggle="tooltip"]')
+    ).map((tooltipHost) => new Tooltip(tooltipHost));
+  }
+  
+  protected removePopperTooltips() {
+    this.popperTooltips.forEach(tooltip => {
+      tooltip.dispose();
+    })
+    this.popperTooltips = [];
   }
 }

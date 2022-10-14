@@ -59,6 +59,10 @@ export class BrewPackageInfoAdapter
     return packageInfo.desc;
   }
 
+  packageWebsiteURL(packageInfo: BrewPackageInfo): string | undefined {
+    return packageInfo.homepage;
+  }
+
   isPackageInstalled(packageInfo: BrewPackageInfo): boolean {
     return !!packageInfo.installed.length;
   }
@@ -75,105 +79,92 @@ export class BrewPackageInfoAdapter
     return packageInfo.disabled;
   }
 
-  packageDetails(packageInfo: BrewPackageInfo): PackageDetailField[] {
+  packageDetails(packageInfo: BrewPackageInfo): PackageDetailField[][] {
     return [
-      {
-        heading: "Status",
-        value: packageInfo.disabled
-          ? html`<dl class="text-danger">
-              <dt>
-                Disabled${packageInfo.disable_date
-                  ? ` ${packageInfo.disable_date}`
-                  : ""}:
-              </dt>
-              <dd>${packageInfo.disable_reason}</dd>
-            </dl>`
-          : packageInfo.deprecated
-          ? html`<dl class="text-danger">
-              <dt>
-                Deprecated${packageInfo.deprecation_date
-                  ? ` ${packageInfo.deprecation_date}`
-                  : ""}:
-              </dt>
-              <dd>${packageInfo.deprecation_reason}</dd>
-            </dl>`
-          : null,
-      },
-      {
-        heading: "Description",
-        value: packageInfo.desc ?? "No description available.",
-      },
-      {
-        heading: "Website",
-        value: html`<p>
-          <a
-            href=${packageInfo.homepage}
-            @click=${(e: Event) => {
-              e.preventDefault();
-              window.openExternalLink.open(packageInfo.homepage);
-            }}
-            >${packageInfo.homepage}</a
-          >
-        </p>`,
-      },
-      {
-        heading: "Versions",
-        value: {
-          Installed: packageInfo.installed?.[0]?.version ?? "None",
-          "Latest stable": packageInfo.versions?.stable ?? "None",
+      [
+        {
+          heading: "Status",
+          value: packageInfo.disabled
+            ? html`<dl class="text-danger">
+                <dt>
+                  Disabled${packageInfo.disable_date
+                    ? ` ${packageInfo.disable_date}`
+                    : ""}:
+                </dt>
+                <dd>${packageInfo.disable_reason}</dd>
+              </dl>`
+            : packageInfo.deprecated
+            ? html`<dl class="text-danger">
+                <dt>
+                  Deprecated${packageInfo.deprecation_date
+                    ? ` ${packageInfo.deprecation_date}`
+                    : ""}:
+                </dt>
+                <dd>${packageInfo.deprecation_reason}</dd>
+              </dl>`
+            : null,
         },
-      },
-      {
-        heading: "Dependencies",
-        value: packageInfo.dependencies,
-        valuesArePackageNames: true,
-      },
-      {
-        heading: "Recommended dependencies",
-        value: packageInfo.recommended_dependencies,
-        valuesArePackageNames: true,
-      },
-      {
-        heading: "Optional dependencies",
-        value: packageInfo.optional_dependencies,
-        valuesArePackageNames: true,
-      },
-      {
-        heading: "Conflicts with",
-        value:
-          packageInfo.conflicts_with &&
-          Object.keys(packageInfo.conflicts_with).length
-            ? html`<ul>
-                ${repeat(
-                  Object.entries(packageInfo.conflicts_with).flatMap(
-                    ([, identifiers]) => identifiers
-                  ),
-                  (identifier) => html`<li>${identifier}</li>`
-                )}
-              </ul>`
-            : null,
-        valuesArePackageNames: true,
-      },
-      {
-        heading: "Identifiers",
-        value: html`<ul>
-          ${repeat(
-            [packageInfo.full_name, ...(packageInfo.aliases ?? [])],
-            (identifier) => html`<li>${identifier}</li>`
-          )}
-        </ul>`,
-      },
-      {
-        heading: "Install-on-request count",
-        value:
-          packageInfo.installed_30d !== null
-            ? {
-                "30 days": (+packageInfo.installed_30d!).toLocaleString(),
-                "90 days": (+packageInfo.installed_90d!).toLocaleString(),
-                "365 days": (+packageInfo.installed_365d!).toLocaleString(),
-              }
-            : null,
-      },
+        {
+          heading: "Versions",
+          value: {
+            Installed: packageInfo.installed?.[0]?.version ?? "None",
+            "Latest stable": packageInfo.versions?.stable ?? "None",
+          },
+        },
+        {
+          heading: "Requested install count",
+          value:
+            packageInfo.installed_30d !== null
+              ? {
+                  "30 days": (+packageInfo.installed_30d!).toLocaleString(),
+                  "90 days": (+packageInfo.installed_90d!).toLocaleString(),
+                  "365 days": (+packageInfo.installed_365d!).toLocaleString(),
+                }
+              : null,
+        },
+      ],
+      [
+        {
+          heading: "Identifiers",
+          value: html`<ul>
+            ${repeat(
+              [packageInfo.full_name, ...(packageInfo.aliases ?? [])],
+              (identifier) => html`<li>${identifier}</li>`
+            )}
+          </ul>`,
+        },
+        {
+          heading: "Dependencies",
+          value: packageInfo.dependencies,
+          valuesArePackageNames: true,
+        },
+        {
+          heading: "Recommended dependencies",
+          value: packageInfo.recommended_dependencies,
+          valuesArePackageNames: true,
+        },
+        {
+          heading: "Optional dependencies",
+          value: packageInfo.optional_dependencies,
+          valuesArePackageNames: true,
+        },
+        {
+          heading: "Conflicts with",
+          value:
+            packageInfo.conflicts_with &&
+            Object.keys(packageInfo.conflicts_with).length
+              ? html`<ul>
+                  ${repeat(
+                    Object.entries(packageInfo.conflicts_with).flatMap(
+                      ([, identifiers]) => identifiers
+                    ),
+                    (identifier) => html`<li>${identifier}</li>`
+                  )}
+                </ul>`
+              : null,
+          valuesArePackageNames: true,
+        },
+      ],
     ];
   }
 }

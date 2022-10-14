@@ -41,6 +41,14 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
     return identifier !== name ? identifier : "";
   }
 
+  protected get description(): string {
+    return this.packageInfoAdapter.packageDescription(this.packageInfo);
+  }
+
+  protected get websiteURL(): string | undefined {
+    return this.packageInfoAdapter.packageWebsiteURL(this.packageInfo);
+  }
+
   protected shouldCauseRerender({ task: successfulTask }: QueuedTask): boolean {
     return (
       (["reindex-all", "reindex"].includes(successfulTask.type) &&
@@ -55,7 +63,7 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
     return !!packageManagerForName(this.packageManagerName).info(packageName);
   }
 
-  protected get fields(): PackageDetailField[] {
+  protected get fields(): PackageDetailField[][] {
     return this.packageInfoAdapter.packageDetails(this.packageInfo);
   }
 
