@@ -3,6 +3,7 @@ import {
   packageIdentifiersOfTask,
   QueuedTask,
 } from "components/tasks/model/Task";
+import taskQueue from "components/tasks/model/TaskQueue";
 import { customElement, property } from "lit/decorators.js";
 import {
   PackageDetailField,
@@ -22,7 +23,7 @@ import {
 @customElement("openstore-package-detail-view")
 export default class PackageDetailView<PackageInfo> extends ProductView {
   @property({ attribute: false })
-  packageInfo: any = {};
+  packageInfo: PackageInfo;
 
   private get packageManagerName(): string {
     return (window as any).openStore.decodeFragment(window.location.hash)
@@ -51,11 +52,9 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
 
   protected shouldCauseRerender({ task: successfulTask }: QueuedTask): boolean {
     return (
-      (["reindex-all", "reindex"].includes(successfulTask.type) &&
-        packageIdentifiersOfTask(successfulTask)?.includes(
-          this.packageInfoAdapter.packageIdentifier(this.packageInfo)
-        )) ??
-      false
+      packageIdentifiersOfTask(successfulTask)?.includes(
+        this.packageInfoAdapter.packageIdentifier(this.packageInfo)
+      ) ?? false
     );
   }
 
@@ -68,26 +67,40 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
   }
 
   protected get buttons(): Button[] {
+    const packageIdentifier = this.packageInfoAdapter.packageIdentifier(
+      this.packageInfo
+    );
+
     return [
       {
         title: "Install",
         color: "success",
+
         shown:
           !this.packageInfoAdapter.isPackageInstalled(this.packageInfo) &&
           !this.packageInfoAdapter.isPackageDisabled(this.packageInfo),
+
+        enabled: !taskQueue.liveForPackage(packageIdentifier).length,
+        loading: !!taskQueue.liveForPackage(packageIdentifier, "install")
+          .length,
+
         onClick: () =>
           installPackage(
             this.packageManagerName,
-            this.packageInfoAdapter.packageIdentifier(this.packageInfo),
+            packageIdentifier,
             this.packageInfoAdapter.packageName(this.packageInfo)
           ),
       },
       {
         title: "Launch",
         color: "primary",
+
         shown:
           this.packageInfoAdapter.isPackageInstalled(this.packageInfo) &&
           !!getCaskAppFileName(this.packageInfo),
+
+        enabled: !taskQueue.liveForPackage(packageIdentifier).length,
+
         onClick: async () => {
           const appFileName = getCaskAppFileName(this.packageInfo);
           if (appFileName) await window.openProduct.openApp(appFileName);
@@ -96,25 +109,37 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
       {
         title: "Update",
         color: "success",
+
         shown:
           this.packageInfoAdapter.isPackageInstalled(this.packageInfo) &&
           this.packageInfoAdapter.isPackageOutdated(this.packageInfo) &&
           !this.packageInfoAdapter.isPackageDisabled(this.packageInfo),
+
+        enabled: !taskQueue.liveForPackage(packageIdentifier).length,
+        loading: !!taskQueue.liveForPackage(packageIdentifier, "upgrade")
+          .length,
+
         onClick: () =>
           upgradePackage(
             this.packageManagerName,
-            this.packageInfoAdapter.packageIdentifier(this.packageInfo),
+            packageIdentifier,
             this.packageInfoAdapter.packageName(this.packageInfo)
           ),
       },
       {
         title: "Uninstall",
         color: "danger",
+
         shown: this.packageInfoAdapter.isPackageInstalled(this.packageInfo),
+
+        enabled: !taskQueue.liveForPackage(packageIdentifier).length,
+        loading: !!taskQueue.liveForPackage(packageIdentifier, "uninstall")
+          .length,
+
         onClick: () =>
           uninstallPackage(
             this.packageManagerName,
-            this.packageInfoAdapter.packageIdentifier(this.packageInfo),
+            packageIdentifier,
             this.packageInfoAdapter.packageName(this.packageInfo)
           ),
       },

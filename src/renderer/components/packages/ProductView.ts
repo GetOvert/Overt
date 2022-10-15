@@ -18,7 +18,12 @@ import {
 export type Button = {
   title: string;
   color: string;
+
   shown: boolean;
+
+  enabled?: boolean;
+  loading?: boolean;
+
   onClick: () => Promise<void>;
 };
 
@@ -52,7 +57,7 @@ export abstract class ProductView extends BootstrapBlockElement {
     taskQueue.removeObserver(this.taskQueueObserver);
 
     document.removeEventListener("keydown", this.keydown);
-    
+
     this.removePopperTooltips();
   }
 
@@ -61,10 +66,7 @@ export abstract class ProductView extends BootstrapBlockElement {
   }
 
   private taskQueueChanged(updatedTask: QueuedTask) {
-    if (
-      updatedTask.state === "succeeded" &&
-      this.shouldCauseRerender(updatedTask)
-    ) {
+    if (this.shouldCauseRerender(updatedTask)) {
       (window as any).openStore.displayPageForWindowLocation(
         document.querySelector("#content")
       );
@@ -115,15 +117,23 @@ export abstract class ProductView extends BootstrapBlockElement {
 
         <div class="text-center my-4">
           ${repeat(
-            this.buttons,
+            shownButtons,
             ({ title }) => title,
-            ({ title, color, shown, onClick }) => html`
+            ({ title, color, enabled, loading, onClick }) => html`
               <button
-                class="btn btn-${color}${shown ? "" : " d-none"}"
+                class="btn btn-${color}"
                 style="min-width: ${buttonWidth}vw; height: 2.7rem"
+                ?disabled=${!enabled}
                 @click=${onClick}
               >
                 ${title}
+                ${loading
+                  ? html`<span
+                      class="spinner-border spinner-border-sm text-white ms-2"
+                      style="vertical-align: text-bottom"
+                      role="status"
+                    ></span>`
+                  : ""}
               </button>
             `
           )}

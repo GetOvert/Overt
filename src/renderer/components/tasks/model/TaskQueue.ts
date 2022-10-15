@@ -1,6 +1,7 @@
 import {
   DeadTaskState,
   LiveTaskState,
+  packageIdentifiersOfTask,
   QueuedTask,
   Task,
   TaskNotifyPoints,
@@ -35,6 +36,14 @@ export class TaskQueue {
   }
   get allTasks(): readonly QueuedTask[] {
     return this._liveAndDeadQueue;
+  }
+
+  liveForPackage(packageIdentifier: string, taskType?: TaskType): QueuedTask[] {
+    return this._liveQueue.filter(
+      ({ task }) =>
+        (taskType === undefined || task.type === taskType) &&
+        packageIdentifiersOfTask(task)?.includes(packageIdentifier)
+    );
   }
 
   nextOfTypes(taskTypes: TaskType[]): QueuedTask | null {
