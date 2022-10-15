@@ -84,16 +84,17 @@ export default class BootstrapBlockElement extends LitElement {
   }
 
   protected popperTooltips: Tooltip[] = [];
+
   protected addPopperTooltips() {
     this.popperTooltips = Array.from(
       this.renderRoot.querySelectorAll('[data-bs-toggle="tooltip"]')
     ).map((tooltipHost) => new Tooltip(tooltipHost));
   }
-  
+
   protected removePopperTooltips() {
-    this.popperTooltips.forEach(tooltip => {
+    this.popperTooltips.forEach((tooltip) => {
       tooltip.dispose();
-    })
+    });
     this.popperTooltips = [];
   }
 }

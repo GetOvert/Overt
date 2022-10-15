@@ -68,7 +68,7 @@ const confirmationProcessor = new TaskProcessor(
       task.confirmButtonTitle,
       task.cancelButtonTitle
     );
-    if (!shouldContinue) return "cancelled";
+    if (!shouldContinue) return "canceled";
 
     taskQueue.push(task.action, task.notify);
     return "succeeded";

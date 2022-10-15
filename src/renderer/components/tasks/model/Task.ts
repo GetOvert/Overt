@@ -14,7 +14,7 @@ export type QueuedTask = {
 
 export type TaskState = LiveTaskState | DeadTaskState;
 const liveTaskStates = ["pending", "running"] as const;
-const deadTaskStates = ["cancelled", "succeeded", "failed"] as const;
+const deadTaskStates = ["canceled", "succeeded", "failed"] as const;
 export type LiveTaskState = typeof liveTaskStates[number];
 export type DeadTaskState = typeof deadTaskStates[number];
 export function isLiveTaskState(
