@@ -1,6 +1,6 @@
-import { isDeadTaskState, isLiveTaskState, QueuedTask } from "./model/Task";
-import taskQueue from "./model/TaskQueue";
-import TasksButton from "./TasksButton";
+import { isDeadTaskState, isLiveTaskState, QueuedTask } from "../Task";
+import taskQueue from "../TaskQueue";
+import TasksButton from "../../components/tasks/TasksButton";
 
 taskQueue.addObserver(async (queuedTask: QueuedTask) => {
   if (!(await window.settings.get("sendNativeNotifications"))) return;

@@ -3,8 +3,8 @@ import {
   ReindexTask,
   UninstallTask,
   UpgradeTask,
-} from "components/tasks/model/Task";
-import taskQueue from "components/tasks/model/TaskQueue";
+} from "tasks/Task";
+import taskQueue from "tasks/TaskQueue";
 
 export async function installPackage(
   packageManager: string,

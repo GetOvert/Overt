@@ -1,4 +1,4 @@
-import { TaskBase } from "components/tasks/model/Task";
+import { TaskBase } from "tasks/Task";
 
 declare global {
   interface Window {

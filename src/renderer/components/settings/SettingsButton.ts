@@ -1,6 +1,6 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
-import FloatingPane from "components/floating-pane/FloatingPane";
-import IconButton from "components/icon-button/IconButton";
+import FloatingPane from "components/ui-elements/floating-pane/FloatingPane";
+import IconButton from "components/ui-elements/icon-button/IconButton";
 import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 

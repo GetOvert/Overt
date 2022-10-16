@@ -1,12 +1,11 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
-import { QueuedTask } from "components/tasks/model/Task";
-import taskQueue, { TaskQueueObserver } from "components/tasks/model/TaskQueue";
+import { QueuedTask } from "tasks/Task";
+import taskQueue, { TaskQueueObserver } from "tasks/TaskQueue";
 import {
   css,
   CSSResultArray,
   html,
   HTMLTemplateResult,
-  PropertyValueMap,
   PropertyValues,
 } from "lit";
 import { repeat } from "lit/directives/repeat.js";

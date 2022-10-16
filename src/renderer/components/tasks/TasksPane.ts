@@ -1,16 +1,10 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import TerminalButton from "components/terminal/TerminalButton";
-import {
-  css,
-  html,
-  HTMLTemplateResult,
-  PropertyValueMap,
-  PropertyValues,
-} from "lit";
+import { css, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
-import { isLiveTaskState, QueuedTask, TaskState, TaskType } from "./model/Task";
-import taskQueue, { TaskQueueObserver } from "./model/TaskQueue";
+import { isLiveTaskState, QueuedTask } from "../../tasks/Task";
+import taskQueue, { TaskQueueObserver } from "../../tasks/TaskQueue";
 
 @customElement("openstore-tasks-pane")
 export class TasksPane extends BootstrapBlockElement {

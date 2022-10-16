@@ -1,7 +1,7 @@
 import { IPCSourceRepositories } from "ipc/IPCSourceRepositories";
 import { SourceRepository } from "package-manager/SourceRepository";
-import { sql } from "util/sql";
-import { cacheDB, cacheDB_addSchema } from "./cacheDB";
+import { sql } from "preload/shared/db/sql";
+import { cacheDB, cacheDB_addSchema } from "./db/cacheDB";
 
 cacheDB_addSchema(
   sql`

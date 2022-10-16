@@ -6,14 +6,14 @@ import {
   cacheDB_addSchema,
   cacheDB_lastFullIndexJsTimestamp,
   cacheDB_updateLastFullIndexJsTimestamp,
-} from "../cacheDB";
+} from "preload/shared/db/cacheDB";
 import {
   deleteAllRecords,
   deleteRecords,
   insertOrReplaceRecords,
   sql,
-} from "util/sql";
-import terminal from "../terminal";
+} from "preload/shared/db/sql";
+import terminal from "preload/shared/terminal";
 import path from "path";
 import {
   IPCWinget,
@@ -21,7 +21,6 @@ import {
 } from "ipc/package-managers/Windows/IPCWinget";
 import { downloadWingetManifests } from "./winget-to-json/download";
 import { extractWingetManifests } from "./winget-to-json/extract";
-import { SourceRepository } from "package-manager/SourceRepository";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day

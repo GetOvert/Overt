@@ -1,7 +1,7 @@
 import { html } from "lit";
 import { packageManagerForName } from "package-manager/PackageManagerRegistry";
-import ActionConfirmationModal from "./modal/ActionConfirmationModal";
-import PasswordPromptModal from "./modal/PasswordPromptModal";
+import ActionConfirmationModal from "components/modal/ActionConfirmationModal";
+import PasswordPromptModal from "components/modal/PasswordPromptModal";
 import {
   packageIdentifiersOfTask,
   ReindexTask,
@@ -9,8 +9,8 @@ import {
   TaskType,
   Task,
   DeadTaskState,
-} from "./tasks/model/Task";
-import taskQueue from "./tasks/model/TaskQueue";
+} from "../Task";
+import taskQueue from "../TaskQueue";
 
 class TaskProcessor<TaskTypes extends TaskType[]> {
   constructor(

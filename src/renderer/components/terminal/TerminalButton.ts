@@ -1,7 +1,7 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
-import FloatingPane from "components/floating-pane/FloatingPane";
+import FloatingPane from "components/ui-elements/floating-pane/FloatingPane";
 import { html } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement } from "lit/decorators.js";
 
 @customElement("openstore-terminal-button")
 export default class TerminalButton extends BootstrapBlockElement {

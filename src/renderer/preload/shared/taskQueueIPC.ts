@@ -1,4 +1,4 @@
-import { TaskBase, TaskNotifyPoints } from "components/tasks/model/Task";
+import { TaskBase, TaskNotifyPoints } from "tasks/Task";
 import { IPCTaskQueue } from "ipc/IPCTaskQueue";
 
 export let push: (task: TaskBase, notify: TaskNotifyPoints) => void;

@@ -1,5 +1,4 @@
 import { Database } from "better-sqlite3";
-import { promisify } from "util";
 
 // Install a VS Code extension and use this template literal tag to get syntax highlighting for inline SQL.
 // https://stackoverflow.com/questions/59643297/how-to-syntax-highlight-autocomplete-autoformat-sql-command-inside-javascript

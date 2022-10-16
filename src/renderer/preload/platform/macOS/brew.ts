@@ -6,23 +6,22 @@ import {
   cacheDB_addSchema,
   cacheDB_lastFullIndexJsTimestamp,
   cacheDB_updateLastFullIndexJsTimestamp,
-} from "../cacheDB";
+} from "preload/shared/db/cacheDB";
 import {
   deleteAllRecords,
   deleteRecords,
   insertOrReplaceRecords,
   sql,
-} from "util/sql";
+} from "preload/shared/db/sql";
 import {
   BrewPackageInfo,
   IPCBrew,
   SortKey,
 } from "ipc/package-managers/macOS/IPCBrew";
-import terminal from "../terminal";
-import * as taskQueue from "../taskQueueIPC";
-import { PromptForPasswordTask } from "components/tasks/model/Task";
+import terminal from "preload/shared/terminal";
+import * as taskQueue from "preload/shared/taskQueueIPC";
+import { PromptForPasswordTask } from "tasks/Task";
 import { getBrewExecutablePath } from "./brewCask";
-import { SourceRepository } from "package-manager/SourceRepository";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day

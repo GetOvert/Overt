@@ -1,12 +1,12 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import { css, html, HTMLTemplateResult, PropertyValues } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import taskQueue from "components/tasks/model/TaskQueue";
+import taskQueue from "tasks/TaskQueue";
 import {
   AddSourceRepositoryTask,
   ReindexAllTask,
   RemoveSourceRepositoryTask,
-} from "components/tasks/model/Task";
+} from "tasks/Task";
 import SourceRepositoriesModal from "components/modal/SourceRepositoriesModal";
 import { allPackageMangers } from "package-manager/PackageManagerRegistry";
 
@@ -19,9 +19,7 @@ export class SettingsPane extends BootstrapBlockElement {
   @state()
   sendNativeNotifications: boolean;
 
-  protected updated(
-    changedProperties: PropertyValues<this>
-  ): void {
+  protected updated(changedProperties: PropertyValues<this>): void {
     this.addPopperTooltips();
     this.fetchSettingsValues();
   }

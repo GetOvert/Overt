@@ -1,10 +1,10 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
-import FloatingPane from "components/floating-pane/FloatingPane";
+import FloatingPane from "components/ui-elements/floating-pane/FloatingPane";
 import TerminalButton from "components/terminal/TerminalButton";
 import { html } from "lit";
 import { customElement, state } from "lit/decorators.js";
-import { isLiveTaskState } from "./model/Task";
-import taskQueue, { TaskQueueObserver } from "./model/TaskQueue";
+import { isLiveTaskState } from "../../tasks/Task";
+import taskQueue, { TaskQueueObserver } from "../../tasks/TaskQueue";
 import { TasksPane } from "./TasksPane";
 
 @customElement("openstore-tasks-button")

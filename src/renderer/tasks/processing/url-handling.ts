@@ -9,8 +9,8 @@ import {
   Task,
   TaskNotifyPoints,
   urlInTask,
-} from "./tasks/model/Task";
-import taskQueue from "./tasks/model/TaskQueue";
+} from "../Task";
+import taskQueue from "../TaskQueue";
 
 export async function handleURL(urlString: string) {
   try {

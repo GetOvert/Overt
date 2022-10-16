@@ -1,10 +1,10 @@
 import cloneDeep from "clone-deep";
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
-import "components/card/Card";
+import "components/ui-elements/card/Card";
 import "components/grid/bootstrap-grid";
 import "components/grid/css-grid";
-import { QueuedTask, ReindexAllTask } from "components/tasks/model/Task";
-import taskQueue, { TaskQueueObserver } from "components/tasks/model/TaskQueue";
+import { QueuedTask, ReindexAllTask } from "tasks/Task";
+import taskQueue, { TaskQueueObserver } from "tasks/TaskQueue";
 import {
   FilterKey,
   IPCPackageManager,

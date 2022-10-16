@@ -1,5 +1,5 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
-import { css, html } from "lit";
+import { html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 @customElement("openstore-icon-button")

@@ -6,24 +6,23 @@ import {
   cacheDB_addSchema,
   cacheDB_lastFullIndexJsTimestamp,
   cacheDB_updateLastFullIndexJsTimestamp,
-} from "../cacheDB";
+} from "preload/shared/db/cacheDB";
 import {
   deleteAllRecords,
   deleteRecords,
   insertOrReplaceRecords,
   sql,
-} from "util/sql";
+} from "preload/shared/db/sql";
 import {
   BrewCaskPackageInfo,
   IPCBrewCask,
   SortKey,
 } from "ipc/package-managers/macOS/IPCBrewCask";
-import terminal from "../terminal";
-import * as taskQueue from "../taskQueueIPC";
-import { PromptForPasswordTask } from "components/tasks/model/Task";
-import settings from "../settings";
+import terminal from "preload/shared/terminal";
+import * as taskQueue from "preload/shared/taskQueueIPC";
+import { PromptForPasswordTask } from "tasks/Task";
+import settings from "preload/shared/settings";
 import path from "path";
-import { SourceRepository } from "package-manager/SourceRepository";
 import brew from "./brew";
 
 // TODO: Make user-configurable?

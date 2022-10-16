@@ -1,9 +1,6 @@
 import { Button, ProductView } from "components/packages/ProductView";
-import {
-  packageIdentifiersOfTask,
-  QueuedTask,
-} from "components/tasks/model/Task";
-import taskQueue from "components/tasks/model/TaskQueue";
+import { packageIdentifiersOfTask, QueuedTask } from "tasks/Task";
+import taskQueue from "tasks/TaskQueue";
 import { customElement, property } from "lit/decorators.js";
 import {
   PackageDetailField,

@@ -32,30 +32,30 @@ import Color from "color";
 import "bootswatch/dist/sandstone/bootstrap.min.css";
 import "styles/default.css";
 
-import "core/nav";
+import "nav/nav";
 
 import "components/sidebar/Sidebar";
 import "components/packages/PackagesView";
 import "components/packages/PackageDetailView";
-import "components/tasks/TasksPane";
 import "components/settings/SettingsPane";
+import "components/settings/SettingsButton";
+import "components/tasks/TasksPane";
 import "components/tasks/TasksButton";
-import "components/settings-button/SettingsButton";
-import "components/floating-pane/FloatingPane";
-import "components/icon-button/IconButton";
+import "components/ui-elements/floating-pane/FloatingPane";
+import "components/ui-elements/icon-button/IconButton";
 import "components/terminal/TerminalButton";
 import "components/terminal/terminal";
-import "components/task-processing";
-import "components/url-handling";
-import "components/tasks/task-notifications";
+import "tasks/processing/task-processing";
+import "tasks/processing/url-handling";
+import "tasks/processing/task-notifications";
 import "components/modal/PasswordPromptModal";
 
-import taskQueue from "components/tasks/model/TaskQueue";
+import taskQueue from "tasks/TaskQueue";
 import {
   ReindexAllTask,
   ReindexOutdatedTask,
   ReindexSourceRepositoriesTask,
-} from "components/tasks/model/Task";
+} from "tasks/Task";
 import { allPackageMangers } from "package-manager/PackageManagerRegistry";
 
 const accentColor = window.theme.getAccentColor();
