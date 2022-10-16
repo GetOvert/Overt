@@ -1,6 +1,6 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import { css, html } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, query } from "lit/decorators.js";
 
 @customElement("openstore-card")
 export default class Card extends BootstrapBlockElement {
@@ -17,15 +17,22 @@ export default class Card extends BootstrapBlockElement {
   @property()
   href = "#";
 
+  @query(".openstore-card-link")
+  linkElement: HTMLAnchorElement | null;
+
   static styles = [
     BootstrapBlockElement.styles,
     css`
+      .user-select-none {
+        -webkit-user-drag: none;
+      }
+
       .card,
       .card * {
         z-index: 2;
       }
       .card:hover::before,
-      .openstore-card-link:focus .card::before {
+      .openstore-card-link:focus-visible .card::before {
         content: "";
         position: absolute;
         z-index: 1;
@@ -91,5 +98,9 @@ export default class Card extends BootstrapBlockElement {
         this.href
       );
     }
+  }
+
+  focus(options?: FocusOptions | undefined): void {
+    this.linkElement?.focus(options);
   }
 }

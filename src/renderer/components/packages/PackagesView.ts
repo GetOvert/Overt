@@ -45,6 +45,8 @@ export default class AppsView<
   @state()
   private _loadedCount = 0;
   @state()
+  private _batchNumber = 0;
+  @state()
   private _canLoadMore = true;
 
   private _scrollContainerRef: Ref<HTMLElement> = createRef();
@@ -105,6 +107,7 @@ export default class AppsView<
   private _reset() {
     this._appGenerators = [];
     this._loadedCount = 0;
+    this._batchNumber = 0;
     this._canLoadMore = true;
   }
 
@@ -122,6 +125,7 @@ export default class AppsView<
         this.offset,
         (result) => {
           this._loadedCount += result.length;
+          this._batchNumber += 1;
           this._canLoadMore = result.length === limit;
 
           window.setTimeout(() => {
@@ -135,6 +139,8 @@ export default class AppsView<
             } else {
               this._scrollContainer.scrollTo({ top: 0 });
             }
+            this.focusFirstCardInBatch();
+
             lastRouteParams = cloneDeep(routeParams);
           }, 0);
         }
@@ -144,9 +150,16 @@ export default class AppsView<
     this.requestUpdate();
   }
 
-  protected firstUpdated(
-    changedProperties: PropertyValues<this>
-  ): void {
+  private focusFirstCardInBatch(): void {
+    if (this._batchNumber === 1) return;
+
+    const card = this.renderRoot?.querySelector<HTMLElement>(
+      `openstore-card.batch-${this._batchNumber}`
+    );
+    card?.focus({ preventScroll: true });
+  }
+
+  protected firstUpdated(changedProperties: PropertyValues<this>): void {
     this._scrollContainer.addEventListener(
       "scroll",
       () => {
@@ -156,9 +169,7 @@ export default class AppsView<
     );
   }
 
-  protected updated(
-    changedProperties: PropertyValues<this>
-  ): void {
+  protected updated(changedProperties: PropertyValues<this>): void {
     if (changedProperties.has("offset")) {
       this._scrollContainer.scrollTo({ top: lastScrollY });
     }
@@ -283,6 +294,7 @@ export default class AppsView<
                 return html`
                   <openstore-col class="mx-2">
                     <openstore-card
+                      class=${`batch-${this._batchNumber}`}
                       .title=${name}
                       .subtitle=${identifier !== name ? identifier : ""}
                       .status=${isInstalled
