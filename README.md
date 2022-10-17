@@ -39,7 +39,7 @@ If you encounter a bug or would like to request a feature, please check the [iss
 
 ### Setup
 
-To develop Overt, use [Visual Studio Code](https://code.visualstudio.com/) (available on Overt!) with the following extensions:
+To develop Overt, use [Visual Studio Code](https://code.visualstudio.com/) (available [on Overt](https://getovert.app/open?action=overt:brew-cask%3F1=install%261[name]=visual-studio-code)) with the following extensions:
 
 - [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) — you should set this up to run on file save for JS, TS, and HTML
 - [Inline HTML](https://marketplace.visualstudio.com/items?itemName=pushqrdx.inline-html) — highlights and allows Prettier to format Lit's `html` and `css` template literals
