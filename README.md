@@ -19,7 +19,7 @@ Overt **does**:
 - Install, update, and uninstall apps with a single click
 - Let you add your own source repositories
 
-<a href="https://getovert.app">About</a> • <a href="https://getovert.app/install">Install</a>
+<a href="https://getovert.app/about">About</a> • <a href="https://getovert.app/install">Install</a>
 
 ## Bugs and feature requests
 
