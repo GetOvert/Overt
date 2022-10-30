@@ -4,6 +4,9 @@ import { customElement, property } from "lit/decorators.js";
 
 @customElement("openstore-icon-button")
 export default class IconButton extends BootstrapBlockElement {
+  @property({ attribute: "btn-class" })
+  btnClass = "btn-outline-secondary";
+
   @property({ type: Boolean })
   active = false;
 
@@ -13,7 +16,7 @@ export default class IconButton extends BootstrapBlockElement {
     return html`${BootstrapBlockElement.styleLink}
 
       <button
-        class="btn btn-outline-secondary ${this.active ? "active" : ""}"
+        class="btn ${this.btnClass} ${this.active ? "active" : ""}"
         style="padding-top: 2px"
       >
         <slot>
