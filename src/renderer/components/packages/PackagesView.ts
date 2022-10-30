@@ -260,7 +260,20 @@ export default class AppsView<
             ${this.animatedLoadingText("Building catalog…")}
           </h1>
           <p class="text-muted fst-italic fw-normal mt-3">
-            This may take a minute or two
+            ${navigator.onLine
+              ? "This will take a few seconds"
+              : html`
+                  <h2 class="text-warning fs-4">Currently offline</h2>
+                  <p>
+                    Since this info can't be pulled from the internet,<br />
+                    this may take a minute or two
+                  </p>
+                  <p>
+                    Your catalog will not have the latest information;<br />
+                    to update it later, select <b>Rebuild Catalog</b> in
+                    Settings
+                  </p>
+                `}
           </p>
         </div>
 

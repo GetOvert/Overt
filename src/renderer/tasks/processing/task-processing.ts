@@ -88,15 +88,15 @@ const reindexProcessor = new TaskProcessor(
         success = true;
         break;
       case "reindex-outdated":
-        await packageManager.reindexOutdated();
+        await packageManager.indexOutdated();
         success = true;
         break;
       case "reindex":
-        await packageManager.updateIndex(task.packageIdentifiers);
+        await packageManager.indexSpecific(task.packageIdentifiers);
         success = true;
         break;
       case "reindex-source-repositories":
-        await packageManager.reindexSourceRepositories();
+        await packageManager.indexSourceRepositories();
         success = true;
         break;
     }

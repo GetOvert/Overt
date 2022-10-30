@@ -1,4 +1,3 @@
-import { spawn } from "child_process";
 import { quote } from "shell-quote";
 
 import {
@@ -24,6 +23,7 @@ import { PromptForPasswordTask } from "tasks/Task";
 import settings from "preload/shared/settings";
 import path from "path";
 import brew from "./brew";
+import { runBackgroundProcess } from "../shared";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
@@ -54,41 +54,64 @@ if (process.platform === "darwin") {
 
 let indexListeners = new Set<() => void>();
 
-type CaskAnalyticsData = {
-  formulae: { [key: string]: [{ cask: string; count: number }] };
+export type TapInfo = {
+  name: string;
+  user: string;
+  repo: string;
+  path: string;
+  installed: boolean;
+  official: boolean;
+
+  formula_names: string[];
+  formula_files: string[];
+  cask_tokens: string[];
+  cask_files: string[];
+  command_files: string[];
+
+  remote: string;
+  custom_remote: string | null;
+  private: boolean;
 };
+
+export type BrewAnalyticsAll = {
+  installed_30d: BrewAnalyticsResponse;
+  installed_90d: BrewAnalyticsResponse;
+  installed_365d: BrewAnalyticsResponse;
+};
+
+export type BrewAnalyticsResponse = {
+  formulae: {
+    [caskToken: string]: [
+      {
+        cask: string;
+        count: number;
+      }
+    ];
+  };
+};
+
+// const impl = new (class {
+// async rebuildIndex(condition, wipeIndexFirst) {
+// }
+// })();
+
+// function objectFromPrototype(objectWithPrototype: ): any {
+//   const prototype = Object.getPrototypeOf(objectWithPrototype);
+//   const properties = Object.getOwnPropertyNames(
+//     prototype
+//   );
+
+//   const newObject: object = {};
+//   for (const property of properties) {
+//     newObject[property] = prototype[property];
+//   }
+// }
 
 const brewCask: IPCBrewCask = {
   name: "brew-cask",
 
   addIndexListener(listener: () => void) {
     indexListeners.add(listener);
-  },
-
-  async reindexOutdated(): Promise<void> {
-    const brewProcess = spawn(await getBrewExecutablePath(), [
-      "outdated",
-      "--cask",
-      "--greedy-latest",
-    ]);
-
-    let stdout = "";
-    let stderr = "";
-    brewProcess.stdout.on("data", (data) => {
-      stdout += data;
-    });
-    brewProcess.stderr.on("data", (data) => {
-      console.error(`stderr: ${data}`);
-      stderr += data;
-    });
-
-    return new Promise((resolve, reject) => {
-      brewProcess.on("exit", async (code) => {
-        await brewCask.updateIndex(stdout.split(/\s+/).filter((s) => s));
-        resolve();
-      });
-      brewProcess.on("error", reject);
-    });
   },
 
   async rebuildIndex(condition, wipeIndexFirst) {
@@ -113,106 +136,152 @@ const brewCask: IPCBrewCask = {
       condition === "always"
     ) {
       if (wipeIndexFirst) deleteAllRecords(cacheDB(), "casks");
-      await brewCask.updateIndex();
+      await brewCask.indexAll();
     }
   },
 
-  async updateIndex(caskNames?: string[]): Promise<void> {
-    if (Array.isArray(caskNames) && caskNames.length === 0) return;
+  async indexAll(): Promise<void> {
+    try {
+      await runBackgroundBrewProcess(["update", "--quiet"]);
+    } catch (error) {
+      console.error(error);
+      return await (brewCask as any)._indexWithoutInternet();
+    }
 
-    (await (async () => {
-      if (!caskNames) {
-        // Updating index for all, so we'd might as well fetch from remote
-        // while we're at it.
-        try {
-          await (brewCask as any)._runBrewUpdate();
-        } catch (error) {
-          // Bad omen...
-          console.error(error);
-        }
-      }
+    await Promise.all([
+      (brewCask as any)._indexOfficial(),
+      (brewCask as any)._indexUnofficial(),
+    ]);
 
-      const brewProcess = spawn(await getBrewExecutablePath(), [
+    (brewCask as any)._postIndexing();
+  },
+
+  async indexOutdated(): Promise<void> {
+    const stdout: string = await runBackgroundBrewProcess([
+      "outdated",
+      "--cask",
+      "--greedy-latest",
+    ]);
+
+    await brewCask.indexSpecific(stdout.split(/\s+/).filter((s) => s));
+  },
+
+  async indexSpecific(caskNames: string[]): Promise<void> {
+    const { casks } = JSON.parse(
+      await runBackgroundBrewProcess([
         "info",
         "--json=v2",
         "--cask",
-        ...(caskNames ?? ["--eval-all"]),
-      ]);
+        ...caskNames,
+      ])
+    );
 
-      let json = "";
-      let stderr = "";
-      brewProcess.stdout.on("data", (data) => {
-        json += data;
-      });
-      brewProcess.stderr.on("data", (data) => {
-        console.error(`stderr: ${data}`);
-        stderr += data;
-      });
+    await (brewCask as any)._ingestCaskInfo(casks, {
+      deleteIfUnavailable: caskNames,
+    });
 
-      return new Promise((resolve, reject) => {
-        brewProcess.on("exit", async (code) => {
-          if (code !== 0) return reject(stderr);
+    (brewCask as any)._postIndexing();
+  },
 
-          const installs30d = await (
+  async _indexOfficial(): Promise<void> {
+    const casksFromAPI: BrewCaskPackageInfo[] = await (
+      await fetch("https://formulae.brew.sh/api/cask.json")
+    ).json();
+
+    // The API returns some garbage `installed` and `outdated` values,
+    // so make sure those fields are cleared
+    for (const cask of casksFromAPI) {
+      cask.installed = null;
+      cask.outdated = false;
+    }
+
+    const analytics = await (brewCask as any)._fetchOfficialAnalytics();
+
+    await (brewCask as any)._ingestCaskInfo(casksFromAPI, {
+      analytics,
+    });
+
+    // The API response can't tell us what's installed locally,
+    // so reindex installed packages as a 2nd step
+    const { casks } = JSON.parse(
+      await runBackgroundBrewProcess([
+        "info",
+        "--json=v2",
+        "--cask",
+        "--installed",
+      ])
+    );
+
+    await (brewCask as any)._ingestCaskInfo(casks, {
+      analytics,
+    });
+  },
+
+  async _fetchOfficialAnalytics(): Promise<BrewAnalyticsAll> {
+    const [installed_30d, installed_90d, installed_365d] = await Promise.all(
+      ["30d", "90d", "365d"].map(
+        async (days) =>
+          await (
             await fetch(
-              "https://formulae.brew.sh/api/analytics/cask-install/homebrew-cask/30d.json"
+              `https://formulae.brew.sh/api/analytics/cask-install/homebrew-cask/${days}.json`
             )
-          ).json();
-          const installs90d = await (
-            await fetch(
-              "https://formulae.brew.sh/api/analytics/cask-install/homebrew-cask/90d.json"
-            )
-          ).json();
-          const installs365d = await (
-            await fetch(
-              "https://formulae.brew.sh/api/analytics/cask-install/homebrew-cask/365d.json"
-            )
-          ).json();
+          ).json()
+      )
+    );
 
-          await (brewCask as any)._rebuildIndexFromCaskInfo(
-            caskNames,
-            JSON.parse(json).casks,
-            installs30d,
-            installs90d,
-            installs365d
-          );
-          resolve();
-        });
-        brewProcess.on("error", reject);
-      });
-    })()) as void;
+    return {
+      installed_30d,
+      installed_90d,
+      installed_365d,
+    };
+  },
 
+  async _indexUnofficial(): Promise<void> {
+    const taps: TapInfo[] = JSON.parse(
+      await runBackgroundBrewProcess(["tap-info", "--json=v1", "--installed"])
+    );
+
+    const unofficialTaps: TapInfo[] = taps.filter(({ official }) => !official);
+
+    const unofficialCasks = unofficialTaps.flatMap(
+      ({ cask_tokens }) => cask_tokens
+    );
+
+    await brewCask.indexSpecific(unofficialCasks);
+  },
+
+  async _indexWithoutInternet(): Promise<void> {
+    const { casks } = JSON.parse(
+      await runBackgroundBrewProcess([
+        "info",
+        "--json=v2",
+        "--cask",
+        "--eval-all",
+      ])
+    );
+
+    await (brewCask as any)._ingestCaskInfo(casks);
+  },
+
+  _postIndexing(): void {
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
 
     cacheDB_updateLastFullIndexJsTimestamp();
   },
 
-  async _runBrewUpdate(): Promise<void> {
-    const brewUpdateProcess = spawn(await getBrewExecutablePath(), [
-      "update",
-      "--quiet",
-    ]);
-
-    return new Promise((resolve, reject) => {
-      brewUpdateProcess.on("exit", resolve);
-      brewUpdateProcess.on("error", reject);
-    });
-  },
-
-  async _rebuildIndexFromCaskInfo(
-    caskNamesToUpdate: string[] | undefined,
-    casks: any[],
-    installs30d: CaskAnalyticsData,
-    installs90d: CaskAnalyticsData,
-    installs365d: CaskAnalyticsData
+  async _ingestCaskInfo(
+    casks: BrewCaskPackageInfo[],
+    {
+      analytics,
+      deleteIfUnavailable,
+    }: {
+      analytics?: BrewAnalyticsAll;
+      deleteIfUnavailable?: string[];
+    } = {}
   ) {
-    console.log(
-      "indexing casks: " +
-        (Array.isArray(caskNamesToUpdate)
-          ? caskNamesToUpdate.join(", ")
-          : "all")
-    );
+    const { installed_30d, installed_90d, installed_365d } = analytics ?? {};
+
     insertOrReplaceRecords(
       cacheDB(),
       "casks",
@@ -239,13 +308,13 @@ const brewCask: IPCBrewCask = {
         outdated: +cask.outdated,
         auto_updates: cask.auto_updates ? 1 : 0,
 
-        installed_30d: installs30d?.formulae?.[cask.full_token]?.[0]?.count
+        installed_30d: installed_30d?.formulae?.[cask.full_token]?.[0]?.count
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
-        installed_90d: installs90d?.formulae?.[cask.full_token]?.[0]?.count
+        installed_90d: installed_90d?.formulae?.[cask.full_token]?.[0]?.count
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
-        installed_365d: installs365d?.formulae?.[cask.full_token]?.[0]?.count
+        installed_365d: installed_365d?.formulae?.[cask.full_token]?.[0]?.count
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
 
@@ -253,17 +322,18 @@ const brewCask: IPCBrewCask = {
       }))
     );
 
-    if (caskNamesToUpdate) {
+    if (deleteIfUnavailable) {
       deleteRecords(
         cacheDB(),
         "casks",
-        caskNamesToUpdate
+        deleteIfUnavailable
           .map((caskName) => {
-            const caskInfo: any = brewCask.info(caskName);
+            const caskInfo = brewCask.info(caskName);
             if (!caskInfo) return null; // Not in DB anyway
             if (caskInfo?.installed) return null; // Still installed
 
-            return caskInfo.rowid; // Delete from DB
+            // Cask should be deleted from DB
+            return (caskInfo as any).rowid;
           })
           .filter((x) => x)
       );
@@ -466,7 +536,7 @@ const brewCask: IPCBrewCask = {
     });
   },
 
-  async reindexSourceRepositories(): Promise<void> {
+  async indexSourceRepositories(): Promise<void> {
     // Handled by brew
   },
 
@@ -493,6 +563,12 @@ function dbKeyForSortKey(sortKey: SortKey): string {
     default:
       return "added";
   }
+}
+
+export async function runBackgroundBrewProcess(
+  args: string[]
+): Promise<string> {
+  return await runBackgroundProcess(await getBrewExecutablePath(), args);
 }
 
 export async function getBrewExecutablePath(): Promise<string> {

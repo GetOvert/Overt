@@ -1,4 +1,3 @@
-import { spawn } from "child_process";
 import { quote } from "shell-quote";
 
 import {
@@ -21,6 +20,7 @@ import {
 } from "ipc/package-managers/Windows/IPCWinget";
 import { downloadWingetManifests } from "./winget-to-json/download";
 import { extractWingetManifests } from "./winget-to-json/extract";
+import { runBackgroundProcess } from "../shared";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
@@ -48,32 +48,6 @@ const winget: IPCWinget = {
     indexListeners.add(listener);
   },
 
-  async reindexOutdated(): Promise<void> {
-    const wingetProcess = spawn(await getWingetExecutablePath(), [
-      "upgrade",
-      ...wingetCommonArguments(),
-      ...wingetInstallationCommandArguments(),
-    ]);
-
-    let stdout = "";
-    let stderr = "";
-    wingetProcess.stdout.on("data", (data) => {
-      stdout += data;
-    });
-    wingetProcess.stderr.on("data", (data) => {
-      console.error(`stderr: ${data}`);
-      stderr += data;
-    });
-
-    return new Promise((resolve, reject) => {
-      wingetProcess.on("exit", async (code) => {
-        await winget.updateIndex(stdout.split(/\s+/).filter((s) => s));
-        resolve();
-      });
-      wingetProcess.on("error", reject);
-    });
-  },
-
   async rebuildIndex(condition, wipeIndexFirst) {
     if (!condition) condition = "always";
 
@@ -96,12 +70,34 @@ const winget: IPCWinget = {
       condition === "always"
     ) {
       if (wipeIndexFirst) deleteAllRecords(cacheDB(), "winget_packages");
-      await winget.updateIndex();
+      await winget.indexAll();
     }
   },
 
-  async updateIndex(packageNames?: string[]): Promise<void> {
-    if (Array.isArray(packageNames) && packageNames.length === 0) return;
+  async indexAll(): Promise<void> {
+    // TODO: Parameterize URL
+    const manifestsPath = await downloadWingetManifests(
+      "https://github.com/microsoft/winget-pkgs/archive/master.zip"
+    );
+    const manifests = extractWingetManifests(manifestsPath);
+
+    (winget as any)._ingestPackageInfo(undefined, manifests);
+
+    (winget as any)._postIndexing();
+  },
+
+  async indexOutdated(): Promise<void> {
+    const stdout = await runBackgroundWingetProcess([
+      "upgrade",
+      ...wingetCommonArguments(),
+      ...wingetInstallationCommandArguments(),
+    ]);
+
+    await winget.indexSpecific(stdout.split(/\s+/).filter((s) => s));
+  },
+
+  async indexSpecific(packageNames: string[]): Promise<void> {
+    if (packageNames.length === 0) return;
 
     // TODO: Parameterize URL
     const manifestsPath = await downloadWingetManifests(
@@ -109,24 +105,28 @@ const winget: IPCWinget = {
     );
     const manifests = extractWingetManifests(manifestsPath);
 
-    (winget as any)._rebuildIndexFromPackageInfo(packageNames, manifests);
+    (winget as any)._ingestPackageInfo(packageNames, manifests);
 
+    (winget as any)._postIndexing();
+  },
+
+  _postIndexing(): void {
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
 
     cacheDB_updateLastFullIndexJsTimestamp();
   },
 
-  async _rebuildIndexFromPackageInfo(
-    packageNamesToUpdate: string[] | undefined,
-    packages: WingetPackageInfo[]
+  async _ingestPackageInfo(
+    packages: WingetPackageInfo[],
+    {
+      deleteIfUnavailable,
+    }: {
+      deleteIfUnavailable?: string[];
+    }
   ) {
-    console.log(
-      "indexing packages: " +
-        (Array.isArray(packageNamesToUpdate)
-          ? packageNamesToUpdate.join(", ")
-          : "all")
-    );
+    console.dir(packages);
+
     insertOrReplaceRecords(
       cacheDB(),
       "winget_packages",
@@ -142,17 +142,18 @@ const winget: IPCWinget = {
       }))
     );
 
-    if (packageNamesToUpdate) {
+    if (deleteIfUnavailable) {
       deleteRecords(
         cacheDB(),
         "winget_packages",
-        packageNamesToUpdate
-          .map((packageName) => winget.info(packageName))
-          .map((packageInfo) => {
+        deleteIfUnavailable
+          .map((packageName) => {
+            const packageInfo = winget.info(packageName);
             if (!packageInfo) return null; // Not in DB anyway
             if (packageInfo?.installedVersion) return null; // Still installed
 
-            return (packageInfo as any).rowid; // Delete from DB
+            // Package should be deleted from DB
+            return (packageInfo as any).rowid;
           })
           .filter((x) => x)
       );
@@ -302,7 +303,7 @@ const winget: IPCWinget = {
     });
   },
 
-  async reindexSourceRepositories(): Promise<void> {
+  async indexSourceRepositories(): Promise<void> {
     // TODO: unimplemented
     throw new Error("unimplemented");
   },
@@ -326,7 +327,11 @@ function wingetInstallationCommandArguments(): string[] {
   return ["--id", "--exact", "--accept-package-agreements"];
 }
 
-export async function getWingetExecutablePath(): Promise<string> {
+async function runBackgroundWingetProcess(args: string[]): Promise<string> {
+  return await runBackgroundProcess(await getWingetExecutablePath(), args);
+}
+
+async function getWingetExecutablePath(): Promise<string> {
   return path.join(
     process.env.LOCALAPPDATA!,
     "Microsoft",

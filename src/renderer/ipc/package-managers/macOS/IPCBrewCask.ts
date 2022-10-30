@@ -12,7 +12,7 @@ declare global {
   }
 }
 
-export type IPCBrewCask = IPCPackageManager<object, SortKey>;
+export type IPCBrewCask = IPCPackageManager<BrewCaskPackageInfo, SortKey>;
 
 export type BrewCaskPackageInfo = {
   token: string;
@@ -22,15 +22,15 @@ export type BrewCaskPackageInfo = {
   version: string;
   desc: string;
   homepage: string;
-  installed: string;
+  installed: string | null;
   auto_updates?: boolean;
   depends_on?: any; // TODO: Better typing
   conflicts_with?: any; // TODO: Better typing
   aliases?: string[];
   outdated: boolean;
-  installed_30d: string | null; // TODO: Better typing
-  installed_90d: string | null; // TODO: Better typing
-  installed_365d: string | null; // TODO: Better typing
+  installed_30d?: string | null; // TODO: Better typing
+  installed_90d?: string | null; // TODO: Better typing
+  installed_365d?: string | null; // TODO: Better typing
   // TODO: There are more fields that aren't here yet
 };
 

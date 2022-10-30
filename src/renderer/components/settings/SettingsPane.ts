@@ -96,7 +96,7 @@ export class SettingsPane extends BootstrapBlockElement {
 
         ${this.makeButton(
           "Rebuild Catalog",
-          "Replace Overt's catalog with a fresh copy from the package manager. This may take a minute or two.",
+          "Replace Overt's catalog with a fresh copy from the package manager. This will take a few seconds, or a minute or two if you're offline.",
           "secondary",
           this.rebuildIndex.bind(this)
         )}

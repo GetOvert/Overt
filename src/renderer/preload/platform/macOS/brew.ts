@@ -1,4 +1,3 @@
-import { spawn } from "child_process";
 import { quote } from "shell-quote";
 
 import {
@@ -21,7 +20,12 @@ import {
 import terminal from "preload/shared/terminal";
 import * as taskQueue from "preload/shared/taskQueueIPC";
 import { PromptForPasswordTask } from "tasks/Task";
-import { getBrewExecutablePath } from "./brewCask";
+import {
+  BrewAnalyticsAll,
+  getBrewExecutablePath,
+  runBackgroundBrewProcess,
+  TapInfo,
+} from "./brewCask";
 
 // TODO: Make user-configurable?
 const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
@@ -50,41 +54,11 @@ if (process.platform === "darwin") {
 
 let indexListeners = new Set<() => void>();
 
-type FormulaAnalyticsData = {
-  formulae: { [key: string]: [{ formula: string; count: number }] };
-};
-
 const brew: IPCBrew = {
   name: "brew",
 
   addIndexListener(listener: () => void) {
     indexListeners.add(listener);
-  },
-
-  async reindexOutdated(): Promise<void> {
-    const brewProcess = spawn(await getBrewExecutablePath(), [
-      "outdated",
-      "--formula",
-      "--greedy-latest",
-    ]);
-
-    let stdout = "";
-    let stderr = "";
-    brewProcess.stdout.on("data", (data) => {
-      stdout += data;
-    });
-    brewProcess.stderr.on("data", (data) => {
-      console.error(`stderr: ${data}`);
-      stderr += data;
-    });
-
-    return new Promise((resolve, reject) => {
-      brewProcess.on("exit", async (code) => {
-        await brew.updateIndex(stdout.split(/\s+/).filter((s) => s));
-        resolve();
-      });
-      brewProcess.on("error", reject);
-    });
   },
 
   async rebuildIndex(condition, wipeIndexFirst) {
@@ -109,106 +83,165 @@ const brew: IPCBrew = {
       condition === "always"
     ) {
       if (wipeIndexFirst) deleteAllRecords(cacheDB(), "formulae");
-      await brew.updateIndex();
+      await brew.indexAll();
     }
   },
 
-  async updateIndex(formulaNames?: string[]): Promise<void> {
-    if (Array.isArray(formulaNames) && formulaNames.length === 0) return;
+  async indexAll(): Promise<void> {
+    try {
+      await runBackgroundBrewProcess(["update", "--quiet"]);
+    } catch (error) {
+      console.error(error);
+      return await (brew as any)._indexWithoutInternet();
+    }
 
-    (await (async () => {
-      if (!formulaNames) {
-        // Updating index for all, so we'd might as well fetch from remote
-        // while we're at it.
-        try {
-          await (brew as any)._runBrewUpdate();
-        } catch (error) {
-          // Bad omen...
-          console.error(error);
-        }
-      }
+    await Promise.all([
+      (brew as any)._indexOfficial(),
+      (brew as any)._indexUnofficial(),
+    ]);
 
-      const brewProcess = spawn(await getBrewExecutablePath(), [
+    (brew as any)._postIndexing();
+  },
+
+  async indexOutdated(): Promise<void> {
+    const stdout: string = await runBackgroundBrewProcess([
+      "outdated",
+      "--formula",
+      "--greedy-latest",
+    ]);
+
+    await brew.indexSpecific(stdout.split(/\s+/).filter((s) => s));
+  },
+
+  async indexSpecific(formulaNames: string[]): Promise<void> {
+    const { formulae } = JSON.parse(
+      await runBackgroundBrewProcess([
         "info",
         "--json=v2",
         "--formula",
-        ...(formulaNames ?? ["--eval-all"]),
-      ]);
+        ...formulaNames,
+      ])
+    );
 
-      let json = "";
-      let stderr = "";
-      brewProcess.stdout.on("data", (data) => {
-        json += data;
-      });
-      brewProcess.stderr.on("data", (data) => {
-        console.error(`stderr: ${data}`);
-        stderr += data;
-      });
+    await (brew as any)._ingestFormulaInfo(formulae, {
+      deleteIfUnavailable: formulaNames,
+    });
 
-      return new Promise((resolve, reject) => {
-        brewProcess.on("exit", async (code) => {
-          if (code !== 0) return reject(stderr);
+    (brew as any)._postIndexing();
+  },
 
-          const installs30d = await (
+  async _indexOfficial(): Promise<void> {
+    const formulaeFromAPI: BrewPackageInfo[] = await (
+      await fetch("https://formulae.brew.sh/api/formula.json")
+    ).json();
+
+    // The API returns some garbage `installed` and `outdated` values,
+    // so make sure those fields are cleared
+    for (const formula of formulaeFromAPI) {
+      formula.installed = [];
+      formula.outdated = false;
+    }
+
+    const analytics = await (brew as any)._fetchOfficialAnalytics();
+
+    await (brew as any)._ingestFormulaInfo(formulaeFromAPI, {
+      analytics,
+    });
+
+    // The API response can't tell us what's installed locally,
+    // so reindex installed packages as a 2nd step
+    const { formulae } = JSON.parse(
+      await runBackgroundBrewProcess([
+        "info",
+        "--json=v2",
+        "--formula",
+        "--installed",
+      ])
+    );
+
+    await (brew as any)._ingestFormulaInfo(formulae, {
+      analytics,
+    });
+  },
+
+  async _indexInstalled(): Promise<void> {
+    const { formulae } = JSON.parse(
+      await runBackgroundBrewProcess([
+        "info",
+        "--json=v2",
+        "--formula",
+        "--installed",
+      ])
+    );
+
+    await (brew as any)._ingestFormulaInfo(formulae);
+  },
+
+  async _fetchOfficialAnalytics(): Promise<BrewAnalyticsAll> {
+    const [installed_30d, installed_90d, installed_365d] = await Promise.all(
+      ["30d", "90d", "365d"].map(
+        async (days) =>
+          await (
             await fetch(
-              "https://formulae.brew.sh/api/analytics/install-on-request/homebrew-core/30d.json"
+              `https://formulae.brew.sh/api/analytics/install-on-request/homebrew-core/${days}.json`
             )
-          ).json();
-          const installs90d = await (
-            await fetch(
-              "https://formulae.brew.sh/api/analytics/install-on-request/homebrew-core/90d.json"
-            )
-          ).json();
-          const installs365d = await (
-            await fetch(
-              "https://formulae.brew.sh/api/analytics/install-on-request/homebrew-core/365d.json"
-            )
-          ).json();
+          ).json()
+      )
+    );
 
-          await (brew as any)._rebuildIndexFromFormulaInfo(
-            formulaNames,
-            JSON.parse(json).formulae,
-            installs30d,
-            installs90d,
-            installs365d
-          );
-          resolve();
-        });
-        brewProcess.on("error", reject);
-      });
-    })()) as void;
+    return {
+      installed_30d,
+      installed_90d,
+      installed_365d,
+    };
+  },
 
+  async _indexUnofficial(): Promise<void> {
+    const taps: TapInfo[] = JSON.parse(
+      await runBackgroundBrewProcess(["tap-info", "--json=v1", "--installed"])
+    );
+
+    const unofficialTaps: TapInfo[] = taps.filter(({ official }) => !official);
+
+    const unofficialFormulae = unofficialTaps.flatMap(
+      ({ formula_names }) => formula_names
+    );
+
+    await brew.indexSpecific(unofficialFormulae);
+  },
+
+  async _indexWithoutInternet(): Promise<void> {
+    const { formulae } = JSON.parse(
+      await runBackgroundBrewProcess([
+        "info",
+        "--json=v2",
+        "--formula",
+        "--eval-all",
+      ])
+    );
+
+    await (brew as any)._ingestFormulaInfo(formulae);
+  },
+
+  _postIndexing(): void {
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
 
     cacheDB_updateLastFullIndexJsTimestamp();
   },
 
-  async _runBrewUpdate(): Promise<void> {
-    const brewUpdateProcess = spawn(await getBrewExecutablePath(), [
-      "update",
-      "--quiet",
-    ]);
-
-    return new Promise((resolve, reject) => {
-      brewUpdateProcess.on("exit", resolve);
-      brewUpdateProcess.on("error", reject);
-    });
-  },
-
-  async _rebuildIndexFromFormulaInfo(
-    formulaNamesToUpdate: string[] | undefined,
-    formulae: any[],
-    installs30d: FormulaAnalyticsData,
-    installs90d: FormulaAnalyticsData,
-    installs365d: FormulaAnalyticsData
+  async _ingestFormulaInfo(
+    formulae: BrewPackageInfo[],
+    {
+      analytics,
+      deleteIfUnavailable,
+    }: {
+      analytics?: BrewAnalyticsAll;
+      deleteIfUnavailable?: string[];
+    } = {}
   ) {
-    console.log(
-      "indexing formulae: " +
-        (Array.isArray(formulaNamesToUpdate)
-          ? formulaNamesToUpdate.join(", ")
-          : "all")
-    );
+    const { installed_30d, installed_90d, installed_365d } = analytics ?? {};
+
     insertOrReplaceRecords(
       cacheDB(),
       "formulae",
@@ -232,13 +265,15 @@ const brew: IPCBrew = {
         installed: formula.installed[0]?.version,
         outdated: +formula.outdated,
 
-        installed_30d: installs30d?.formulae?.[formula.full_name]?.[0]?.count
+        installed_30d: installed_30d?.formulae?.[formula.full_name]?.[0]?.count
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
-        installed_90d: installs90d?.formulae?.[formula.full_name]?.[0]?.count
+        installed_90d: installed_90d?.formulae?.[formula.full_name]?.[0]?.count
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
-        installed_365d: installs365d?.formulae?.[formula.full_name]?.[0]?.count
+        installed_365d: installed_365d?.formulae?.[
+          formula.full_name
+        ]?.[0]?.count
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
 
@@ -246,17 +281,18 @@ const brew: IPCBrew = {
       }))
     );
 
-    if (formulaNamesToUpdate) {
+    if (deleteIfUnavailable) {
       deleteRecords(
         cacheDB(),
         "formulae",
-        formulaNamesToUpdate
+        deleteIfUnavailable
           .map((formulaName) => {
-            const formulaInfo: any = brew.info(formulaName);
+            const formulaInfo = brew.info(formulaName);
             if (!formulaInfo) return null; // Not in DB anyway
             if (formulaInfo?.installed) return null; // Still installed
 
-            return formulaInfo.rowid; // Delete from DB
+            // Formula should be deleted from DB
+            return (formulaInfo as any).rowid;
           })
           .filter((x) => x)
       );
@@ -461,44 +497,17 @@ const brew: IPCBrew = {
     });
   },
 
-  async reindexSourceRepositories(): Promise<void> {
-    (await (async () => {
-      const brewProcess = spawn(await getBrewExecutablePath(), [
-        "tap-info",
-        "--installed",
-        "--json=v1",
-      ]);
+  async indexSourceRepositories(): Promise<void> {
+    const tapInfo: TapInfo[] = JSON.parse(
+      await runBackgroundBrewProcess(["tap-info", "--json=v1", "--installed"])
+    );
 
-      let json = "";
-      let stderr = "";
-      brewProcess.stdout.on("data", (data) => {
-        json += data;
-      });
-      brewProcess.stderr.on("data", (data) => {
-        console.error(`stderr: ${data}`);
-        stderr += data;
-      });
+    await (brew as any)._rebuildSourceRepositoryIndexFromTapInfo(tapInfo);
 
-      return new Promise((resolve, reject) => {
-        brewProcess.on("exit", async (code) => {
-          if (code !== 0) return reject(stderr);
-
-          await (brew as any)._rebuildSourceRepositoryIndexFromTapInfo(
-            JSON.parse(json)
-          );
-          resolve();
-        });
-        brewProcess.on("error", reject);
-      });
-    })()) as void;
-
-    indexListeners.forEach((listener) => listener());
-    indexListeners.clear();
+    (brew as any)._postIndexing();
   },
 
   async _rebuildSourceRepositoryIndexFromTapInfo(taps: any[]) {
-    console.log("indexing taps");
-
     const db = cacheDB();
 
     const brewSourceRepositories = db
@@ -547,7 +556,7 @@ const brew: IPCBrew = {
       );
     });
 
-    brew.reindexSourceRepositories();
+    brew.indexSourceRepositories();
 
     return success;
   },
@@ -571,7 +580,7 @@ const brew: IPCBrew = {
       );
     });
 
-    brew.reindexSourceRepositories();
+    brew.indexSourceRepositories();
 
     return success;
   },

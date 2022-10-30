@@ -38,9 +38,9 @@ export type BrewPackageInfo = {
   disabled: boolean;
   disable_date?: string | null;
   disable_reason?: string | null;
-  installed_30d: string | null; // TODO: Better typing
-  installed_90d: string | null; // TODO: Better typing
-  installed_365d: string | null; // TODO: Better typing
+  installed_30d?: string | null; // TODO: Better typing
+  installed_90d?: string | null; // TODO: Better typing
+  installed_365d?: string | null; // TODO: Better typing
   // TODO: There are more fields that aren't here yet
 };
 

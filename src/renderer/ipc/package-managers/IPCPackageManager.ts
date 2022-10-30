@@ -1,5 +1,3 @@
-import { SourceRepository } from "package-manager/SourceRepository";
-
 export interface IPCPackageManager<PackageInfo, SortKey> {
   readonly name: string;
 
@@ -8,8 +6,9 @@ export interface IPCPackageManager<PackageInfo, SortKey> {
     condition: "always" | "if-too-old" | "if-nonexistent",
     wipeIndexFirst?: boolean
   ): Promise<void>;
-  reindexOutdated(): Promise<void>;
-  updateIndex(packageNames?: string[]): Promise<void>;
+  indexAll(): Promise<void>;
+  indexOutdated(): Promise<void>;
+  indexSpecific(packageNames?: string[]): Promise<void>;
 
   search(
     searchString: string,
@@ -24,8 +23,7 @@ export interface IPCPackageManager<PackageInfo, SortKey> {
   upgrade(packageName: string): Promise<boolean>;
   uninstall(packageName: string): Promise<boolean>;
 
-  reindexSourceRepositories(): Promise<void>;
-
+  indexSourceRepositories(): Promise<void>;
   addSourceRepository(name: string, url: string): Promise<boolean>;
   removeSourceRepository(name: string): Promise<boolean>;
 
