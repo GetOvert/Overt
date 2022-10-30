@@ -177,6 +177,7 @@ const brewCask: IPCBrewCask = {
     );
 
     await (brewCask as any)._ingestCaskInfo(casks, {
+      analytics: await (brewCask as any)._fetchOfficialAnalytics(),
       deleteIfUnavailable: caskNames,
     });
 

@@ -124,6 +124,7 @@ const brew: IPCBrew = {
     );
 
     await (brew as any)._ingestFormulaInfo(formulae, {
+      analytics: await (brew as any)._fetchOfficialAnalytics(),
       deleteIfUnavailable: formulaNames,
     });
 
