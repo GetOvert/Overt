@@ -60,7 +60,7 @@ export default class FloatingPane extends BootstrapBlockElement {
       <div
         class=${"floating-pane-container " +
         (this.shown ? "" : "d-none ") +
-        "bg-light bg-gradient border shadow-lg px-2 py-2"}
+        "bg-light bg-gradient border shadow-lg p-2"}
       >
         <slot></slot>
       </div>`;

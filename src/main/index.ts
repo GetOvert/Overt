@@ -81,13 +81,16 @@ async function createWindow(): Promise<void> {
         })
       : pty.spawn("/bin/sh", [], {
           name: "xterm-color",
-          cols: 80,
-          rows: 30,
+          cols: 220,
+          rows: 26,
           cwd: process.env.HOME,
           env: {
             ...process.env,
-            PS1: "> ",
-            BASH_SILENCE_DEPRECATION_WARNING: "1", // Silence "move to zsh" suggestion on macOS 10.15+
+            PS1: `\r\n${Array.from(Array(220).keys())
+              .map(() => "━")
+              .join("")}\r\n`,
+            // Silence "move to zsh" suggestion on macOS 10.15+
+            BASH_SILENCE_DEPRECATION_WARNING: "1",
           },
         });
 
