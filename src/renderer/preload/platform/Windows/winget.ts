@@ -20,10 +20,7 @@ import {
 } from "ipc/package-managers/Windows/IPCWinget";
 import { downloadWingetManifests } from "./winget-to-json/download";
 import { extractWingetManifests } from "./winget-to-json/extract";
-import { runBackgroundProcess } from "../shared";
-
-// TODO: Make user-configurable?
-const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
+import { getFullIndexIntervalInSeconds, runBackgroundProcess } from "../shared";
 
 if (process.platform === "win32") {
   cacheDB_addSchema(
@@ -62,7 +59,7 @@ const winget: IPCWinget = {
     const nowTime = new Date().getTime();
     const indexTooOld =
       (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
-      rebuildIndexAfterSeconds;
+      (await getFullIndexIntervalInSeconds());
 
     if (
       !indexExists ||

@@ -99,18 +99,24 @@ async function createWindow(): Promise<void> {
   });
 
   type Config = {
-    validateCodeSignatures: boolean;
-    homebrewPath: string;
     sendNativeNotifications: boolean;
+    validateCodeSignatures: boolean;
+
+    fullIndexIntervalDays: number;
+
+    homebrewPath: string;
   };
 
   const store = new ElectronStore<Config>({
     defaults: {
+      sendNativeNotifications: true,
       validateCodeSignatures: true,
+
+      fullIndexIntervalDays: 3,
+
       homebrewPath: existsSync("/opt/homebrew/bin/brew")
         ? "/opt/homebrew"
         : "/usr/local",
-      sendNativeNotifications: true,
     },
   });
 

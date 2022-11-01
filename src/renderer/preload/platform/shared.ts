@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import settings from "preload/shared/settings";
 
 export async function runBackgroundProcess(
   executable: string,
@@ -24,4 +25,13 @@ export async function runBackgroundProcess(
     });
     process.on("error", reject);
   });
+}
+
+export async function getFullIndexIntervalInSeconds(): Promise<number> {
+  return (
+    60 * // seconds/minute
+    60 * // minutes/hour
+    24 * // hours/day
+    (await settings.get("fullIndexIntervalDays"))
+  );
 }

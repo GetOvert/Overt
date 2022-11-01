@@ -26,9 +26,7 @@ import {
   runBackgroundBrewProcess,
   TapInfo,
 } from "./brewCask";
-
-// TODO: Make user-configurable?
-const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
+import { getFullIndexIntervalInSeconds } from "../shared";
 
 if (process.platform === "darwin") {
   cacheDB_addSchema(
@@ -75,7 +73,7 @@ const brew: IPCBrew = {
     const nowTime = new Date().getTime();
     const indexTooOld =
       (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
-      rebuildIndexAfterSeconds;
+      (await getFullIndexIntervalInSeconds());
 
     if (
       !indexExists ||

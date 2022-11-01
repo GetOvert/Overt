@@ -23,10 +23,7 @@ import { PromptForPasswordTask } from "tasks/Task";
 import settings from "preload/shared/settings";
 import path from "path";
 import brew from "./brew";
-import { runBackgroundProcess } from "../shared";
-
-// TODO: Make user-configurable?
-const rebuildIndexAfterSeconds = 60 * 60 * 24; // 1 day
+import { getFullIndexIntervalInSeconds, runBackgroundProcess } from "../shared";
 
 if (process.platform === "darwin") {
   cacheDB_addSchema(
@@ -128,7 +125,7 @@ const brewCask: IPCBrewCask = {
     const nowTime = new Date().getTime();
     const indexTooOld =
       (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
-      rebuildIndexAfterSeconds;
+      (await getFullIndexIntervalInSeconds());
 
     if (
       !indexExists ||

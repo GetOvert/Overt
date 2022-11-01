@@ -13,11 +13,15 @@ import { allPackageMangers } from "package-manager/PackageManagerRegistry";
 @customElement("openstore-settings-pane")
 export class SettingsPane extends BootstrapBlockElement {
   @state()
-  homebrewPath: string;
-  @state()
   validateCodeSignatures: boolean;
   @state()
   sendNativeNotifications: boolean;
+
+  @state()
+  fullIndexIntervalDays: number;
+
+  @state()
+  homebrewPath: string;
 
   protected updated(changedProperties: PropertyValues<this>): void {
     this.addPopperTooltips();
@@ -25,13 +29,18 @@ export class SettingsPane extends BootstrapBlockElement {
   }
 
   private async fetchSettingsValues() {
-    this.homebrewPath = await window.settings.get("homebrewPath");
     this.validateCodeSignatures = await window.settings.get(
       "validateCodeSignatures"
     );
     this.sendNativeNotifications = await window.settings.get(
       "sendNativeNotifications"
     );
+
+    this.fullIndexIntervalDays = await window.settings.get(
+      "fullIndexIntervalDays"
+    );
+
+    this.homebrewPath = await window.settings.get("homebrewPath");
   }
 
   static styles = [
@@ -41,9 +50,33 @@ export class SettingsPane extends BootstrapBlockElement {
         display: flex;
         flex-direction: column;
       }
-      .settings-pane-heading {
+      * {
+        user-select: none;
+      }
+
+      h2 {
         font-size: 1.2rem;
         font-weight: normal;
+      }
+
+      h3 {
+        font-size: 1.05rem;
+        font-weight: bold;
+
+        margin-right: 1rem;
+      }
+      h3:not(:first-child) {
+        margin-top: 0.5rem;
+      }
+
+      hr {
+        flex-shrink: 0;
+        margin-top: 0;
+        margin-right: 1rem;
+      }
+
+      label:not(:last-child) {
+        margin-bottom: 1rem;
       }
     `,
   ];
@@ -53,65 +86,79 @@ export class SettingsPane extends BootstrapBlockElement {
       <div
         class="d-flex align-items-center justify-content-between border-bottom mx-2 pb-2"
       >
-        <h2 class="settings-pane-heading text-center mt-2">Settings</h2>
+        <h2 class="text-center mt-2">Settings</h2>
       </div>
 
-      <div class="d-flex flex-column overflow-auto m-2 mt-3">
+      <div class="d-flex flex-column overflow-auto p-2 pt-3">
+        <h3>General</h3>
+        <hr aria-hidden="true" />
+
         ${this.makeCheckbox(
           "sendNativeNotifications",
-          "Send Notifications",
-          "When enabled, Overt will send you desktop notifications when major tasks are started or completed. Enabled by default.",
-          this.sendNativeNotifications
+          "Desktop notifications",
+          "Send desktop notifications for requested tasks? (Default: Yes)"
         )}
         ${this.makeCheckbox(
           "validateCodeSignatures",
-          "Validate Code Signatures",
-          "When enabled, macOS will validate the digital signature of apps installed through Overt. This blocks both malware and unsigned legitimate software from running. Enabled by default.",
-          this.validateCodeSignatures
+          "Use macOS Gatekeeper",
+          "Ask Gatekeeper to check downloads? Blocks known malware and some legitimate software. (Default: Yes)"
         )}
         ${this.makeButton(
           "Sources",
-          "Add/remove additional software sources. Reminder: Avoiding malware is your responsibility.",
+          "Add or remove software sources. Only add sources you trust.",
           "primary",
           this.showSourceRepositories.bind(this)
         )}
 
-        <hr class="mt-2" />
-
-        <label
-          class="mb-3"
+        <h3
           data-bs-toggle="tooltip"
           data-bs-placement="right"
-          title="Path to root directory of the Homebrew installation to use. The standard location for arm64 (“Apple silicon”) architecture is /opt/homebrew, and the standard location for x86_64 (“Intel”) architecture is /usr/local. There are two reasons to change this setting: 1) You want to switch Homebrew architectures on an arm64 Mac; 2) You have installed Homebrew in a custom location."
+          title="Overt's index of available and installed software"
         >
-          Homebrew Path
-          <input
-            type="text"
-            class="form-control form-control-sm"
-            name="homebrewPath"
-            value=${this.homebrewPath}
-            @change=${this.onTextBoxChanged}
-          />
-        </label>
+          Catalog
+        </h3>
+        <hr aria-hidden="true" />
 
+        ${this.makeStepperField(
+          "fullIndexIntervalDays",
+          "Auto-rebuild catalog every",
+          "How often to rebuild the software catalog at launch. Shorter intervals provide more up-to-date information. (Default: Every 3 days)",
+          {
+            min: 0,
+            unitLabel: "days",
+          }
+        )}
         ${this.makeButton(
-          "Rebuild Catalog",
-          "Replace Overt's catalog with a fresh copy from the package manager. This will take a few seconds, or a minute or two if you're offline.",
+          "Rebuild Now",
+          "Replace the catalog with a fresh copy. This will take a few seconds, or a minute or two if you're offline.",
           "secondary",
           this.rebuildIndex.bind(this)
+        )}
+
+        <h3
+          data-bs-toggle="tooltip"
+          data-bs-placement="right"
+          title="If you know what you're doing"
+        >
+          Advanced
+        </h3>
+        <hr aria-hidden="true" />
+
+        ${this.makeTextField(
+          "homebrewPath",
+          "Homebrew path",
+          "Path to root directory of the Homebrew installation to use. The standard location for arm64 (“Apple silicon”) architecture is /opt/homebrew, and the standard location for x86_64 (“Intel”) architecture is /usr/local. There are two reasons to change this setting: 1) You want to switch Homebrew architectures on an arm64 Mac; 2) You have installed Homebrew in a custom location."
         )}
       </div> `;
   }
 
   private makeCheckbox(
-    name: string,
+    name: keyof this,
     label: string,
-    tooltip: string,
-    checked: boolean
+    tooltip: string
   ): HTMLTemplateResult {
     return html`
       <label
-        class="mb-3"
         data-bs-toggle="tooltip"
         data-bs-placement="right"
         title=${tooltip}
@@ -128,11 +175,70 @@ export class SettingsPane extends BootstrapBlockElement {
           type="checkbox"
           class="form-check-input me-1"
           name=${name}
-          ?checked=${checked}
+          ?checked=${this[name]}
           @change=${this.onCheckboxClicked}
           @mousedown=${(event: Event) => event.preventDefault()}
         />
         ${label}
+      </label>
+    `;
+  }
+
+  private makeTextField(name: keyof this, label: string, tooltip: string) {
+    return html`
+      <label
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        title=${tooltip}
+      >
+        ${label}
+
+        <input
+          type="text"
+          class="form-control form-control-sm mt-1"
+          name=${name}
+          value=${this[name]}
+          @change=${this.onTextFieldChanged}
+        />
+      </label>
+    `;
+  }
+
+  private makeStepperField(
+    name: keyof this,
+    label: string,
+    tooltip: string,
+    {
+      min,
+      max,
+      unitLabel,
+    }: {
+      min?: number;
+      max?: number;
+      unitLabel?: string;
+    } = {}
+  ) {
+    return html`
+      <label
+        data-bs-toggle="tooltip"
+        data-bs-placement="right"
+        title=${tooltip}
+      >
+        ${label}
+
+        <div class="d-flex align-items-baseline mt-1">
+          <input
+            type="number"
+            class="form-control form-control-sm"
+            name=${name}
+            value=${this[name]}
+            min=${min}
+            max=${max}
+            @change=${this.onNumericTextFieldChanged}
+          />
+
+          ${unitLabel && html`<div class="ms-2">${unitLabel}</div>`}
+        </div>
       </label>
     `;
   }
@@ -162,9 +268,14 @@ export class SettingsPane extends BootstrapBlockElement {
     window.settings.set(checkbox.name, checkbox.checked);
   }
 
-  private onTextBoxChanged(event: Event) {
-    const textBox = event.target as HTMLInputElement;
-    window.settings.set(textBox.name, textBox.value);
+  private onTextFieldChanged(event: Event) {
+    const textField = event.target as HTMLInputElement;
+    window.settings.set(textField.name, textField.value);
+  }
+
+  private onNumericTextFieldChanged(event: Event) {
+    const textField = event.target as HTMLInputElement;
+    window.settings.set(textField.name, Number(textField.value));
   }
 
   private async showSourceRepositories() {

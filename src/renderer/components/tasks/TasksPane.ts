@@ -38,10 +38,15 @@ export class TasksPane extends BootstrapBlockElement {
         display: flex;
         flex-direction: column;
       }
+      * {
+        user-select: none;
+      }
+
       .task-pane-heading {
         font-size: 1.2rem;
         font-weight: normal;
       }
+
       .task-list {
         height: 100%;
         overflow: auto;
