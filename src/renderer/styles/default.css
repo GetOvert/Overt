@@ -5,6 +5,22 @@
 
 body {
   --bs-body-font-size: 0.9rem;
+
+  /* Revert visual changes in Bootstrap 5.2 */
+  --bs-border-radius: 0.25rem !important;
+  --bs-btn-border-radius: var(--bs-border-radius) !important;
+  --bs-dropdown-border-radius: var(--bs-border-radius) !important;
+  --bs-nav-tabs-border-radius: var(--bs-border-radius) !important;
+  --bs-nav-pills-border-radius: var(--bs-border-radius) !important;
+  --bs-navbar-toggler-border-radius: var(--bs-border-radius) !important;
+  --bs-card-border-radius: var(--bs-border-radius) !important;
+  --bs-accordion-border-radius: var(--bs-border-radius) !important;
+  --bs-pagination-border-radius: var(--bs-border-radius) !important;
+  --bs-badge-border-radius: var(--bs-border-radius) !important;
+  --bs-alert-border-radius: var(--bs-border-radius) !important;
+  --bs-list-group-border-radius: var(--bs-border-radius) !important;
+  --bs-toast-border-radius: var(--bs-border-radius) !important;
+  --bs-tooltip-border-radius: var(--bs-border-radius) !important;
 }
 .h1,
 h1 {
