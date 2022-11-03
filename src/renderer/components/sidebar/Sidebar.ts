@@ -18,17 +18,6 @@ export default class Sidebar extends BootstrapBlockElement {
       :host > div {
         max-height: 100%;
       }
-
-      .nav-pills .nav-link:hover {
-        color: var(--bs-gray-dark);
-      }
-      .nav-pills .nav-link:focus {
-        color: var(--bs-gray-dark);
-      }
-      .nav-pills .nav-link.active {
-        color: var(--bs-light);
-        background-color: var(--accent-color);
-      }
     `,
   ];
 

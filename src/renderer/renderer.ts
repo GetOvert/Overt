@@ -26,11 +26,9 @@
  * ```
  */
 
-// import { auto as followSystemColorScheme, setFetchMethod } from "darkreader";
-import Color from "color";
-
 import "bootswatch/dist/sandstone/bootstrap.min.css";
 import "styles/default.css";
+import "styles/injection";
 
 import "nav/nav";
 
@@ -57,40 +55,6 @@ import {
   ReindexSourceRepositoriesTask,
 } from "tasks/Task";
 import { allPackageMangers } from "package-manager/PackageManagerRegistry";
-
-const accentColor = window.theme.getAccentColor();
-document.documentElement.style.setProperty("--accent-color", accentColor);
-document.documentElement.style.setProperty(
-  "--accent-color-dark",
-  new Color(accentColor).darken(0.2).string()
-);
-
-// setFetchMethod(window.fetch);
-/*
-followSystemColorScheme(
-  {
-    brightness: 100,
-    contrast: 90,
-    sepia: 10,
-  },
-  {
-    invert: [],
-    css: `
-      a:not(.nav-link.active), .nav-link:not(.active) {
-        color: var(--accent-color) !important;
-      }
-      a:hover, .nav-link:hover {
-        color: var(--accent-color-dark) !important;
-      }
-      .nav-pills .nav-link.active {
-        background-color: var(--accent-color) !important;
-      }
-    `,
-    ignoreInlineStyle: [],
-    ignoreImageAnalysis: [],
-    disableStyleSheetsProxy: true,
-  }
-);*/
 
 window.addEventListener("load", () => {
   (window as any).openStore.updateWindowLocationFragment({

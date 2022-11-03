@@ -11,7 +11,11 @@ module.exports = {
   },
   plugins: plugins,
   resolve: {
-    modules: [path.resolve(__dirname, "src/renderer"), "node_modules"],
+    modules: [
+      path.resolve(__dirname, "src/renderer"),
+      path.resolve(__dirname, "src"),
+      "node_modules",
+    ],
     extensions: [".js", ".ts", ".jsx", ".tsx", ".css"],
   },
 };

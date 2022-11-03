@@ -9,6 +9,7 @@ import {
 } from "tasks/Task";
 import SourceRepositoriesModal from "components/modal/SourceRepositoriesModal";
 import { allPackageMangers } from "package-manager/PackageManagerRegistry";
+import { Config } from "shared/config";
 
 @customElement("openstore-settings-pane")
 export class SettingsPane extends BootstrapBlockElement {
@@ -16,6 +17,11 @@ export class SettingsPane extends BootstrapBlockElement {
   validateCodeSignatures: boolean;
   @state()
   sendNativeNotifications: boolean;
+
+  @state()
+  useSystemAccentColor: boolean;
+  @state()
+  tintDarkBackgrounds: boolean;
 
   @state()
   fullIndexIntervalDays: number;
@@ -29,18 +35,20 @@ export class SettingsPane extends BootstrapBlockElement {
   }
 
   private async fetchSettingsValues() {
-    this.validateCodeSignatures = await window.settings.get(
-      "validateCodeSignatures"
-    );
-    this.sendNativeNotifications = await window.settings.get(
-      "sendNativeNotifications"
+    const keys: (keyof this & keyof Config)[] = [
+      "validateCodeSignatures",
+      "sendNativeNotifications",
+      "useSystemAccentColor",
+      "tintDarkBackgrounds",
+      "fullIndexIntervalDays",
+      "homebrewPath",
+    ];
+
+    const valueEntries = await Promise.all(
+      keys.map(async (key) => [key, await window.settings.get(key)])
     );
 
-    this.fullIndexIntervalDays = await window.settings.get(
-      "fullIndexIntervalDays"
-    );
-
-    this.homebrewPath = await window.settings.get("homebrewPath");
+    Object.assign(this, Object.fromEntries(valueEntries));
   }
 
   static styles = [
@@ -108,6 +116,26 @@ export class SettingsPane extends BootstrapBlockElement {
           "Add or remove software sources. Only add sources you trust.",
           "primary",
           this.showSourceRepositories.bind(this)
+        )}
+
+        <h3
+          data-bs-toggle="tooltip"
+          data-bs-placement="right"
+          title="Overt's index of available and installed software"
+        >
+          Appearance
+        </h3>
+        <hr aria-hidden="true" />
+
+        ${this.makeCheckbox(
+          "useSystemAccentColor",
+          "Use system accent color",
+          "Use the accent color you've chosen in your system settings? (Default: Yes)"
+        )}
+        ${this.makeCheckbox(
+          "tintDarkBackgrounds",
+          "Tint dark backgrounds",
+          "Tint backgrounds in dark theme? (Default: No)"
         )}
 
         <h3
@@ -265,17 +293,20 @@ export class SettingsPane extends BootstrapBlockElement {
 
   private onCheckboxClicked(event: Event) {
     const checkbox = event.target as HTMLInputElement;
-    window.settings.set(checkbox.name, checkbox.checked);
+    window.settings.set(checkbox.name as keyof Config, checkbox.checked);
   }
 
   private onTextFieldChanged(event: Event) {
     const textField = event.target as HTMLInputElement;
-    window.settings.set(textField.name, textField.value);
+    window.settings.set(textField.name as keyof Config, textField.value);
   }
 
   private onNumericTextFieldChanged(event: Event) {
     const textField = event.target as HTMLInputElement;
-    window.settings.set(textField.name, Number(textField.value));
+    window.settings.set(
+      textField.name as keyof Config,
+      Number(textField.value)
+    );
   }
 
   private async showSourceRepositories() {

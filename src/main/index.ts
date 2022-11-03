@@ -7,7 +7,7 @@ import {
   MenuItemConstructorOptions,
   systemPreferences,
 } from "electron";
-import { config } from "./config";
+import { Config, config } from "shared/config";
 import contextMenu from "electron-context-menu";
 import ElectronStore from "electron-store";
 import { existsSync } from "fs";
@@ -101,19 +101,13 @@ async function createWindow(): Promise<void> {
     mainWindow.webContents.send("terminal.receive", data);
   });
 
-  type Config = {
-    sendNativeNotifications: boolean;
-    validateCodeSignatures: boolean;
-
-    fullIndexIntervalDays: number;
-
-    homebrewPath: string;
-  };
-
   const store = new ElectronStore<Config>({
     defaults: {
       sendNativeNotifications: true,
       validateCodeSignatures: true,
+
+      useSystemAccentColor: true,
+      tintDarkBackgrounds: false,
 
       fullIndexIntervalDays: 3,
 
@@ -132,6 +126,11 @@ async function createWindow(): Promise<void> {
   ipcMain.handle("settings.get", (event: IpcMainEvent, key: keyof Config) => {
     return store.get(key);
   });
+  for (const [key] of store) {
+    store.onDidChange(key, () => {
+      mainWindow.webContents.send(`settings.${key}.change`);
+    });
+  }
 
   let contextMenuItems: {
     items: (MenuItemConstructorOptions &

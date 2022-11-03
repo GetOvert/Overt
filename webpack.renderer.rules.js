@@ -10,7 +10,18 @@ module.exports = [
     },
   },
   {
-    test: /\.css$/,
+    test: /\.lit\.css$/,
+    use: [
+      {
+        loader: "css-loader",
+        options: {
+          exportType: "css-style-sheet",
+        },
+      },
+    ],
+  },
+  {
+    test: /(?<!\.lit)\.css$/,
     use: [{ loader: "style-loader" }, { loader: "css-loader" }],
   },
   {

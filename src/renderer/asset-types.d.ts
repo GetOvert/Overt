@@ -1,11 +1,12 @@
 // This file defines the TypeScript type of imported asset modules.
 // https://webpack.js.org/guides/typescript/#importing-other-assets
 
-declare module "*.svg" {
-  const content: any;
+declare module "*.lit.css" {
+  const content: CSSStyleSheet;
   export default content;
 }
-declare module "*.lit.css" {
-  const content: CSSResult;
+
+declare module "*.svg" {
+  const content: any;
   export default content;
 }

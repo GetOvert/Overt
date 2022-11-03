@@ -1,12 +1,22 @@
 import { ipcRenderer } from "electron";
 import { IPCSettings } from "ipc/IPCSettings";
 
-export default {
+const settings: IPCSettings = {
+  get(key) {
+    return ipcRenderer.invoke("settings.get", key);
+  },
+
   set(key, value) {
     return ipcRenderer.invoke("settings.set", key, value);
   },
 
-  get(key) {
-    return ipcRenderer.invoke("settings.get", key);
+  onChange(keys, callback) {
+    for (const key of keys) {
+      ipcRenderer.on(`settings.${key}.change`, () => {
+        callback();
+      });
+    }
   },
-} as IPCSettings;
+};
+
+export default settings;
