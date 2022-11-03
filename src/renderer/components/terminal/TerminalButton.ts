@@ -16,14 +16,14 @@ export default class TerminalButton extends BootstrapBlockElement {
   static styles = [BootstrapBlockElement.styles];
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <button
         class="openstore-jsnav-toggle-link btn btn-outline-dark"
         @click=${this.toggleShown}
       >
         View Log
-      </button> `;
+      </button>
+    `;
   }
 
   toggleShown() {

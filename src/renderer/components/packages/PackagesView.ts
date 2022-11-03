@@ -222,8 +222,6 @@ export default class AppsView<
 
   render() {
     return html`
-      ${BootstrapBlockElement.styleLink}
-
       <openstore-sidebar
         class="position-fixed px-3"
         style="

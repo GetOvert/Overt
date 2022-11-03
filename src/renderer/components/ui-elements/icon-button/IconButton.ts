@@ -13,8 +13,7 @@ export default class IconButton extends BootstrapBlockElement {
   static styles = [BootstrapBlockElement.styles];
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <button
         class="btn ${this.btnClass} ${this.active ? "active" : ""}"
         style="padding-top: 2px"
@@ -34,6 +33,7 @@ export default class IconButton extends BootstrapBlockElement {
             />
           </svg>
         </slot>
-      </button> `;
+      </button>
+    `;
   }
 }

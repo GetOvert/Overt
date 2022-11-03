@@ -9,11 +9,11 @@ export class Grid extends BootstrapBlockElement {
   }
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <div class="openstore-grid-container container">
         <slot></slot>
-      </div> `;
+      </div>
+    `;
   }
 }
 
@@ -24,11 +24,11 @@ export class Row extends BootstrapBlockElement {
   }
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <div class="row row-cols-auto justify-content-evenly">
         <slot></slot>
-      </div> `;
+      </div>
+    `;
   }
 }
 
@@ -48,10 +48,10 @@ export class Column extends BootstrapBlockElement {
   ];
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <div class="col gx-4 gy-0">
         <slot></slot>
-      </div> `;
+      </div>
+    `;
   }
 }

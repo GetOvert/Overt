@@ -39,8 +39,7 @@ export default class FloatingPane extends BootstrapBlockElement {
   ];
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <style>
         :host {
           top: ${"top" in this.anchorPoint ? this.anchorPoint.top : "unset"};
@@ -63,7 +62,8 @@ export default class FloatingPane extends BootstrapBlockElement {
         "bg-light bg-gradient border shadow-lg p-2"}
       >
         <slot></slot>
-      </div>`;
+      </div>
+    `;
   }
 }
 

@@ -90,7 +90,7 @@ export class SettingsPane extends BootstrapBlockElement {
   ];
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
+    return html`
       <div
         class="d-flex align-items-center justify-content-between border-bottom mx-2 pb-2"
       >
@@ -177,7 +177,8 @@ export class SettingsPane extends BootstrapBlockElement {
           "Homebrew path",
           "Path to root directory of the Homebrew installation to use. The standard location for arm64 (“Apple silicon”) architecture is /opt/homebrew, and the standard location for x86_64 (“Intel”) architecture is /usr/local. There are two reasons to change this setting: 1) You want to switch Homebrew architectures on an arm64 Mac; 2) You have installed Homebrew in a custom location."
         )}
-      </div> `;
+      </div>
+    `;
   }
 
   private makeCheckbox(

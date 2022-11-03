@@ -61,8 +61,7 @@ export default class TasksButton extends BootstrapBlockElement {
   static styles = [BootstrapBlockElement.styles];
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <button
         class="openstore-jsnav-toggle-link btn btn-outline-info"
         @click=${this.togglePaneShown}
@@ -77,7 +76,8 @@ export default class TasksButton extends BootstrapBlockElement {
               ></div>
             `
           : ""}
-      </button> `;
+      </button>
+    `;
   }
 
   private terminalPaneEnabled = false;

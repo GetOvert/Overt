@@ -67,9 +67,7 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
 
   private modalRoot: Ref<HTMLElement> = createRef();
 
-  protected firstUpdated(
-    changedProperties: PropertyValues<this>
-  ): void {
+  protected firstUpdated(changedProperties: PropertyValues<this>): void {
     const modal = Modal.getOrCreateInstance(this.modalRoot.value!);
 
     this.modalRoot.value!.addEventListener(
@@ -81,7 +79,7 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
   }
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
+    return html`
       <div
         ${ref(this.modalRoot)}
         class="modal"
@@ -155,7 +153,8 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
             </div>
           </form>
         </div>
-      </div> `;
+      </div>
+    `;
   }
 
   private openModalLinkURL(event: Event) {

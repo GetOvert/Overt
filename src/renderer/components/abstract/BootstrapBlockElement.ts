@@ -136,15 +136,6 @@ export default class BootstrapBlockElement extends LitElement {
     `,
   ];
 
-  static styleLink: HTMLTemplateResult = html`
-    <!-- <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootswatch@5.1.3/dist/sandstone/bootstrap.min.css"
-      integrity="sha256-zWAnZkKmT2MYxdCMp506rQtnA9oE2w0/K/WVU7V08zw="
-      crossorigin="anonymous"
-    /> -->
-  `;
-
   getRootNode(options?: GetRootNodeOptions): ShadowRoot {
     return super.getRootNode(options) as ShadowRoot;
   }

@@ -64,8 +64,7 @@ export class TasksPane extends BootstrapBlockElement {
   }
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <div
         class="d-flex align-items-center justify-content-between border-bottom mx-2 pb-2"
       >
@@ -101,7 +100,8 @@ export class TasksPane extends BootstrapBlockElement {
               Pending, running, and completed install/update/uninstall tasks
               will show up here
             </p>
-          `} `;
+          `}
+    `;
   }
 
   private statusDescriptionForTask(task: QueuedTask): string {
@@ -174,8 +174,7 @@ export class TasksPaneTask extends BootstrapBlockElement {
   ];
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <div class="outer d-flex align-items-center justify-content-between">
         <div class="d-flex flex-column">
           <strong class="flex-grow-1 lh-sm">${this.label}</strong>
@@ -214,7 +213,8 @@ export class TasksPaneTask extends BootstrapBlockElement {
               `
             : ""}
         </div>
-      </div> `;
+      </div>
+    `;
   }
 
   private cancel() {

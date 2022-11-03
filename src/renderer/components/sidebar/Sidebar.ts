@@ -22,8 +22,7 @@ export default class Sidebar extends BootstrapBlockElement {
   ];
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <div
         class="d-flex flex-column justify-content-between overflow-auto pt-3 px-0"
       >
@@ -150,6 +149,7 @@ export default class Sidebar extends BootstrapBlockElement {
             label="Newly Added"
           ></openstore-sidebar-nav-link> -->
         </nav>
-      </div> `;
+      </div>
+    `;
   }
 }

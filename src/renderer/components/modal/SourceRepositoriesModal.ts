@@ -115,7 +115,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
   ];
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
+    return html`
       <div
         ${ref(this.modalRoot)}
         class="modal"
@@ -332,7 +332,8 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
             </div>
           </form>
         </div>
-      </div> `;
+      </div>
+    `;
   }
 
   private addItem() {

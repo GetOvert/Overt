@@ -49,8 +49,7 @@ export default class Card extends BootstrapBlockElement {
   ];
 
   render() {
-    return html`${BootstrapBlockElement.styleLink}
-
+    return html`
       <a
         href=${this.href}
         class="openstore-card-link openstore-jsnav-link col-lg-8 user-select-none"
@@ -87,7 +86,8 @@ export default class Card extends BootstrapBlockElement {
             </div>
           </div>
         </div>
-      </a> `;
+      </a>
+    `;
   }
 
   private clicked(event: Event) {
