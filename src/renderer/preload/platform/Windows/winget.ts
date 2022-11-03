@@ -81,6 +81,7 @@ const winget: IPCWinget = {
     (winget as any)._ingestPackageInfo(undefined, manifests);
 
     (winget as any)._postIndexing();
+    cacheDB_updateLastFullIndexJsTimestamp();
   },
 
   async indexOutdated(): Promise<void> {
@@ -110,8 +111,6 @@ const winget: IPCWinget = {
   _postIndexing(): void {
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
-
-    cacheDB_updateLastFullIndexJsTimestamp();
   },
 
   async _ingestPackageInfo(

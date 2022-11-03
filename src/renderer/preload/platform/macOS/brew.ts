@@ -99,6 +99,7 @@ const brew: IPCBrew = {
     ]);
 
     (brew as any)._postIndexing();
+    cacheDB_updateLastFullIndexJsTimestamp();
   },
 
   async indexOutdated(): Promise<void> {
@@ -225,8 +226,6 @@ const brew: IPCBrew = {
   _postIndexing(): void {
     indexListeners.forEach((listener) => listener());
     indexListeners.clear();
-
-    cacheDB_updateLastFullIndexJsTimestamp();
   },
 
   async _ingestFormulaInfo(
