@@ -230,11 +230,11 @@ const winget: IPCWinget = {
   async install(packageName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
-        if (data.match(/(?<!')-- openstore-succeeded: winget-install --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: winget-install --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: winget-install --/)) {
+        if (data.match(/(?<!')-- overt-failed: winget-install --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -248,7 +248,7 @@ const winget: IPCWinget = {
           ...wingetCommonArguments(),
           ...wingetInstallationCommandArguments(),
         ]) +
-          "; if ($?) { echo '-- openstore-succeeded: winget-install --' } else { echo '-- openstore-failed: winget-install --' }\n"
+          "; if ($?) { echo '-- overt-succeeded: winget-install --' } else { echo '-- overt-failed: winget-install --' }\n"
       );
     });
   },
@@ -256,11 +256,11 @@ const winget: IPCWinget = {
   async upgrade(packageName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
-        if (data.match(/(?<!')-- openstore-succeeded: winget-upgrade --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: winget-upgrade --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: winget-upgrade --/)) {
+        if (data.match(/(?<!')-- overt-failed: winget-upgrade --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -274,7 +274,7 @@ const winget: IPCWinget = {
           ...wingetCommonArguments(),
           ...wingetInstallationCommandArguments(),
         ]) +
-          "; if ($?) { echo '-- openstore-succeeded: winget-upgrade --' } else { echo '-- openstore-failed: winget-upgrade --' }\n"
+          "; if ($?) { echo '-- overt-succeeded: winget-upgrade --' } else { echo '-- overt-failed: winget-upgrade --' }\n"
       );
     });
   },
@@ -282,11 +282,11 @@ const winget: IPCWinget = {
   async uninstall(packageName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
-        if (data.match(/(?<!')-- openstore-succeeded: winget-uninstall --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: winget-uninstall --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: winget-uninstall --/)) {
+        if (data.match(/(?<!')-- overt-failed: winget-uninstall --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -294,7 +294,7 @@ const winget: IPCWinget = {
 
       terminal.send(
         quote([await getWingetExecutablePath(), "uninstall", packageName]) +
-          "; if ($?) { echo '-- openstore-succeeded: winget-uninstall --' } else { echo '-- openstore-failed: winget-uninstall --' }\n"
+          "; if ($?) { echo '-- overt-succeeded: winget-uninstall --' } else { echo '-- overt-failed: winget-uninstall --' }\n"
       );
     });
   },

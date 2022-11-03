@@ -403,11 +403,11 @@ const brew: IPCBrew = {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
-        if (data.match(/(?<!')-- openstore-succeeded: formula-install --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: formula-install --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: formula-install --/)) {
+        if (data.match(/(?<!')-- overt-failed: formula-install --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -420,7 +420,7 @@ const brew: IPCBrew = {
           "--formula",
           formulaName,
         ]) +
-          " && echo '-- openstore-succeeded: formula-install --' || echo '-- openstore-failed: formula-install --'\n"
+          " && echo '-- overt-succeeded: formula-install --' || echo '-- overt-failed: formula-install --'\n"
       );
     });
   },
@@ -438,11 +438,11 @@ const brew: IPCBrew = {
             ["before"]
           );
         }
-        if (data.match(/(?<!')-- openstore-succeeded: formula-upgrade --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: formula-upgrade --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: formula-upgrade --/)) {
+        if (data.match(/(?<!')-- overt-failed: formula-upgrade --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -455,7 +455,7 @@ const brew: IPCBrew = {
           "--formula",
           formulaName,
         ]) +
-          " && echo '-- openstore-succeeded: formula-upgrade --' || echo '-- openstore-failed: formula-upgrade --'\n"
+          " && echo '-- overt-succeeded: formula-upgrade --' || echo '-- overt-failed: formula-upgrade --'\n"
       );
     });
   },
@@ -473,11 +473,11 @@ const brew: IPCBrew = {
             ["before"]
           );
         }
-        if (data.match(/(?<!')-- openstore-succeeded: formula-uninstall --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: formula-uninstall --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: formula-uninstall --/)) {
+        if (data.match(/(?<!')-- overt-failed: formula-uninstall --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -490,7 +490,7 @@ const brew: IPCBrew = {
           "--formula",
           formulaName,
         ]) +
-          " && echo '-- openstore-succeeded: formula-uninstall --' || echo '-- openstore-failed: formula-uninstall --'\n"
+          " && echo '-- overt-succeeded: formula-uninstall --' || echo '-- overt-failed: formula-uninstall --'\n"
       );
     });
   },
@@ -538,11 +538,11 @@ const brew: IPCBrew = {
   async addSourceRepository(name: string, url: string): Promise<boolean> {
     const success = await new Promise<boolean>(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
-        if (data.match(/(?<!')-- openstore-succeeded: tap --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: tap --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: tap --/)) {
+        if (data.match(/(?<!')-- overt-failed: tap --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -550,7 +550,7 @@ const brew: IPCBrew = {
 
       terminal.send(
         quote([await getBrewExecutablePath(), "tap", name, url]) +
-          " && echo '-- openstore-succeeded: tap --' || echo '-- openstore-failed: tap --'\n"
+          " && echo '-- overt-succeeded: tap --' || echo '-- overt-failed: tap --'\n"
       );
     });
 
@@ -562,11 +562,11 @@ const brew: IPCBrew = {
   async removeSourceRepository(name: string): Promise<boolean> {
     const success = await new Promise<boolean>(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
-        if (data.match(/(?<!')-- openstore-succeeded: untap --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: untap --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: untap --/)) {
+        if (data.match(/(?<!')-- overt-failed: untap --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -574,7 +574,7 @@ const brew: IPCBrew = {
 
       terminal.send(
         quote([await getBrewExecutablePath(), "untap", name]) +
-          " && echo '-- openstore-succeeded: untap --' || echo '-- openstore-failed: untap --'\n"
+          " && echo '-- overt-succeeded: untap --' || echo '-- overt-failed: untap --'\n"
       );
     });
 

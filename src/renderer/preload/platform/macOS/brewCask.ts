@@ -439,11 +439,11 @@ const brewCask: IPCBrewCask = {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
-        if (data.match(/(?<!')-- openstore-succeeded: cask-install --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: cask-install --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: cask-install --/)) {
+        if (data.match(/(?<!')-- overt-failed: cask-install --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -457,7 +457,7 @@ const brewCask: IPCBrewCask = {
           "--cask",
           caskName,
         ]) +
-          " && echo '-- openstore-succeeded: cask-install --' || echo '-- openstore-failed: cask-install --'\n"
+          " && echo '-- overt-succeeded: cask-install --' || echo '-- overt-failed: cask-install --'\n"
       );
     });
   },
@@ -475,11 +475,11 @@ const brewCask: IPCBrewCask = {
             ["before"]
           );
         }
-        if (data.match(/(?<!')-- openstore-succeeded: cask-upgrade --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: cask-upgrade --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: cask-upgrade --/)) {
+        if (data.match(/(?<!')-- overt-failed: cask-upgrade --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -493,7 +493,7 @@ const brewCask: IPCBrewCask = {
           "--cask",
           caskName,
         ]) +
-          " && echo '-- openstore-succeeded: cask-upgrade --' || echo '-- openstore-failed: cask-upgrade --'\n"
+          " && echo '-- overt-succeeded: cask-upgrade --' || echo '-- overt-failed: cask-upgrade --'\n"
       );
     });
   },
@@ -511,11 +511,11 @@ const brewCask: IPCBrewCask = {
             ["before"]
           );
         }
-        if (data.match(/(?<!')-- openstore-succeeded: cask-uninstall --/)) {
+        if (data.match(/(?<!')-- overt-succeeded: cask-uninstall --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- openstore-failed: cask-uninstall --/)) {
+        if (data.match(/(?<!')-- overt-failed: cask-uninstall --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
@@ -528,7 +528,7 @@ const brewCask: IPCBrewCask = {
           "--cask",
           caskName,
         ]) +
-          " && echo '-- openstore-succeeded: cask-uninstall --' || echo '-- openstore-failed: cask-uninstall --'\n"
+          " && echo '-- overt-succeeded: cask-uninstall --' || echo '-- overt-failed: cask-uninstall --'\n"
       );
     });
   },
