@@ -106,7 +106,7 @@ async function createWindow(): Promise<void> {
       sendNativeNotifications: true,
       validateCodeSignatures: true,
 
-      useSystemAccentColor: true,
+      useSystemAccentColor: false,
       tintDarkBackgrounds: false,
 
       fullIndexIntervalDays: 3,

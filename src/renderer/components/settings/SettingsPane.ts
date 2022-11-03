@@ -130,7 +130,7 @@ export class SettingsPane extends BootstrapBlockElement {
         ${this.makeCheckbox(
           "useSystemAccentColor",
           "Use system accent color",
-          "Use the accent color you've chosen in your system settings? (Default: Yes)"
+          "Use the accent color you've chosen in your system settings? (Default: No)"
         )}
         ${this.makeCheckbox(
           "tintDarkBackgrounds",
