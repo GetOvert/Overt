@@ -9,11 +9,6 @@
     --bs-secondary-fill: hsl(45, 2%, 45%);
     --bs-secondary-disabled: hsl(0, 0%, 38%);
 
-    --bs-success: hsl(90, 67%, 47%);
-    --bs-success-rgb: 119, 200, 39;
-    --bs-success-fill: hsl(90, 73%, 41%);
-    --bs-success-disabled: hsl(90, 51%, 48%);
-
     --bs-info: hsl(197, 82%, 56%);
     --bs-info-rgb: 41, 171, 224;
     --bs-info-fill: hsl(204, 82%, 56%);

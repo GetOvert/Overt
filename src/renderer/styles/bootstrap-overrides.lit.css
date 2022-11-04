@@ -21,10 +21,14 @@
   --bs-tooltip-border-radius: var(--bs-border-radius) !important;
 }
 
-:root,
-:host {
+* {
   --bs-primary: var(--accent-color);
   --bs-primary-rgb: var(--accent-color-rgb);
+
+  --bs-success: hsl(90, 67%, 47%);
+  --bs-success-rgb: 119, 200, 39;
+  --bs-success-fill: hsl(90, 73%, 41%);
+  --bs-success-disabled: hsl(90, 51%, 48%);
 }
 
 :root,
@@ -95,6 +99,27 @@ h6 {
   --bs-btn-disabled-border-color: var(--bs-primary);
 }
 
+.btn-success {
+  --bs-btn-bg: var(--bs-success);
+  --bs-btn-border-color: var(--bs-success);
+  --bs-btn-hover-bg: var(--bs-success-fill);
+  --bs-btn-active-bg: var(--bs-success-fill);
+  --bs-btn-disabled-bg: var(--bs-success-disabled);
+  --bs-btn-disabled-border-color: var(--bs-success);
+}
+
+.btn-outline-success {
+  --bs-btn-color: var(--bs-success);
+  --bs-btn-border-color: var(--bs-success);
+  --bs-btn-hover-bg: var(--bs-success);
+  --bs-btn-hover-border-color: var(--bs-success);
+  --bs-btn-focus-shadow-rgb: var(--bs-success-rgb);
+  --bs-btn-active-bg: var(--bs-success);
+  --bs-btn-active-border-color: var(--bs-success);
+  --bs-btn-disabled-color: var(--bs-success-disabled);
+  --bs-btn-disabled-border-color: var(--bs-success-disabled);
+}
+
 /* Our Bootswatch theme hardcodes this as #fff; make it dynamic again here */
 .btn-success,
 .btn-warning {
@@ -155,7 +180,8 @@ a:active,
   background-color: var(--accent-color) !important;
 }
 
-.form-control, .form-select {
+.form-control,
+.form-select {
   color: var(--bs-body-color);
   background-color: var(--bs-white);
   border-color: var(--bs-border-color);
