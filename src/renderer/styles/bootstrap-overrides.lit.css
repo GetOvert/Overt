@@ -95,6 +95,14 @@ h6 {
   --bs-btn-disabled-border-color: var(--bs-primary);
 }
 
+/* Our Bootswatch theme hardcodes this as #fff; make it dynamic again here */
+.btn-success,
+.btn-warning {
+  --bs-btn-color: var(--bs-white);
+
+  color: var(--bs-btn-color) !important;
+}
+
 .form-check-input:checked,
 .form-check-input[type="checkbox"]:indeterminate {
   background-color: var(--bs-primary);
@@ -147,16 +155,19 @@ a:active,
   background-color: var(--accent-color) !important;
 }
 
-.form-control {
+.form-control, .form-select {
   color: var(--bs-body-color);
   background-color: var(--bs-white);
   border-color: var(--bs-border-color);
   border-radius: var(--bs-border-radius);
 }
-.form-control:focus {
+:is(.form-control, .form-select):focus {
   color: var(--bs-body-color);
   background-color: var(--bs-white);
   box-shadow: 0 0 0 0.25rem rgba(205, 162, 119, 0.25);
+}
+:is(.form-control, .form-select):disabled {
+  background-color: var(--bs-light);
 }
 
 .tooltip {

@@ -94,7 +94,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
         top: 0;
         padding-top: 0 !important;
         padding-bottom: 0 !important;
-        background: #fff !important;
+        background: var(--bs-white) !important;
       }
       .table thead th > .th-inner {
         padding-bottom: 0.5rem;
