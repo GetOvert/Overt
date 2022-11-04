@@ -19,7 +19,7 @@ import {
 } from "ipc/package-managers/macOS/IPCBrewCask";
 import terminal from "preload/shared/terminal";
 import * as taskQueue from "preload/shared/taskQueueIPC";
-import { PromptForPasswordTask } from "tasks/Task";
+import { ConfirmActionTask, PromptForPasswordTask } from "tasks/Task";
 import settings from "preload/shared/settings";
 import path from "path";
 import brew from "./brew";
@@ -421,23 +421,50 @@ const brewCask: IPCBrewCask = {
   },
 
   async install(caskName: string): Promise<boolean> {
-    return new Promise(async (resolve, reject) => {
+    const runInstallCommand = async (
+      resolve: (value: boolean | PromiseLike<boolean>) => void,
+      reject: (reason?: any) => void,
+      force: boolean = false
+    ) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
-          taskQueue.push(
+          taskQueue.push<PromptForPasswordTask>(
             {
               type: "prompt-for-password",
               label: `Authenticate to install ${caskName}`,
               prompt: `The installer for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
-            } as PromptForPasswordTask,
+            },
             ["before"]
           );
         }
-        if (
-          data.match(new RegExp(`Cask '${caskName}' is already installed`, "i"))
-        ) {
+        if (data.match(/different from the one being installed/)) {
+          taskQueue.push<ConfirmActionTask>(
+            {
+              type: "confirm-action",
+              label: `Confirm overwrite of ${caskName}`,
+
+              promptTitle: `Overwrite with new version?`,
+              prompt: `A different version of ${caskName} is currently installed. Would you like to overwrite it?`,
+              promptCannedMessage: `
+                <p class="text-warning">
+                  Overt's version of this app is probably newer, but not necessarily.
+                </p>
+                <p class="text-info">
+                  Custom icons trigger this message. If you continue, any custom icons on this app will be lost.
+                </p>
+              `,
+              url: null,
+              confirmButtonTitle: "Overwrite",
+              cancelButtonTitle: "Cancel",
+
+              action: () =>
+                runInstallCommand(resolve, reject, /* force: */ true),
+              cancel: () => resolve(false),
+            },
+            []
+          );
+
           terminal.offReceive(callbackID);
-          return resolve(false);
         }
         if (data.match(/(?<!')-- overt-succeeded: cask-install --/)) {
           terminal.offReceive(callbackID);
@@ -453,13 +480,16 @@ const brewCask: IPCBrewCask = {
         quote([
           await getBrewExecutablePath(),
           "install",
+          force ? "--force" : "--adopt",
           ...(await getQuarantineFlags()),
           "--cask",
           caskName,
         ]) +
           " && echo '-- overt-succeeded: cask-install --' || echo '-- overt-failed: cask-install --'\n"
       );
-    });
+    };
+
+    return new Promise(runInstallCommand);
   },
 
   async upgrade(caskName: string): Promise<boolean> {

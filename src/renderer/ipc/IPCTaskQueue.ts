@@ -1,4 +1,4 @@
-import { TaskBase } from "tasks/Task";
+import { TaskBase, TaskNotifyPoints } from "tasks/Task";
 
 declare global {
   interface Window {
@@ -7,5 +7,10 @@ declare global {
 }
 
 export interface IPCTaskQueue {
-  onTaskQueueCreated(push: (task: TaskBase) => void): Promise<void>;
+  onTaskQueueCreated(
+    push: <Task extends TaskBase = TaskBase>(
+      task: Task,
+      notify: TaskNotifyPoints
+    ) => void
+  ): Promise<void>;
 }

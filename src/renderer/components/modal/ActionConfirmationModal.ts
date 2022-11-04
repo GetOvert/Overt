@@ -1,5 +1,4 @@
 import { Modal } from "bootstrap";
-import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import LightDOMBlockElement from "components/abstract/LightDOMBlockElement";
 import { html, HTMLTemplateResult, nothing, PropertyValues, render } from "lit";
 import { customElement, property } from "lit/decorators.js";
@@ -15,7 +14,7 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
   @property()
   modalPrompt: string;
   @property()
-  modalPromptCannedMessage: HTMLTemplateResult | typeof nothing;
+  modalPromptCannedMessage?: HTMLTemplateResult | null;
   @property()
   modalLinkURL: string | null;
   @property()
@@ -31,7 +30,7 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
 
   static async runModal(
     prompt: string,
-    promptCannedMessage: HTMLTemplateResult | typeof nothing,
+    promptCannedMessage: HTMLTemplateResult | null,
     url: string | null,
     title: string,
     confirmButtonTitle: string,

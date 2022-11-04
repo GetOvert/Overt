@@ -2,6 +2,7 @@
 //   overt:brew?1=update&1[name]=node
 //   overt:brew-cask?1=add-source-repository&1[name]=getovert/tap&1[url]=https://github.com/getovert/homebrew-tap&2=install&2[name]=overt
 
+import { html } from "lit";
 import {
   ConfirmActionTask,
   describeTask,
@@ -100,17 +101,18 @@ export async function handleURL(urlString: string) {
     );
 
     const confirmActionTasks = actions.map(
-      ([action, notify], index): ConfirmActionTask => ({
+      ([task, notify], index): ConfirmActionTask => ({
         type: "confirm-action",
         label: "Confirm action from URL",
 
-        action,
-        notify,
+        action: () => taskQueue.push(task, notify),
 
         promptTitle: `Confirm action from URL (${index + 1}/${actions.length})`,
-        prompt: `You clicked a link to ${describeTask(action)}.`,
-        promptCannedMessage: promptCannedMessageForTask(action),
-        url: urlInTask(action),
+        prompt: `You clicked a link to ${describeTask(task)}.`,
+        promptCannedMessage: html`
+          Do you want to allow this? ${promptCannedMessageForTask(task)}
+        `,
+        url: urlInTask(task),
         confirmButtonTitle: "Continue",
         cancelButtonTitle: "Cancel",
       })

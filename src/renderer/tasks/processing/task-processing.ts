@@ -1,4 +1,5 @@
 import { html } from "lit";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { packageManagerForName } from "package-manager/PackageManagerRegistry";
 import ActionConfirmationModal from "components/modal/ActionConfirmationModal";
 import PasswordPromptModal from "components/modal/PasswordPromptModal";
@@ -62,15 +63,21 @@ const confirmationProcessor = new TaskProcessor(
   async (task) => {
     const shouldContinue = await ActionConfirmationModal.runModal(
       task.prompt,
-      html`Do you want to allow this? ${task.promptCannedMessage}`,
+      typeof task.promptCannedMessage === "string"
+        ? html`${unsafeHTML(task.promptCannedMessage)}`
+        : task.promptCannedMessage,
       task.url,
       task.promptTitle,
       task.confirmButtonTitle,
       task.cancelButtonTitle
     );
-    if (!shouldContinue) return "canceled";
 
-    taskQueue.push(task.action, task.notify);
+    if (!shouldContinue) {
+      task.cancel?.();
+      return "canceled";
+    }
+
+    task.action();
     return "succeeded";
   }
 );

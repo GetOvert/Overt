@@ -68,12 +68,16 @@ export type PromptForPasswordTask = TaskBase & {
 
 export type ConfirmActionTask = TaskBase & {
   type: "confirm-action";
-  action: Task;
-  notify?: TaskNotifyPoints;
+  action: () => void;
+  cancel?: () => void;
 
   promptTitle: string;
   prompt: string;
-  promptCannedMessage?: HTMLTemplateResult;
+  /** Static HTML below the main message; don't pass user input! */
+  promptCannedMessage:
+    | HTMLTemplateResult
+    | string /* Interpreted as html (for preload code, which can't use html`` literals) */
+    | null;
   url: string | null;
   confirmButtonTitle: string;
   cancelButtonTitle: string;
@@ -142,7 +146,7 @@ export function describeTask(task: Task): string {
     case "prompt-for-password":
       return `ask for password with prompt "${task.prompt}"`;
     case "confirm-action":
-      return `confirm action "${describeTask(task.action)}"`;
+      return `confirm an action`;
     case "reindex-all":
       const condition = (() => {
         switch (task.condition) {

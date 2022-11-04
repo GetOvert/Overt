@@ -59,8 +59,8 @@ export class TaskQueue {
     return task;
   }
 
-  push(
-    task: Task,
+  push<TaskT extends Task>(
+    task: TaskT,
     notify: TaskNotifyPoints = [],
     state: LiveTaskState = "pending"
   ): Promise<QueuedTask & { state: DeadTaskState }> {
