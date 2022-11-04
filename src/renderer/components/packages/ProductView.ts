@@ -120,7 +120,7 @@ export abstract class ProductView extends BootstrapBlockElement {
             ({ title }) => title,
             ({ title, color, enabled, loading, onClick }) => html`
               <button
-                class="btn btn-${color}"
+                class="btn btn-${color} mx-1"
                 style="min-width: ${buttonWidth}vw; height: 2.7rem"
                 ?disabled=${!enabled}
                 @click=${onClick}

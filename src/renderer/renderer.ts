@@ -27,7 +27,7 @@
  */
 
 import "bootswatch/dist/sandstone/bootstrap.min.css";
-import "styles/default.css";
+import "styles/all.css";
 import "styles/injection";
 
 import "nav/nav";

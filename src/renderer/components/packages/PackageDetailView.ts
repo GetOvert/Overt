@@ -71,7 +71,7 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
     return [
       {
         title: "Install",
-        color: "success",
+        color: "primary",
 
         shown:
           !this.packageInfoAdapter.isPackageInstalled(this.packageInfo) &&

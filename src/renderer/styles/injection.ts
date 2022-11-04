@@ -19,11 +19,20 @@ export const injectColors = async () => {
     ? accentColor.darken(0.9)
     : fallbackAccentColor.grayscale().darken(0.8);
 
+  const textOnAccentColor = new Color(
+    `#${
+      accentColor.luminosity() < 0.3
+        ? config.lightTextOnAccentColor
+        : config.darkTextOnAccentColor
+    }`
+  );
+
   [
     ["--accent-color", accentColor],
     ["--accent-color-dark", accentColorDark],
     ["--accent-color-darker", accentColorDarker],
     ["--accent-color-dark-bg-tint", accentColorDarkBgTint],
+    ["--text-on-accent-color", textOnAccentColor],
   ].forEach(([name, color]: [string, Color]) => {
     document.documentElement.style.setProperty(name, color.string());
     document.documentElement.style.setProperty(

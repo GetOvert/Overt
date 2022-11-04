@@ -67,11 +67,11 @@ export default class TasksButton extends BootstrapBlockElement {
         @click=${this.togglePaneShown}
       >
         Tasks
-        <span class="text-primary ms-2">${this.liveTaskCount}</span>
+        <span class="ms-2">${this.liveTaskCount}</span>
         ${this.liveTaskCount > 0
           ? html`
               <div
-                class="spinner-border spinner-border-sm text-primary ms-1"
+                class="spinner-border spinner-border-sm align-text-bottom ms-1"
                 role="status"
               ></div>
             `

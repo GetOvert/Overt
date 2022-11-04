@@ -1,12 +1,10 @@
-@import "./dark-theme.lit.css";
-
 /* Overrides rule in Bootstrap's _reboot.scss */
 :root {
   scroll-behavior: auto !important;
 }
 
-body {
-  /* Revert visual changes in Bootstrap 5.2 */
+/* Revert visual changes in Bootstrap 5.2 */
+* {
   --bs-border-radius: 0.25rem !important;
   --bs-btn-border-radius: var(--bs-border-radius) !important;
   --bs-dropdown-border-radius: var(--bs-border-radius) !important;
@@ -23,12 +21,14 @@ body {
   --bs-tooltip-border-radius: var(--bs-border-radius) !important;
 }
 
-body {
+:root,
+:host {
   --bs-primary: var(--accent-color);
   --bs-primary-rgb: var(--accent-color-rgb);
 }
 
-body {
+:root,
+:host {
   --bs-body-font-size: 0.9rem;
 }
 .h1,
@@ -95,6 +95,12 @@ h6 {
   --bs-btn-disabled-border-color: var(--bs-primary);
 }
 
+.form-check-input:checked,
+.form-check-input[type="checkbox"]:indeterminate {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+
 a,
 .nav-link,
 .btn-link {
@@ -121,9 +127,9 @@ a:active,
   border-color: var(--bs-border-color);
 }
 
-.nav-pills .nav-link.active,
 .nav-pills .nav-link:hover,
-.nav-pills .nav-link:focus {
+.nav-pills .nav-link:focus,
+.nav-pills .nav-link.active {
   background-color: var(--bs-light);
   border-color: var(--bs-border-color);
 }
@@ -132,15 +138,25 @@ a:active,
   color: var(--bs-border-color);
 }
 
-.nav-pills .nav-link:hover {
-  color: var(--bs-dark);
-}
+.nav-pills .nav-link:hover,
 .nav-pills .nav-link:focus {
-  color: var(--bs-dark);
+  color: var(--bs-dark) !important;
 }
 .nav-pills .nav-link.active {
-  color: var(--bs-light);
-  background-color: var(--accent-color);
+  color: var(--text-on-accent-color) !important;
+  background-color: var(--accent-color) !important;
+}
+
+.form-control {
+  color: var(--bs-body-color);
+  background-color: var(--bs-white);
+  border-color: var(--bs-border-color);
+  border-radius: var(--bs-border-radius);
+}
+.form-control:focus {
+  color: var(--bs-body-color);
+  background-color: var(--bs-white);
+  box-shadow: 0 0 0 0.25rem rgba(205, 162, 119, 0.25);
 }
 
 .tooltip {

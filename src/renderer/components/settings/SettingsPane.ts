@@ -98,7 +98,13 @@ export class SettingsPane extends BootstrapBlockElement {
       </div>
 
       <div class="d-flex flex-column overflow-auto p-2 pt-3">
-        <h3>General</h3>
+        <h3
+          data-bs-toggle="tooltip"
+          data-bs-placement="right"
+          title="Configure basic settings"
+        >
+          General
+        </h3>
         <hr aria-hidden="true" />
 
         ${this.makeCheckbox(
@@ -121,7 +127,7 @@ export class SettingsPane extends BootstrapBlockElement {
         <h3
           data-bs-toggle="tooltip"
           data-bs-placement="right"
-          title="Overt's index of available and installed software"
+          title="Personalize!"
         >
           Appearance
         </h3>
@@ -141,7 +147,7 @@ export class SettingsPane extends BootstrapBlockElement {
         <h3
           data-bs-toggle="tooltip"
           data-bs-placement="right"
-          title="Overt's index of available and installed software"
+          title="Configure Overt's index of available and installed software"
         >
           Catalog
         </h3>
