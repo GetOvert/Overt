@@ -13,6 +13,6 @@ export type Config = {
 export const config = {
   fallbackAccentColor: "46b04aff",
   
-  lightTextOnAccentColor: "dddfe2",
+  lightTextOnAccentColor: "f8f5f0",
   darkTextOnAccentColor: "232421",
 };

@@ -21,7 +21,7 @@ export const injectColors = async () => {
 
   const textOnAccentColor = new Color(
     `#${
-      accentColor.luminosity() < 0.3
+      accentColor.luminosity() < 0.4
         ? config.lightTextOnAccentColor
         : config.darkTextOnAccentColor
     }`
