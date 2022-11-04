@@ -114,28 +114,30 @@ export abstract class ProductView extends BootstrapBlockElement {
           ${this.description}
         </p>
 
-        <div class="text-center my-4">
-          ${repeat(
-            shownButtons,
-            ({ title }) => title,
-            ({ title, color, enabled, loading, onClick }) => html`
-              <button
-                class="btn btn-${color} mx-1"
-                style="min-width: ${buttonWidth}vw; height: 2.7rem"
-                ?disabled=${!enabled}
-                @click=${onClick}
-              >
-                ${title}
-                ${loading
-                  ? html`<span
-                      class="spinner-border spinner-border-sm text-white ms-2"
-                      style="vertical-align: text-bottom"
-                      role="status"
-                    ></span>`
-                  : ""}
-              </button>
-            `
-          )}
+        <div class="text-center w-100 my-4">
+          <div class="btn-group mx-auto" role="group">
+            ${repeat(
+              shownButtons,
+              ({ title }) => title,
+              ({ title, color, enabled, loading, onClick }) => html`
+                <button
+                  class="btn btn-${color}"
+                  style="min-width: ${buttonWidth}vw; height: 2.7rem"
+                  ?disabled=${!enabled}
+                  @click=${onClick}
+                >
+                  ${title}
+                  ${loading
+                    ? html`<span
+                        class="spinner-border spinner-border-sm text-white ms-2"
+                        style="vertical-align: text-bottom"
+                        role="status"
+                      ></span>`
+                    : ""}
+                </button>
+              `
+            )}
+          </div>
         </div>
 
         <div class="row g-0 mx-3 pt-2">
