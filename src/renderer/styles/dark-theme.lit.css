@@ -30,9 +30,9 @@
 
     --bs-body-color: #dddfe2 !important;
     --bs-body-color-rgb: 248, 249, 250 !important;
-    
+
     --bs-border-color: hsl(37, 25%, 17%) !important;
-    --bs-border-color-translucent: hsla(37, 25%, 17%, 0.175) !important;
+    --bs-border-color-translucent: rgba(255, 255, 255, 0.175) !important;
     --bs-card-border-color: hsla(37, 25%, 17%, 0.75) !important;
 
     --bs-btn-active-shadow: inset 0 3px 5px rgba(255, 255, 255, 0.125) !important;
@@ -40,7 +40,9 @@
     --box-shadow-sm: 0 0.125rem 0.25rem rgba(255, 255, 255, 0.075) !important;
 
     --bs-modal-bg: var(--bs-white) !important;
-    --bs-modal-border-color: var(--bs-border-color-translucent) !important;
+    --bs-modal-border-color: var(--bs-border-color) !important;
+    --bs-modal-header-border-color: var(--bs-border-color) !important;
+    --bs-modal-footer-border-color: var(--bs-border-color) !important;
     --bs-modal-box-shadow: var(--box-shadow-sm) !important;
   }
 
@@ -193,6 +195,20 @@
     --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
     --bs-btn-disabled-color: var(--bs-dark-disabled);
     --bs-btn-disabled-border-color: var(--bs-dark-disabled);
+  }
+
+  .dropdown-menu {
+    --bs-dropdown-color: var(--bs-dark);
+    --bs-dropdown-bg: var(--bs-white);
+    --bs-dropdown-border-color: var(--bs-border-color-translucent);
+    --bs-dropdown-divider-bg: var(--bs-border-color-translucent);
+    --bs-dropdown-link-color: var(--bs-secondary);
+    --bs-dropdown-link-hover-color: var(--bs-secondary);
+    --bs-dropdown-link-hover-bg: var(--bs-light);
+    --bs-dropdown-link-active-color: var(--bs-secondary);
+    --bs-dropdown-link-active-bg: var(--bs-light);
+    --bs-dropdown-link-disabled-color: var(--bs-gray-500);
+    --bs-dropdown-header-color: var(--bs-secondary);
   }
 
   :is(.form-control, .form-select):focus {
