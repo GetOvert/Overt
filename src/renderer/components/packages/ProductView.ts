@@ -155,6 +155,7 @@ export abstract class ProductView extends BootstrapBlockElement {
                           data-bs-toggle="dropdown"
                           aria-haspopup="true"
                           aria-label="Toggle related actions dropdown"
+                          ?disabled=${!enabled}
                         ></button>
                         <ul
                           class="dropdown-menu"
