@@ -217,31 +217,32 @@ export default class AppsView<
           opacity: 100%;
         }
       }
+
+      openstore-sidebar {
+        top: 56px;
+        left: 0;
+
+        width: max(25vw, 240px);
+        height: calc(100vh - 56px);
+      }
+
+      .main-container {
+        top: 56px;
+        right: 0;
+
+        width: calc(100vw - max(25vw, 240px));
+        height: calc(100vh - 56px);
+      }
     `,
   ];
 
   render() {
     return html`
-      <openstore-sidebar
-        class="position-fixed px-3"
-        style="
-          top: 56px;
-          left: 0;
-          width: 25vw;
-          height: calc(100vh - 56px);
-          "
-      >
-      </openstore-sidebar>
+      <openstore-sidebar class="position-fixed px-3"></openstore-sidebar>
 
       <div
         ${ref(this._scrollContainerRef)}
-        class="position-fixed overflow-scroll pe-2"
-        style="
-          top: 56px;
-          right: 0;
-          width: 75vw;
-          height: calc(100vh - 56px);
-        "
+        class="main-container position-fixed overflow-scroll"
       >
         <div
           class="text-center position-absolute top-50 start-50 translate-middle pb-5 ${this

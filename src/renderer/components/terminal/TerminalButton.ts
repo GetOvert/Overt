@@ -17,10 +17,7 @@ export default class TerminalButton extends BootstrapBlockElement {
 
   render() {
     return html`
-      <button
-        class="openstore-jsnav-toggle-link btn btn-outline-dark"
-        @click=${this.toggleShown}
-      >
+      <button class="btn btn-outline-dark" @click=${this.toggleShown}>
         View Log
       </button>
     `;
@@ -33,7 +30,5 @@ export default class TerminalButton extends BootstrapBlockElement {
 
     if (this.pane.shown) button.classList.add("active");
     else button.classList.remove("active");
-
-    ((window as any).openStore as any).fitTerminal();
   }
 }

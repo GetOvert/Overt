@@ -29,6 +29,7 @@ export default class SidebarNavLink extends LightDOMBlockElement {
           "nav-link": true,
           active: this.active,
         })}
+        style="--bs-nav-link-padding-y: 0.375rem"
         aria-current="${ifDefined(this.active ? "page" : null)}"
         @click=${this.clicked}
       >

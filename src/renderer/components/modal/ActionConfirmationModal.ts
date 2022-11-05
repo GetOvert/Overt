@@ -137,7 +137,7 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
 
               <button
                 type="button"
-                class="btn btn-secondary"
+                class="btn btn-light"
                 data-bs-dismiss="modal"
               >
                 ${this.cancelButtonTitle}

@@ -12,11 +12,18 @@ export default class Sidebar extends BootstrapBlockElement {
   static styles = [
     BootstrapBlockElement.styles,
     css`
-      :host {
-        max-width: 300px;
-      }
       :host > div {
         max-height: 100%;
+      }
+
+      .heading {
+        font-size: 1.05rem;
+        font-weight: bold;
+      }
+
+      .nav:not(:last-child) {
+        border-bottom: var(--bs-border-width) var(--bs-border-style)
+          var(--bs-border-color);
       }
     `,
   ];
@@ -24,10 +31,10 @@ export default class Sidebar extends BootstrapBlockElement {
   render() {
     return html`
       <div
-        class="d-flex flex-column justify-content-between overflow-auto pt-3 px-0"
+        class="d-flex flex-column justify-content-between overflow-auto pt-2 px-0"
       >
         <nav class="nav nav-pills nav-fill flex-column">
-          <span class="fs-6 fw-bold text-uppercase ms-2 mt-1 mb-2">Source</span>
+          <span class="heading ps-2 mt-1 mb-1">Source</span>
 
           ${window.platform.getNodePlatformString() === "darwin"
             ? html`
@@ -64,7 +71,7 @@ export default class Sidebar extends BootstrapBlockElement {
         </nav>
 
         <nav class="nav nav-pills nav-fill flex-column">
-          <span class="fs-6 fw-bold text-uppercase ms-2 mt-3 mb-2">Filter</span>
+          <span class="heading ps-2 mt-3 mb-1">Filter</span>
 
           <openstore-sidebar-nav-link
             href=${((window as any).openStore as any).encodeFragment({
@@ -105,9 +112,7 @@ export default class Sidebar extends BootstrapBlockElement {
         </nav>
 
         <nav class="nav nav-pills nav-fill flex-column">
-          <span class="fs-6 fw-bold text-uppercase ms-2 mt-3 mb-2"
-            >Sort by</span
-          >
+          <span class="heading ps-2 mt-3 mb-1">Sort</span>
 
           <openstore-sidebar-nav-link
             href=${((window as any).openStore as any).encodeFragment({

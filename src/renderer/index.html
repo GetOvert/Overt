@@ -14,8 +14,24 @@
     <header class="sticky-top bg-light">
       <nav class="navbar navbar-light">
         <div class="container-fluid">
-          <div class="d-flex justify-content-start" style="flex: 1 0 8.5vw">
-            <openstore-settings-button></openstore-settings-button>
+          <div
+            class="d-flex"
+            style="
+              width: 25vw;
+              min-width: 200px;
+              padding-left: 0.25rem;
+              margin-right: 0.5rem;
+            "
+          >
+            <openstore-settings-button
+              class="me-auto"
+              style="margin-left: -0.35rem"
+            ></openstore-settings-button>
+
+            <openstore-tasks-button
+              class="ms-auto px-4"
+              style="margin-right: -0.5rem"
+            ></openstore-tasks-button>
           </div>
 
           <form
@@ -32,13 +48,6 @@
               oninput="event.preventDefault(); window.openStore.updateWindowLocationFragment({ ...window.openStore.decodeFragment(window.location.hash), search: event.target.value ?? '', subpage: null });"
             />
           </form>
-
-          <div
-            class="d-flex justify-content-end"
-            style="flex: 0 0 15vw; min-width: 120px"
-          >
-            <openstore-tasks-button></openstore-tasks-button>
-          </div>
         </div>
       </nav>
     </header>
@@ -47,7 +56,7 @@
       <openstore-floating-pane
         id="openstore-settings-pane"
         anchorPoint='{ "top": "56px", "left": "10px" }'
-        width="25vw"
+        width="max(25vw, 240px)"
         height="calc(98vh - 56px)"
       >
         <openstore-settings-pane></openstore-settings-pane>
@@ -55,8 +64,8 @@
 
       <openstore-floating-pane
         id="openstore-tasks-pane"
-        anchorPoint='{ "top": "56px", "right": "10px" }'
-        width="25vw"
+        anchorPoint='{ "top": "56px", "left": "10px" }'
+        width="max(25vw, 240px)"
         height="calc(98vh - 56px)"
       >
         <openstore-tasks-pane></openstore-tasks-pane>
@@ -64,8 +73,8 @@
 
       <openstore-floating-pane
         id="openstore-terminal-pane"
-        anchorPoint='{ "top": "56px", "right": "calc(10px + 25vw)" }'
-        width="calc(50vw - 20px)"
+        anchorPoint='{ "top": "56px", "right": "10px" }'
+        width="calc(100vw - max(25vw, 240px) - 20px)"
         height="calc(98vh - 56px)"
       >
         <div class="overflow-auto">

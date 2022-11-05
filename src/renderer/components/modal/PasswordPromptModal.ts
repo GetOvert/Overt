@@ -93,7 +93,7 @@ export default class PasswordPromptModal extends LightDOMBlockElement {
             <div class="modal-footer">
               <button
                 type="button"
-                class="btn btn-secondary"
+                class="btn btn-light"
                 data-bs-dismiss="modal"
               >
                 Cancel

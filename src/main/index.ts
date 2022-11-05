@@ -40,6 +40,9 @@ async function createWindow(): Promise<void> {
   mainWindow = new BrowserWindow({
     width: 992,
     height: 600,
+    minWidth: 450,
+    minHeight: 400,
+
     webPreferences: {
       additionalArguments: [
         `Overt.accentColor=${accentColor}`,
@@ -49,6 +52,7 @@ async function createWindow(): Promise<void> {
       ],
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
+
     show: false,
   });
 

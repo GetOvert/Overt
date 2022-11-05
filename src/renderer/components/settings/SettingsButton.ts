@@ -1,13 +1,21 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
+import TasksButton from "components/tasks/TasksButton";
 import FloatingPane from "components/ui-elements/floating-pane/FloatingPane";
 import IconButton from "components/ui-elements/icon-button/IconButton";
 import { html } from "lit";
-import { customElement } from "lit/decorators.js";
+import { customElement, query } from "lit/decorators.js";
 
 @customElement("openstore-settings-button")
 export default class SettingsButton extends BootstrapBlockElement {
+  @query("openstore-icon-button")
+  readonly button: IconButton;
+
   get pane(): FloatingPane {
     return document.querySelector("#openstore-settings-pane")!;
+  }
+
+  get tasksButton(): TasksButton {
+    return document.querySelector("openstore-tasks-button")!;
   }
 
   constructor() {
@@ -51,15 +59,23 @@ export default class SettingsButton extends BootstrapBlockElement {
   }
 
   togglePaneShown() {
+    // Toggle Settings pane and update button visual state
     this.pane.shown = !this.pane.shown;
+    this.button.active = this.pane.shown;
 
-    const button = this.renderRoot.querySelector(
-      "openstore-icon-button"
-    ) as IconButton;
-    button.active = this.pane.shown;
+    if (this.pane.shown) {
+      // We've just shown the Settings pane
+
+      // Hide conflicting Tasks pane
+      this.tasksButton.hidePane();
+    }
   }
 
   showPane() {
     if (!this.pane.shown) this.togglePaneShown();
+  }
+
+  hidePane() {
+    if (this.pane.shown) this.togglePaneShown();
   }
 }

@@ -5,7 +5,7 @@ import { customElement, property } from "lit/decorators.js";
 @customElement("openstore-icon-button")
 export default class IconButton extends BootstrapBlockElement {
   @property({ attribute: "btn-class" })
-  btnClass = "btn-outline-secondary";
+  btnClass = "btn-light";
 
   @property({ type: Boolean })
   active = false;
