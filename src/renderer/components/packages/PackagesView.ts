@@ -261,7 +261,13 @@ export default class PackagesView<
           </h1>
           <p class="text-muted fst-italic fw-normal mt-3">
             ${navigator.onLine
-              ? "This will take a few seconds"
+              ? html`
+                  <p>This will take a few seconds</p>
+                  <p>
+                    Also updating your package manager;<br />
+                    this may take a while if you haven't used it recently
+                  </p>
+                `
               : html`
                   <h2 class="text-warning fs-4">Currently offline</h2>
                   <p>
