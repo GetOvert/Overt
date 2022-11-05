@@ -16,10 +16,12 @@
 
     --bs-light: var(--accent-color-dark-bg-tint) !important;
     --bs-light-rgb: var(--accent-color-dark-bg-tint-rgb) !important;
+    --bs-light-fill: hsl(0, 0%, 21%);
     --bs-light-disabled: var(--bs-light);
 
     --bs-dark: #f8f9fa !important;
     --bs-dark-rgb: 248, 249, 250 !important;
+    --bs-dark-fill: #d3d0cc;
     --bs-dark-disabled: var(--bs-dark);
 
     --bs-white: #000;
@@ -141,11 +143,11 @@
     --bs-btn-bg: var(--bs-light);
     --bs-btn-border-color: var(--bs-light);
     --bs-btn-hover-color: var(--bs-black);
-    --bs-btn-hover-bg: #5b5c58;
+    --bs-btn-hover-bg: var(--bs-light-fill);
     --bs-btn-hover-border-color: #51524e;
     --bs-btn-focus-shadow-rgb: 91, 92, 88;
     --bs-btn-active-color: var(--bs-black);
-    --bs-btn-active-bg: #656561;
+    --bs-btn-active-bg: var(--bs-light-fill);
     --bs-btn-active-border-color: #51524e;
     --bs-btn-disabled-color: var(--bs-black);
     --bs-btn-disabled-bg: var(--bs-light-disabled);
@@ -153,12 +155,12 @@
   }
 
   .btn-outline-light {
-    --bs-btn-color: var(--bs-light);
+    --bs-btn-color: var(--bs-dark);
     --bs-btn-border-color: var(--bs-light);
     --bs-btn-hover-color: var(--bs-black);
     --bs-btn-hover-bg: var(--bs-light);
     --bs-btn-hover-border-color: var(--bs-light);
-    --bs-btn-focus-shadow-rgb: 62, 63, 58;
+    --bs-btn-focus-shadow-rgb: var(--bs-light-rgb);
     --bs-btn-active-color: var(--bs-black);
     --bs-btn-active-bg: var(--bs-light);
     --bs-btn-active-border-color: var(--bs-light);
@@ -171,11 +173,11 @@
     --bs-btn-bg: var(--bs-dark);
     --bs-btn-border-color: var(--bs-dark);
     --bs-btn-hover-color: var(--bs-white);
-    --bs-btn-hover-bg: #d3d0cc;
+    --bs-btn-hover-bg: var(--bs-dark-fill);
     --bs-btn-hover-border-color: #c6c4c0;
     --bs-btn-focus-shadow-rgb: 211, 208, 204;
     --bs-btn-active-color: var(--bs-white);
-    --bs-btn-active-bg: #c6c4c0;
+    --bs-btn-active-bg: var(--bs-dark-fill);
     --bs-btn-active-border-color: #bab8b4;
     --bs-btn-disabled-color: var(--bs-white);
     --bs-btn-disabled-bg: var(--bs-dark-disabled);
@@ -188,7 +190,7 @@
     --bs-btn-hover-color: var(--bs-white);
     --bs-btn-hover-bg: var(--bs-dark);
     --bs-btn-hover-border-color: var(--bs-dark);
-    --bs-btn-focus-shadow-rgb: 248, 245, 240;
+    --bs-btn-focus-shadow-rgb: var(--bs-dark-rgb);
     --bs-btn-active-color: var(--bs-white);
     --bs-btn-active-bg: var(--bs-dark);
     --bs-btn-active-border-color: var(--bs-dark);

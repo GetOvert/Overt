@@ -88,6 +88,7 @@ h6 {
   --bs-btn-disabled-bg: var(--bs-primary);
   --bs-btn-disabled-border-color: var(--bs-primary);
 }
+
 .btn-outline-primary {
   --bs-btn-color: var(--bs-primary);
   --bs-btn-border-color: var(--bs-primary);
@@ -118,6 +119,10 @@ h6 {
   --bs-btn-active-border-color: var(--bs-success);
   --bs-btn-disabled-color: var(--bs-success-disabled);
   --bs-btn-disabled-border-color: var(--bs-success-disabled);
+}
+
+.btn-outline-light {
+  --bs-btn-color: var(--bs-dark) !important;
 }
 
 /* Our Bootswatch theme hardcodes this as #fff; make it dynamic again here */
