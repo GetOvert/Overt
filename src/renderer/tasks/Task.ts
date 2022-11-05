@@ -110,6 +110,7 @@ export type UpgradeTask = PackageManagerTaskBase & {
 export type UninstallTask = PackageManagerTaskBase & {
   type: "uninstall";
   packageIdentifier: string;
+  zap?: boolean;
 };
 export type ReindexSourceRepositoriesTask = PackageManagerTaskBase & {
   type: "reindex-source-repositories";

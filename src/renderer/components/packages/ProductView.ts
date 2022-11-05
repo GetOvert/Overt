@@ -15,7 +15,7 @@ import {
 } from "package-manager/PackageInfoAdapter";
 
 export type Button = {
-  title: string;
+  title: string | HTMLTemplateResult;
   color: string;
 
   shown: boolean;
@@ -24,6 +24,8 @@ export type Button = {
   loading?: boolean;
 
   onClick: () => Promise<void>;
+
+  moreActions?: Button[];
 };
 
 export abstract class ProductView extends BootstrapBlockElement {
@@ -48,16 +50,14 @@ export abstract class ProductView extends BootstrapBlockElement {
 
   protected updated(changedProperties: PropertyValues<this>): void {
     this.addPopperTooltips();
+    this.addPopperDropdowns();
   }
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
 
     taskQueue.removeObserver(this.taskQueueObserver);
-
     document.removeEventListener("keydown", this.keydown);
-
-    this.removePopperTooltips();
   }
 
   private keydown(event: KeyboardEvent) {
@@ -119,23 +119,81 @@ export abstract class ProductView extends BootstrapBlockElement {
             ${repeat(
               shownButtons,
               ({ title }) => title,
-              ({ title, color, enabled, loading, onClick }) => html`
-                <button
-                  class="btn btn-${color}"
-                  style="min-width: ${buttonWidth}vw; height: 2.7rem"
-                  ?disabled=${!enabled}
-                  @click=${onClick}
-                >
-                  ${title}
-                  ${loading
-                    ? html`<span
-                        class="spinner-border spinner-border-sm text-white ms-2"
-                        style="vertical-align: text-bottom"
-                        role="status"
-                      ></span>`
-                    : ""}
-                </button>
-              `
+              (
+                { title, color, enabled, loading, onClick, moreActions },
+                index
+              ) => {
+                const button = html`
+                  <button
+                    type="button"
+                    class="btn btn-${color}"
+                    style="min-width: ${buttonWidth -
+                    (moreActions ? buttonWidth / 8 : 0)}vw; height: 2.7rem"
+                    ?disabled=${!enabled}
+                    @click=${onClick}
+                  >
+                    ${title}
+                    ${loading
+                      ? html`<span
+                          class="spinner-border spinner-border-sm text-white ms-2"
+                          style="vertical-align: text-bottom"
+                          role="status"
+                        ></span>`
+                      : ""}
+                  </button>
+                `;
+
+                return moreActions
+                  ? html`
+                      <div class="btn-group" role="group">
+                        ${button}
+
+                        <button
+                          id="product-view-dropdown-button-${index}"
+                          type="button"
+                          class="btn btn-${color} dropdown-toggle border-start"
+                          data-bs-toggle="dropdown"
+                          aria-haspopup="true"
+                          aria-label="Toggle related actions dropdown"
+                        ></button>
+                        <ul
+                          class="dropdown-menu"
+                          aria-labelledby="product-view-dropdown-button-${index}"
+                        >
+                          ${repeat(
+                            moreActions,
+                            ({ title }) => title,
+                            ({
+                              title,
+                              color,
+                              enabled,
+                              loading,
+                              onClick,
+                            }) => html`
+                              <li>
+                                <button
+                                  class="dropdown-item text-${color}"
+                                  href="#"
+                                  ?disabled=${!enabled}
+                                  @click=${onClick}
+                                >
+                                  ${title}
+                                  ${loading
+                                    ? html`<span
+                                        class="spinner-border spinner-border-sm text-white ms-2"
+                                        style="vertical-align: text-bottom"
+                                        role="status"
+                                      ></span>`
+                                    : ""}
+                                </button>
+                              </li>
+                            `
+                          )}
+                        </ul>
+                      </div>
+                    `
+                  : button;
+              }
             )}
           </div>
         </div>

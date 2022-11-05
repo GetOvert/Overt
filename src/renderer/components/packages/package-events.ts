@@ -41,7 +41,8 @@ export async function upgradePackage(
 export async function uninstallPackage(
   packageManager: string,
   packageIdentifier: string,
-  packageFullName: string
+  packageFullName: string,
+  { zap }: { zap?: boolean } = {}
 ) {
   taskQueue.push(
     {
@@ -49,6 +50,7 @@ export async function uninstallPackage(
       label: `Uninstall ${packageFullName}`,
       type: "uninstall",
       packageIdentifier,
+      zap,
     } as UninstallTask,
     ["before", "after"]
   );

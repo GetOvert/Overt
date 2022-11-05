@@ -127,7 +127,9 @@ const packageActionsProcessor = new TaskProcessor(
         success = await packageManager.upgrade(task.packageIdentifier);
         break;
       case "uninstall":
-        success = await packageManager.uninstall(task.packageIdentifier);
+        success = await packageManager.uninstall(task.packageIdentifier, {
+          zap: task.zap,
+        });
         break;
     }
 

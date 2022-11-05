@@ -16,6 +16,8 @@ import {
   uninstallPackage,
   upgradePackage,
 } from "./package-events";
+import { IPCPackageManager } from "ipc/package-managers/IPCPackageManager";
+import { html } from "lit";
 
 @customElement("openstore-package-detail-view")
 export default class PackageDetailView<PackageInfo> extends ProductView {
@@ -25,6 +27,10 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
   private get packageManagerName(): string {
     return (window as any).openStore.decodeFragment(window.location.hash)
       .source;
+  }
+
+  private get packageManager(): IPCPackageManager<PackageInfo, any> {
+    return packageManagerForName(this.packageManagerName) as any;
   }
 
   private get packageInfoAdapter(): PackageInfoAdapter<PackageInfo> {
@@ -56,7 +62,7 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
   }
 
   protected canLinkToPackageName(packageName: string): boolean {
-    return !!packageManagerForName(this.packageManagerName).info(packageName);
+    return !!this.packageManager.info(packageName);
   }
 
   protected get fields(): PackageDetailField[][] {
@@ -139,6 +145,29 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
             packageIdentifier,
             this.packageInfoAdapter.packageName(this.packageInfo)
           ),
+
+        moreActions: [
+          {
+            title: html`Zap <small>(Uninstall + Trash Caches & Preferences)</small>`,
+            color: "danger",
+
+            shown: this.packageManager.supportsZapUninstall ?? false,
+
+            enabled: !taskQueue.liveForPackage(packageIdentifier).length,
+            loading: !!taskQueue.liveForPackage(packageIdentifier, "uninstall")
+              .length,
+
+            onClick: () =>
+              uninstallPackage(
+                this.packageManagerName,
+                packageIdentifier,
+                this.packageInfoAdapter.packageName(this.packageInfo),
+                {
+                  zap: true,
+                }
+              ),
+          },
+        ],
       },
     ];
   }

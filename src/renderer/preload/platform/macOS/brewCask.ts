@@ -106,6 +106,7 @@ export type BrewAnalyticsResponse = {
 
 const brewCask: IPCBrewCask = {
   name: "brew-cask",
+  supportsZapUninstall: true,
 
   addIndexListener(listener: () => void) {
     indexListeners.add(listener);
@@ -528,7 +529,10 @@ const brewCask: IPCBrewCask = {
     });
   },
 
-  async uninstall(caskName: string): Promise<boolean> {
+  async uninstall(
+    caskName: string,
+    { zap }: { zap?: boolean } = {}
+  ): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
@@ -555,6 +559,7 @@ const brewCask: IPCBrewCask = {
         quote([
           await getBrewExecutablePath(),
           "uninstall",
+          ...(zap ? ["--zap"] : []),
           "--cask",
           caskName,
         ]) +

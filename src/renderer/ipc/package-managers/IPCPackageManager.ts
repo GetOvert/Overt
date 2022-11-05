@@ -1,5 +1,6 @@
 export interface IPCPackageManager<PackageInfo, SortKey> {
   readonly name: string;
+  readonly supportsZapUninstall?: boolean;
 
   addIndexListener(listener: () => void): void;
   rebuildIndex(
@@ -21,7 +22,7 @@ export interface IPCPackageManager<PackageInfo, SortKey> {
 
   install(packageName: string): Promise<boolean>;
   upgrade(packageName: string): Promise<boolean>;
-  uninstall(packageName: string): Promise<boolean>;
+  uninstall(packageName: string, options?: { zap?: boolean }): Promise<boolean>;
 
   indexSourceRepositories(): Promise<void>;
   addSourceRepository(name: string, url: string): Promise<boolean>;
