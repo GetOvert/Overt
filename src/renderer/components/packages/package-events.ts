@@ -14,7 +14,7 @@ export async function installPackage(
   taskQueue.push(
     {
       packageManager,
-      label: `Install ${packageFullName}`,
+      label: `Install ${packageIdentifier}`,
       type: "install",
       packageIdentifier,
     } as InstallTask,
@@ -30,7 +30,7 @@ export async function upgradePackage(
   taskQueue.push(
     {
       packageManager: packageManager,
-      label: `Update ${packageFullName}`,
+      label: `Update ${packageIdentifier}`,
       type: "upgrade",
       packageIdentifier,
     } as UpgradeTask,
@@ -47,7 +47,7 @@ export async function uninstallPackage(
   taskQueue.push(
     {
       packageManager,
-      label: `Uninstall ${packageFullName}`,
+      label: `Uninstall ${packageIdentifier}`,
       type: "uninstall",
       packageIdentifier,
       zap,
@@ -64,7 +64,7 @@ export async function reindexPackage(
   taskQueue.push(
     {
       packageManager,
-      label: `Index ${packageFullName}`,
+      label: `Index ${packageIdentifier}`,
       type: "reindex",
       packageIdentifiers: [packageIdentifier],
     } as ReindexTask,
