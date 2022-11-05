@@ -18,7 +18,7 @@ export default class Card extends BootstrapBlockElement {
   href = "#";
 
   @query(".openstore-card-link")
-  linkElement: HTMLAnchorElement | null;
+  private readonly linkElement: HTMLAnchorElement | null;
 
   static styles = [
     BootstrapBlockElement.styles,

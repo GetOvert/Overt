@@ -11,14 +11,14 @@ import {
 } from "ipc/package-managers/IPCPackageManager";
 import { css, html, HTMLTemplateResult, PropertyValues, render } from "lit";
 import { asyncAppend } from "lit-html/directives/async-append.js";
-import { customElement, property, state } from "lit/decorators.js";
-import { Ref, createRef, ref } from "lit/directives/ref.js";
+import { customElement, property, query, state } from "lit/decorators.js";
 import { repeat } from "lit/directives/repeat.js";
 import { PackageInfoAdapter } from "package-manager/PackageInfoAdapter";
 import {
   packageInfoAdapterForPackageManagerName,
   packageManagerForName,
 } from "package-manager/PackageManagerRegistry";
+import Sidebar from "components/sidebar/Sidebar";
 
 const fetchedChunkSize = 25;
 let lastOffset = 0;
@@ -27,7 +27,7 @@ let lastScrollY = 0;
 let lastRouteParams: any = {};
 
 @customElement("openstore-packages-view")
-export default class AppsView<
+export default class PackagesView<
   PackageManager extends IPCPackageManager<PackageInfo, SortKey>,
   PackageInfo,
   SortKey
@@ -49,10 +49,10 @@ export default class AppsView<
   @state()
   private _canLoadMore = true;
 
-  private _scrollContainerRef: Ref<HTMLElement> = createRef();
-  get _scrollContainer(): HTMLElement {
-    return this._scrollContainerRef.value!;
-  }
+  @query("openstore-sidebar", true)
+  private readonly sidebar: Sidebar;
+  @query(".main-container", true)
+  private readonly _scrollContainer: HTMLElement;
 
   constructor() {
     super();
@@ -175,6 +175,10 @@ export default class AppsView<
     }
   }
 
+  focus(options?: FocusOptions | undefined): void {
+    this.sidebar?.focus(options);
+  }
+
   loadMoreApps() {
     lastOffset += fetchedChunkSize;
     this.offset = lastOffset;
@@ -240,10 +244,7 @@ export default class AppsView<
     return html`
       <openstore-sidebar class="position-fixed px-3"></openstore-sidebar>
 
-      <div
-        ${ref(this._scrollContainerRef)}
-        class="main-container position-fixed overflow-scroll"
-      >
+      <div class="main-container position-fixed overflow-scroll">
         <div
           class="text-center position-absolute top-50 start-50 translate-middle pb-5 ${this
             ._currentlyIndexing

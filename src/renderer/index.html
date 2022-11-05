@@ -10,7 +10,25 @@
 
     <title>Overt</title>
   </head>
-  <body class="bg-light">
+  <body
+    class="bg-light visible-after-bootstrap-loads"
+    style="visibility: hidden"
+  >
+    <p class="visually-hidden" tabindex="1">
+      Welcome to Overt! Please note that keyboard navigation and screen reader
+      support is preliminary and best-effort at this time.
+    </p>
+
+    <nav class="visually-hidden-focusable nav nav-pills mx-2">
+      <a
+        class="nav-link"
+        href="#"
+        onclick="event.preventDefault(); document.querySelector('#search-bar').focus()"
+      >
+        Skip to search
+      </a>
+    </nav>
+
     <header class="sticky-top bg-light">
       <nav class="navbar navbar-light">
         <div class="container-fluid">

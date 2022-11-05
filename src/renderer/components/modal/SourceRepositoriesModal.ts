@@ -212,7 +212,7 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                                       this,
                                       index
                                     )}
-                                    aria-label="Done"
+                                    aria-label="Cancel"
                                   >
                                     ✗
                                   </button>

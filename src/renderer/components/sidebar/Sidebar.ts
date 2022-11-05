@@ -1,12 +1,20 @@
 import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import "components/sidebar/SidebarNavLink";
+import SidebarNavLink from "components/sidebar/SidebarNavLink";
 import { css, html } from "lit";
-import { customElement } from "lit/decorators.js";
+import { customElement, query } from "lit/decorators.js";
 
 @customElement("openstore-sidebar")
 export default class Sidebar extends BootstrapBlockElement {
   constructor() {
     super();
+  }
+
+  @query("openstore-sidebar-nav-link")
+  private readonly firstNavLink: SidebarNavLink;
+
+  focus(options?: FocusOptions | undefined): void {
+    this.firstNavLink?.focus(options);
   }
 
   static styles = [

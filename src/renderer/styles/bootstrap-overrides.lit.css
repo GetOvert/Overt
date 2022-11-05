@@ -206,3 +206,7 @@ a:active,
   text-transform: none;
   font-weight: normal;
 }
+
+.visible-after-bootstrap-loads {
+  visibility: visible !important;
+}
