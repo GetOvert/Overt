@@ -31,8 +31,8 @@ cask_definition_file="$tap_repo/Casks/overt.rb"
 
 # I'm sorry
 xcrun perl -pi -0 -e "s/(version\s*)\"[^\"]*\"/\$1\"$version\"/" "$cask_definition_file"
-xcrun perl -pi -0 -e "s/(sha256.*?sha256\s*)\"\w+\"/\$1\"$arm64_sha256\"/s" "$cask_definition_file"
-xcrun perl -pi -0 -e "s/(sha256\s*)\"\w+\"/\$1\"$x86_64_sha256\"/" "$cask_definition_file"
+xcrun perl -pi -0 -e "s/(?<=arm:   \")\w{64}/$arm64_sha256/" "$cask_definition_file"
+xcrun perl -pi -0 -e "s/(?<=intel: \")\w{64}/$x86_64_sha256/" "$cask_definition_file"
 
 git -C "$tap_repo" add "$cask_definition_file"
 git -C "$tap_repo" commit -m "Bump version to $version"
