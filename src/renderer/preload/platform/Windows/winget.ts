@@ -21,6 +21,7 @@ import {
 import { downloadWingetManifests } from "./winget-to-json/download";
 import { extractWingetManifests } from "./winget-to-json/extract";
 import { getFullIndexIntervalInSeconds, runBackgroundProcess } from "../shared";
+import { Launchable } from "ipc/package-managers/IPCPackageManager";
 
 if (process.platform === "win32") {
   cacheDB_addSchema(
@@ -312,6 +313,10 @@ const winget: IPCWinget = {
   async removeSourceRepository(name: string): Promise<boolean> {
     // TODO: unimplemented
     throw new Error("unimplemented");
+  },
+
+  async launchables(packageInfo: WingetPackageInfo): Promise<Launchable[]> {
+    return [];
   },
 };
 

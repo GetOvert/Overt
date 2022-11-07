@@ -27,6 +27,7 @@ import {
   TapInfo,
 } from "./brewCask";
 import { getFullIndexIntervalInSeconds } from "../shared";
+import { Launchable } from "ipc/package-managers/IPCPackageManager";
 
 if (process.platform === "darwin") {
   cacheDB_addSchema(
@@ -581,6 +582,10 @@ const brew: IPCBrew = {
     brew.indexSourceRepositories();
 
     return success;
+  },
+
+  async launchables(packageInfo: BrewPackageInfo): Promise<Launchable[]> {
+    return [];
   },
 };
 

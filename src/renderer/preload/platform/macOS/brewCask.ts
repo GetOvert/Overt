@@ -24,6 +24,8 @@ import settings from "preload/shared/settings";
 import path from "path";
 import brew from "./brew";
 import { getFullIndexIntervalInSeconds, runBackgroundProcess } from "../shared";
+import { Launchable } from "ipc/package-managers/IPCPackageManager";
+import * as plist from "plist";
 
 if (process.platform === "darwin") {
   cacheDB_addSchema(
@@ -578,6 +580,74 @@ const brewCask: IPCBrewCask = {
 
   removeSourceRepository(name: string): Promise<boolean> {
     return brew.removeSourceRepository(name);
+  },
+
+  async launchables(packageInfo: BrewCaskPackageInfo): Promise<Launchable[]> {
+    async function pathsForPkg(pkgIdentifier: string): Promise<string[]> {
+      try {
+        const receiptPlist = plist.parse(
+          await runBackgroundProcess("/usr/sbin/pkgutil", [
+            "--pkg-info-plist",
+            pkgIdentifier,
+          ])
+        ) as plist.PlistObject;
+        const installationBasePath = `${receiptPlist["volume"]}/${receiptPlist["install-location"]}`;
+
+        const subpaths = (
+          await runBackgroundProcess("/usr/sbin/pkgutil", [
+            "--only-dirs",
+            "--files",
+            pkgIdentifier,
+          ])
+        ).split(/\r?\n/);
+
+        return subpaths.map((subpath) => `${installationBasePath}/${subpath}`);
+      } catch (error) {
+        console.error(error);
+        return [];
+      }
+    }
+    async function flatAll<T>(promises: Promise<T[]>[]): Promise<T[]> {
+      return (await Promise.all(promises)).flat(1);
+    }
+    function asArray<T>(input: T | T[]): T[] {
+      return Array.isArray(input) ? input : [input];
+    }
+
+    const paths = await flatAll(
+      packageInfo.artifacts.map(async (artifact): Promise<string[]> => {
+        if ("app" in artifact) {
+          return artifact.app.map((app) => `/Applications/${app}`);
+        }
+        if ("uninstall" in artifact) {
+          return await flatAll(
+            artifact.uninstall.map(async (uninstall): Promise<string[]> => {
+              if ("pkgutil" in uninstall) {
+                return await flatAll(
+                  asArray(uninstall.pkgutil).map(pathsForPkg)
+                );
+              }
+              return [];
+            })
+          );
+        }
+        return [];
+      })
+    );
+
+    const appPaths = paths.filter(
+      (path) =>
+        path.match(/\.app$/) &&
+        // Drop apps nested inside other apps
+        !path.match(/\.app\//)
+    );
+
+    return appPaths.flatMap((path) => {
+      const label = path.match(/[^\/]+(?=\.app$)/)?.[0];
+      if (!label) return [];
+
+      return [{ path, label }];
+    });
   },
 };
 

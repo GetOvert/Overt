@@ -33,6 +33,8 @@ export default class BootstrapBlockElement extends LitElement {
   protected popperTooltips: Tooltip[] = [];
 
   protected addPopperTooltips() {
+    this.removePopperTooltips();
+
     this.popperTooltips = Array.from(
       this.renderRoot.querySelectorAll('[data-bs-toggle="tooltip"]')
     ).map((tooltipHost) => new Tooltip(tooltipHost));
@@ -49,6 +51,8 @@ export default class BootstrapBlockElement extends LitElement {
   private hideDropdownsListenerFn = this.hideDropdowns.bind(this);
 
   protected addPopperDropdowns() {
+    this.removePopperDropdowns();
+
     this.popperDropdowns = Array.from(
       this.renderRoot.querySelectorAll('[data-bs-toggle="dropdown"]')
     ).map((dropdownHost) => {

@@ -28,9 +28,16 @@ export interface IPCPackageManager<PackageInfo, SortKey> {
   addSourceRepository(name: string, url: string): Promise<boolean>;
   removeSourceRepository(name: string): Promise<boolean>;
 
+  launchables(packageInfo: PackageInfo): Promise<Launchable[]>;
+
   // Allow extra properties in the implementation, which is an object
   // instead of a class because only objects bridge properly
   [etc: string | number | symbol]: unknown;
 }
 
 export type FilterKey = "all" | "available" | "installed" | "updates";
+
+export type Launchable = {
+  path: string;
+  label: string;
+};

@@ -28,11 +28,43 @@ export type BrewCaskPackageInfo = {
   conflicts_with?: any; // TODO: Better typing
   aliases?: string[];
   outdated: boolean;
+  artifacts: BrewCaskArtifact[];
   installed_30d?: string | null; // TODO: Better typing
   installed_90d?: string | null; // TODO: Better typing
   installed_365d?: string | null; // TODO: Better typing
   // TODO: There are more fields that aren't here yet
 };
+
+export type BrewCaskArtifact = BrewCaskApp | BrewCaskUninstall | BrewCaskZap;
+
+export type BrewCaskApp = {
+  app: string[];
+};
+
+export type BrewCaskUninstall = {
+  uninstall: BrewCaskUninstallItem[];
+};
+
+export type BrewCaskZap = {
+  zap: BrewCaskUninstallItem[];
+};
+
+export type BrewCaskUninstallItem =
+  | {
+      launchctl: string | string[];
+    }
+  | {
+      quit: string | string[];
+    }
+  | {
+      pkgutil: string | string[];
+    }
+  | {
+      delete: string | string[];
+    }
+  | {
+      trash: string | string[];
+    };
 
 export class BrewCaskPackageInfoAdapter
   implements PackageInfoAdapter<BrewCaskPackageInfo>

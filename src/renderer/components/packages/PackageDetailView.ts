@@ -11,7 +11,6 @@ import {
   packageManagerForName,
 } from "package-manager/PackageManagerRegistry";
 import {
-  getCaskAppFileName,
   installPackage,
   uninstallPackage,
   upgradePackage,
@@ -69,10 +68,14 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
     return this.packageInfoAdapter.packageDetails(this.packageInfo);
   }
 
-  protected get buttons(): Button[] {
+  protected async buttons(): Promise<Button[]> {
     const packageIdentifier = this.packageInfoAdapter.packageIdentifier(
       this.packageInfo
     );
+    const [mainLaunchable, ...additionalLaunchables] =
+      this.packageInfoAdapter.isPackageInstalled(this.packageInfo)
+        ? await this.packageManager.launchables(this.packageInfo)
+        : [];
 
     return [
       {
@@ -95,19 +98,33 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
           ),
       },
       {
-        title: "Launch",
+        title: !additionalLaunchables.length
+          ? "Launch"
+          : `Launch ${mainLaunchable.label}`,
         color: "primary",
 
         shown:
           this.packageInfoAdapter.isPackageInstalled(this.packageInfo) &&
-          !!getCaskAppFileName(this.packageInfo),
+          !!mainLaunchable,
 
         enabled: !taskQueue.liveForPackage(packageIdentifier).length,
 
         onClick: async () => {
-          const appFileName = getCaskAppFileName(this.packageInfo);
-          if (appFileName) await window.openProduct.openApp(appFileName);
+          await window.openProduct.openApp(mainLaunchable.path);
         },
+
+        moreActions: additionalLaunchables.map(({ path, label }) => ({
+          title: `Launch ${label}`,
+          color: "primary",
+
+          shown: true,
+
+          enabled: !taskQueue.liveForPackage(packageIdentifier).length,
+
+          onClick: async () => {
+            await window.openProduct.openApp(path);
+          },
+        })),
       },
       {
         title: "Update",
@@ -148,7 +165,8 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
 
         moreActions: [
           {
-            title: html`Zap <small>(Uninstall + Trash Caches & Preferences)</small>`,
+            title: html`Zap
+              <small>(Uninstall + Trash Caches & Preferences)</small>`,
             color: "danger",
 
             shown: this.packageManager.supportsZapUninstall ?? false,

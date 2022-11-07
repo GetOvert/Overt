@@ -72,20 +72,6 @@ export async function reindexPackage(
   );
 }
 
-// TODO: Deprecate in favor of general (not 'brew-cask'-specific) solution
-export function getCaskAppFileName(app: any): string | undefined {
-  return app.artifacts
-    ?.map((artifact: any) => artifact.app)
-    .filter((x: any) => x)
-    .map(
-      (candidateArray: string[]) =>
-        candidateArray.filter(
-          (fileName) =>
-            typeof fileName.endsWith === "function" && fileName.endsWith(".app")
-        )?.[0]
-    )[0];
-}
-
 window.contextMenu.setCallback("install", installPackage);
 window.contextMenu.setCallback("upgrade", upgradePackage);
 window.contextMenu.setCallback("uninstall", uninstallPackage);

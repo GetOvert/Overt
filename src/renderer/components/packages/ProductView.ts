@@ -6,9 +6,12 @@ import {
   CSSResultArray,
   html,
   HTMLTemplateResult,
+  Part,
   PropertyValues,
 } from "lit";
+import { directive, DirectiveParameters } from "lit/directive.js";
 import { repeat } from "lit/directives/repeat.js";
+import { until, UntilDirective } from "lit/directives/until.js";
 import {
   PackageDetailField,
   PackageDetailFieldValue,
@@ -34,8 +37,8 @@ export abstract class ProductView extends BootstrapBlockElement {
   protected abstract readonly websiteURL: string | undefined;
   protected abstract shouldCauseRerender(successfulTask: QueuedTask): boolean;
   protected abstract canLinkToPackageName(packageName: string): boolean;
-  protected abstract fields: PackageDetailField[][];
-  protected abstract buttons: Button[];
+  protected abstract readonly fields: PackageDetailField[][];
+  protected abstract buttons(): Promise<Button[]>;
 
   private taskQueueObserver: TaskQueueObserver;
 
@@ -48,16 +51,20 @@ export abstract class ProductView extends BootstrapBlockElement {
     document.addEventListener("keydown", this.keydown);
   }
 
-  protected updated(changedProperties: PropertyValues<this>): void {
-    this.addPopperTooltips();
-    this.addPopperDropdowns();
-  }
-
   disconnectedCallback(): void {
     super.disconnectedCallback();
 
     taskQueue.removeObserver(this.taskQueueObserver);
     document.removeEventListener("keydown", this.keydown);
+  }
+
+  protected updated(changedProperties: PropertyValues<this>): void {
+    this.addDynamicElements();
+  }
+
+  private addDynamicElements(): void {
+    this.addPopperTooltips();
+    this.addPopperDropdowns();
   }
 
   private keydown(event: KeyboardEvent) {
@@ -79,6 +86,11 @@ export abstract class ProductView extends BootstrapBlockElement {
         font-size: 1rem;
       }
 
+      .loading-text-match-button-height {
+        margin-top: 9.5975px;
+        margin-bottom: 9.5975px;
+      }
+
       dt,
       dd {
         display: inline;
@@ -92,9 +104,6 @@ export abstract class ProductView extends BootstrapBlockElement {
   ];
 
   render() {
-    const shownButtons = this.buttons.filter((button) => button.shown);
-    const buttonWidth = shownButtons.length > 2 ? 16 : 32 / shownButtons.length;
-
     return html`
       <div class="mx-4">
         <p class="fs-slightly-larger text-muted text-center mt-1 mb-2">
@@ -116,37 +125,46 @@ export abstract class ProductView extends BootstrapBlockElement {
 
         <div class="text-center w-100 my-4">
           <div class="btn-group mx-auto" role="group">
-            ${repeat(
-              shownButtons,
-              ({ title }) => title,
-              (
-                { title, color, enabled, loading, onClick, moreActions },
-                index
-              ) => {
-                const button = html`
-                  <button
-                    type="button"
-                    class="btn btn-${color}"
-                    style="min-width: ${buttonWidth -
-                    (moreActions ? buttonWidth / 8 : 0)}vw; height: 2.7rem"
-                    ?disabled=${!enabled}
-                    @click=${onClick}
-                  >
-                    ${title}
-                    ${loading
-                      ? html`<span
-                          class="spinner-border spinner-border-sm text-white ms-2"
-                          style="vertical-align: text-bottom"
-                          role="status"
-                        ></span>`
-                      : ""}
-                  </button>
-                `;
+            ${untilWithCallback(
+              () => this.addDynamicElements(),
+              (async () => {
+                const shownButtons = (await this.buttons()).filter(
+                  (button) => button.shown
+                );
+                const buttonWidth =
+                  shownButtons.length > 2 ? 16 : 32 / shownButtons.length;
 
-                return moreActions
-                  ? html`
+                return shownButtons.map(
+                  (
+                    { title, color, enabled, loading, onClick, moreActions },
+                    index
+                  ) => {
+                    const buttonHTML = html`
+                      <button
+                        type="button"
+                        class="btn btn-${color}"
+                        style="min-width: ${buttonWidth -
+                        (moreActions?.length
+                          ? buttonWidth / 8
+                          : 0)}vw; height: 2.7rem"
+                        ?disabled=${!enabled}
+                        @click=${onClick}
+                      >
+                        ${title}
+                        ${loading
+                          ? html`<span
+                              class="spinner-border spinner-border-sm text-white ms-2"
+                              style="vertical-align: text-bottom"
+                              role="status"
+                            ></span>`
+                          : ""}
+                      </button>
+                    `;
+
+                    if (!moreActions?.length) return buttonHTML;
+                    return html`
                       <div class="btn-group" role="group">
-                        ${button}
+                        ${buttonHTML}
 
                         <button
                           id="product-view-dropdown-button-${index}"
@@ -192,9 +210,22 @@ export abstract class ProductView extends BootstrapBlockElement {
                           )}
                         </ul>
                       </div>
-                    `
-                  : button;
-              }
+                    `;
+                  }
+                );
+              })(),
+              html`
+                <div
+                  class="loading-text-match-button-height fs-slightly-larger text-muted"
+                  role="status"
+                >
+                  Loading actions…
+                  <span
+                    class="spinner-border spinner-border-sm ms-1"
+                    aria-hidden="true"
+                  ></span>
+                </div>
+              `
             )}
           </div>
         </div>
@@ -303,3 +334,19 @@ export abstract class ProductView extends BootstrapBlockElement {
     return (value as any)["_$litType$"] !== undefined;
   }
 }
+
+class UntilWithCallbackDirective extends UntilDirective {
+  changed?: () => void;
+
+  update(part: Part, [overt_changed, ...args]: any[]) {
+    this.changed = overt_changed;
+    return super.update(part, args);
+  }
+
+  setValue(value: unknown): void {
+    super.setValue(value);
+    this.changed?.();
+  }
+}
+
+const untilWithCallback = directive(UntilWithCallbackDirective);
