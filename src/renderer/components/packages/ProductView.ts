@@ -128,7 +128,7 @@ export abstract class ProductView extends BootstrapBlockElement {
             ${untilWithCallback(
               () => this.addDynamicElements(),
               (async () => {
-                const shownButtons = (await this.buttons()).filter(
+                const shownButtons: Button[] = (await this.buttons()).filter(
                   (button) => button.shown
                 );
                 const buttonWidth =
@@ -139,12 +139,16 @@ export abstract class ProductView extends BootstrapBlockElement {
                     { title, color, enabled, loading, onClick, moreActions },
                     index
                   ) => {
+                    const shownMoreActions: Button[] = (
+                      moreActions ?? []
+                    ).filter(({ shown }) => shown);
+
                     const buttonHTML = html`
                       <button
                         type="button"
                         class="btn btn-${color}"
                         style="min-width: ${buttonWidth -
-                        (moreActions?.length
+                        (shownMoreActions.length
                           ? buttonWidth / 8
                           : 0)}vw; height: 2.7rem"
                         ?disabled=${!enabled}
@@ -161,7 +165,7 @@ export abstract class ProductView extends BootstrapBlockElement {
                       </button>
                     `;
 
-                    if (!moreActions?.length) return buttonHTML;
+                    if (!shownMoreActions.length) return buttonHTML;
                     return html`
                       <div class="btn-group" role="group">
                         ${buttonHTML}
@@ -179,9 +183,7 @@ export abstract class ProductView extends BootstrapBlockElement {
                           class="dropdown-menu"
                           aria-labelledby="product-view-dropdown-button-${index}"
                         >
-                          ${repeat(
-                            moreActions,
-                            ({ title }) => title,
+                          ${shownMoreActions.map(
                             ({
                               title,
                               color,
