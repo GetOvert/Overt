@@ -47,33 +47,33 @@ export default class Sidebar extends BootstrapBlockElement {
           ${window.platform.getNodePlatformString() === "darwin"
             ? html`
                 <openstore-sidebar-nav-link
-                  href=${(window as any).openStore.encodeFragment({
-                    source: "brew-cask",
-                  })}
-                  label="Apps (brew cask)"
-                  ?active=${(window as any).openStore.decodeFragment(
-                    window.location.hash
-                  ).source === "brew-cask"}
+                  key="source"
+                  .options=${[
+                    {
+                      value: "brew-cask",
+                      label: "brew \u2013 Apps",
+                    },
+                  ]}
                 ></openstore-sidebar-nav-link>
                 <openstore-sidebar-nav-link
-                  href=${((window as any).openStore as any).encodeFragment({
-                    source: "brew",
-                  })}
-                  label="Tools & Libraries (brew)"
-                  ?active=${(window as any).openStore.decodeFragment(
-                    window.location.hash
-                  ).source === "brew"}
+                  key="source"
+                  .options=${[
+                    {
+                      value: "brew",
+                      label: "brew \u2013 Tools & Libraries",
+                    },
+                  ]}
                 ></openstore-sidebar-nav-link>
               `
             : html`
                 <openstore-sidebar-nav-link
-                  href=${(window as any).openStore.encodeFragment({
-                    source: "winget",
-                  })}
-                  label="Windows Package Manager (winget)"
-                  ?active=${(window as any).openStore.decodeFragment(
-                    window.location.hash
-                  ).source === "winget"}
+                  key="source"
+                  .options=${[
+                    {
+                      value: "winget",
+                      label: "Windows Package Manager (winget)",
+                    },
+                  ]}
                 ></openstore-sidebar-nav-link>
               `}
         </nav>
@@ -82,40 +82,40 @@ export default class Sidebar extends BootstrapBlockElement {
           <span class="heading ps-2 mt-3 mb-1">Filter</span>
 
           <openstore-sidebar-nav-link
-            href=${((window as any).openStore as any).encodeFragment({
-              filter: "all",
-            })}
-            label="All"
-            ?active=${(window as any).openStore.decodeFragment(
-              window.location.hash
-            ).filter === "all"}
+            key="filter"
+            .options=${[
+              {
+                value: "all",
+                label: "All",
+              },
+            ]}
           ></openstore-sidebar-nav-link>
           <openstore-sidebar-nav-link
-            href=${((window as any).openStore as any).encodeFragment({
-              filter: "available",
-            })}
-            label="Available"
-            ?active=${(window as any).openStore.decodeFragment(
-              window.location.hash
-            ).filter === "available"}
+            key="filter"
+            .options=${[
+              {
+                value: "available",
+                label: "Available",
+              },
+            ]}
           ></openstore-sidebar-nav-link>
           <openstore-sidebar-nav-link
-            href=${((window as any).openStore as any).encodeFragment({
-              filter: "installed",
-            })}
-            label="Installed"
-            ?active=${(window as any).openStore.decodeFragment(
-              window.location.hash
-            ).filter === "installed"}
+            key="filter"
+            .options=${[
+              {
+                value: "installed",
+                label: "Installed",
+              },
+            ]}
           ></openstore-sidebar-nav-link>
           <openstore-sidebar-nav-link
-            href=${((window as any).openStore as any).encodeFragment({
-              filter: "updates",
-            })}
-            label="Updates"
-            ?active=${(window as any).openStore.decodeFragment(
-              window.location.hash
-            ).filter === "updates"}
+            key="filter"
+            .options=${[
+              {
+                value: "updates",
+                label: "Updates",
+              },
+            ]}
           ></openstore-sidebar-nav-link>
         </nav>
 
@@ -123,44 +123,37 @@ export default class Sidebar extends BootstrapBlockElement {
           <span class="heading ps-2 mt-3 mb-1">Sort</span>
 
           <openstore-sidebar-nav-link
-            href=${((window as any).openStore as any).encodeFragment({
-              sort: "installed-30d",
-            })}
-            label="Most Installed (30 Days)"
-            ?active=${(window as any).openStore.decodeFragment(
-              window.location.hash
-            ).sort === "installed-30d"}
+            key="sort"
+            .options=${[
+              {
+                value: "installed-30d",
+                label: "Installs \u2013 30\u00a0Days",
+              },
+              {
+                value: "installed-90d",
+                label: "Installs \u2013 90\u00a0Days",
+              },
+              {
+                value: "installed-365d",
+                label: "Installs \u2013 365\u00a0Days",
+              },
+            ]}
           ></openstore-sidebar-nav-link>
           <openstore-sidebar-nav-link
-            href=${((window as any).openStore as any).encodeFragment({
-              sort: "installed-90d",
-            })}
-            label="Most Installed (90 Days)"
-            ?active=${(window as any).openStore.decodeFragment(
-              window.location.hash
-            ).sort === "installed-90d"}
+            key="sort"
+            .options=${[
+              {
+                value: "updated",
+                label: "Last Updated",
+              },
+              /*
+              {
+                value: "added",
+                label: "First Added",
+              },
+              */
+            ]}
           ></openstore-sidebar-nav-link>
-          <openstore-sidebar-nav-link
-            href=${((window as any).openStore as any).encodeFragment({
-              sort: "installed-365d",
-            })}
-            label="Most Installed (365 Days)"
-            ?active=${(window as any).openStore.decodeFragment(
-              window.location.hash
-            ).sort === "installed-365d"}
-          ></openstore-sidebar-nav-link>
-          <!-- <openstore-sidebar-nav-link
-            href=${((window as any).openStore as any).encodeFragment({
-            sort: "updated",
-          })}
-            label="Recently Updated"
-          ></openstore-sidebar-nav-link>
-          <openstore-sidebar-nav-link
-            href=${((window as any).openStore as any).encodeFragment({
-            sort: "added",
-          })}
-            label="Newly Added"
-          ></openstore-sidebar-nav-link> -->
         </nav>
       </div>
     `;
