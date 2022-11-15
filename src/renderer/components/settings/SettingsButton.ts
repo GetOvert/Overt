@@ -22,7 +22,10 @@ export default class SettingsButton extends BootstrapBlockElement {
     super();
 
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && this.pane.shown) this.togglePaneShown();
+      if (event.key === "Escape" && this.pane.shown) {
+        event.stopImmediatePropagation();
+        this.togglePaneShown();
+      }
     });
 
     this.addEventListener("togglePaneShown", () => {

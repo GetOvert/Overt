@@ -68,7 +68,10 @@ export abstract class ProductView extends BootstrapBlockElement {
   }
 
   private keydown(event: KeyboardEvent) {
-    if (event.key === "Escape") window.history.back();
+    if (event.key === "Escape") {
+      event.stopImmediatePropagation();
+      window.history.back();
+    }
   }
 
   private taskQueueChanged(updatedTask: QueuedTask) {
