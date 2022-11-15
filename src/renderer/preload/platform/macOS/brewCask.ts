@@ -80,13 +80,27 @@ export type BrewAnalyticsAll = {
 
 export type BrewAnalyticsResponse = {
   formulae: {
-    [caskToken: string]: [
+    [name: string]: [
       {
         cask: string;
         count: number;
       }
     ];
   };
+};
+
+export type BrewUpdateTimes = {
+  formula: {
+    [fullName: string]: number;
+  };
+  cask: {
+    [fullToken: string]: number;
+  };
+};
+
+export type BrewUpdateTimesResponse = {
+  commit: string;
+  by_name: BrewUpdateTimes;
 };
 
 // const impl = new (class {
@@ -177,8 +191,14 @@ const brewCask: IPCBrewCask = {
       ])
     );
 
+    const [analytics, updateTimes] = await Promise.all([
+      (brewCask as any)._fetchOfficialAnalytics(),
+      fetchUpdateTimes(),
+    ]);
+
     await (brewCask as any)._ingestCaskInfo(casks, {
-      analytics: await (brewCask as any)._fetchOfficialAnalytics(),
+      analytics,
+      updateTimes,
       deleteIfUnavailable: caskNames,
     });
 
@@ -197,10 +217,14 @@ const brewCask: IPCBrewCask = {
       cask.outdated = false;
     }
 
-    const analytics = await (brewCask as any)._fetchOfficialAnalytics();
+    const [analytics, updateTimes] = await Promise.all([
+      (brewCask as any)._fetchOfficialAnalytics(),
+      fetchUpdateTimes(),
+    ]);
 
     await (brewCask as any)._ingestCaskInfo(casksFromAPI, {
       analytics,
+      updateTimes,
     });
 
     // The API response can't tell us what's installed locally,
@@ -216,6 +240,7 @@ const brewCask: IPCBrewCask = {
 
     await (brewCask as any)._ingestCaskInfo(casks, {
       analytics,
+      updateTimes,
     });
   },
 
@@ -274,9 +299,11 @@ const brewCask: IPCBrewCask = {
     casks: BrewCaskPackageInfo[],
     {
       analytics,
+      updateTimes,
       deleteIfUnavailable,
     }: {
       analytics?: BrewAnalyticsAll;
+      updateTimes?: BrewUpdateTimes;
       deleteIfUnavailable?: string[];
     } = {}
   ) {
@@ -300,6 +327,7 @@ const brewCask: IPCBrewCask = {
         "installed_30d",
         "installed_90d",
         "installed_365d",
+        "updated",
       ],
       casks.map((cask) => ({
         ...cask,
@@ -317,6 +345,8 @@ const brewCask: IPCBrewCask = {
         installed_365d: installed_365d?.formulae?.[cask.full_token]?.[0]?.count
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
+
+        updated: updateTimes?.cask?.[cask.full_token],
 
         json: JSON.stringify(cask),
       }))
@@ -350,7 +380,8 @@ const brewCask: IPCBrewCask = {
           casks.json,
           casks.installed_30d,
           casks.installed_90d,
-          casks.installed_365d
+          casks.installed_365d,
+          casks.updated
         FROM casks
         WHERE
           (${keywords
@@ -387,9 +418,12 @@ const brewCask: IPCBrewCask = {
       .all()
       .map((row) => ({
         ...JSON.parse(row.json),
+
         installed_30d: row.installed_30d ?? 0,
         installed_90d: row.installed_90d ?? 0,
         installed_365d: row.installed_365d ?? 0,
+
+        updated: row.updated,
       }));
   },
 
@@ -401,7 +435,8 @@ const brewCask: IPCBrewCask = {
           casks.json,
           casks.installed_30d,
           casks.installed_90d,
-          casks.installed_365d
+          casks.installed_365d,
+          casks.updated
         FROM casks
         WHERE
           casks.full_token = $caskName
@@ -416,10 +451,14 @@ const brewCask: IPCBrewCask = {
 
     return {
       rowid: row.rowid,
+
       ...JSON.parse(row.json),
+
       installed_30d: row.installed_30d,
       installed_90d: row.installed_90d,
       installed_365d: row.installed_365d,
+
+      updated: row.updated,
     };
   },
 
@@ -665,6 +704,33 @@ function dbKeyForSortKey(sortKey: SortKey): string {
     default:
       return "added";
   }
+}
+
+export async function fetchUpdateTimes(): Promise<BrewUpdateTimes> {
+  const taps: TapInfo[] = JSON.parse(
+    await runBackgroundBrewProcess(["tap-info", "--json=v1", "--installed"])
+  );
+
+  const responses: BrewUpdateTimesResponse[] = (
+    await Promise.all(
+      taps.map(async ({ name }) => {
+        const res = await fetch(
+          `https://storage.googleapis.com/storage.getovert.app/brew/${name}/update-times.json`
+        );
+        if (!res.ok) return null;
+
+        return await res.json();
+      })
+    )
+  ).filter((x) => x);
+
+  return {
+    formula: Object.assign(
+      {},
+      ...responses.map(({ by_name }) => by_name?.formula)
+    ),
+    cask: Object.assign({}, ...responses.map(({ by_name }) => by_name?.cask)),
+  };
 }
 
 export async function runBackgroundBrewProcess(

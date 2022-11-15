@@ -41,6 +41,7 @@ export type BrewPackageInfo = {
   installed_30d?: string | null; // TODO: Better typing
   installed_90d?: string | null; // TODO: Better typing
   installed_365d?: string | null; // TODO: Better typing
+  updated?: number;
   // TODO: There are more fields that aren't here yet
 };
 
@@ -109,6 +110,16 @@ export class BrewPackageInfoAdapter
           value: {
             Installed: packageInfo.installed?.[0]?.version ?? "None",
             "Latest stable": packageInfo.versions?.stable ?? "None",
+            "Last updated": packageInfo.updated
+              ? new Date(1000 * packageInfo.updated).toLocaleString(undefined, {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "numeric",
+                })
+              : "Unknown",
           },
         },
         {

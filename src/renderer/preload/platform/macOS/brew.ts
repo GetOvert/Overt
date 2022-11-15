@@ -22,6 +22,8 @@ import * as taskQueue from "preload/shared/taskQueueIPC";
 import { PromptForPasswordTask } from "tasks/Task";
 import {
   BrewAnalyticsAll,
+  BrewUpdateTimes,
+  fetchUpdateTimes,
   getBrewExecutablePath,
   runBackgroundBrewProcess,
   TapInfo,
@@ -123,8 +125,14 @@ const brew: IPCBrew = {
       ])
     );
 
+    const [analytics, updateTimes] = await Promise.all([
+      (brew as any)._fetchOfficialAnalytics(),
+      fetchUpdateTimes(),
+    ]);
+
     await (brew as any)._ingestFormulaInfo(formulae, {
-      analytics: await (brew as any)._fetchOfficialAnalytics(),
+      analytics,
+      updateTimes,
       deleteIfUnavailable: formulaNames,
     });
 
@@ -143,10 +151,14 @@ const brew: IPCBrew = {
       formula.outdated = false;
     }
 
-    const analytics = await (brew as any)._fetchOfficialAnalytics();
+    const [analytics, updateTimes] = await Promise.all([
+      (brew as any)._fetchOfficialAnalytics(),
+      fetchUpdateTimes(),
+    ]);
 
     await (brew as any)._ingestFormulaInfo(formulaeFromAPI, {
       analytics,
+      updateTimes,
     });
 
     // The API response can't tell us what's installed locally,
@@ -162,20 +174,8 @@ const brew: IPCBrew = {
 
     await (brew as any)._ingestFormulaInfo(formulae, {
       analytics,
+      updateTimes,
     });
-  },
-
-  async _indexInstalled(): Promise<void> {
-    const { formulae } = JSON.parse(
-      await runBackgroundBrewProcess([
-        "info",
-        "--json=v2",
-        "--formula",
-        "--installed",
-      ])
-    );
-
-    await (brew as any)._ingestFormulaInfo(formulae);
   },
 
   async _fetchOfficialAnalytics(): Promise<BrewAnalyticsAll> {
@@ -233,9 +233,11 @@ const brew: IPCBrew = {
     formulae: BrewPackageInfo[],
     {
       analytics,
+      updateTimes,
       deleteIfUnavailable,
     }: {
       analytics?: BrewAnalyticsAll;
+      updateTimes?: BrewUpdateTimes;
       deleteIfUnavailable?: string[];
     } = {}
   ) {
@@ -257,6 +259,7 @@ const brew: IPCBrew = {
         "installed_30d",
         "installed_90d",
         "installed_365d",
+        "updated",
       ],
       formulae.map((formula) => ({
         ...formula,
@@ -275,6 +278,8 @@ const brew: IPCBrew = {
         ]?.[0]?.count
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
+
+        updated: updateTimes?.formula?.[formula.full_name],
 
         json: JSON.stringify(formula),
       }))
@@ -308,7 +313,8 @@ const brew: IPCBrew = {
           formulae.json,
           formulae.installed_30d,
           formulae.installed_90d,
-          formulae.installed_365d
+          formulae.installed_365d,
+          formulae.updated
         FROM formulae
         WHERE
           (${keywords
@@ -344,9 +350,12 @@ const brew: IPCBrew = {
       .all()
       .map((row) => ({
         ...JSON.parse(row.json),
+
         installed_30d: row.installed_30d ?? 0,
         installed_90d: row.installed_90d ?? 0,
         installed_365d: row.installed_365d ?? 0,
+
+        updated: row.updated,
       }));
   },
 
@@ -358,7 +367,8 @@ const brew: IPCBrew = {
           formulae.json,
           formulae.installed_30d,
           formulae.installed_90d,
-          formulae.installed_365d
+          formulae.installed_365d,
+          formulae.updated
         FROM formulae
         WHERE
           formulae.full_name = $formulaName
@@ -373,10 +383,14 @@ const brew: IPCBrew = {
 
     return {
       rowid: row.rowid,
+
       ...JSON.parse(row.json),
+
       installed_30d: row.installed_30d,
       installed_90d: row.installed_90d,
       installed_365d: row.installed_365d,
+
+      updated: row.updated,
     };
   },
 
