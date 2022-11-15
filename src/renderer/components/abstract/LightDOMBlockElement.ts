@@ -1,8 +1,10 @@
-import { CSSResult, CSSResultGroup, html, LitElement, render } from "lit";
+import { CSSResult, CSSResultGroup } from "lit";
+
+import BaseElement from "./BaseElement";
 
 let processedElementClasses: Set<typeof LightDOMBlockElement> = new Set();
 
-export default abstract class LightDOMBlockElement extends LitElement {
+export default abstract class LightDOMBlockElement extends BaseElement {
   abstract get customElementName(): string;
 
   constructor() {
@@ -53,6 +55,7 @@ export default abstract class LightDOMBlockElement extends LitElement {
         /(^|(?<=,))/,
         ` ${this.customElementName} `
       );
+      console.log(selectorText)
     }
   }
 
