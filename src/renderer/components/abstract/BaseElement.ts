@@ -64,6 +64,8 @@ export default abstract class BaseElement extends LitElement {
     this.popperDropdowns = [];
   }
 
+  protected dropdownVisiblityChanged() {}
+
   private toggleDropdown(event: Event) {
     const host = (event.target as HTMLElement).closest(
       '[data-bs-toggle="dropdown"]'
@@ -73,6 +75,7 @@ export default abstract class BaseElement extends LitElement {
     if (!host.classList.contains("show")) {
       setTimeout(() => {
         Dropdown.getInstance(host)?.show();
+        this.dropdownVisiblityChanged();
       });
     }
   }
@@ -81,6 +84,7 @@ export default abstract class BaseElement extends LitElement {
     this.popperDropdowns.forEach((dropdown) => {
       dropdown.hide();
     });
+    this.dropdownVisiblityChanged();
   }
 
   private keyDown(event: KeyboardEvent) {

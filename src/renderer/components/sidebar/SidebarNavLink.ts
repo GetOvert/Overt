@@ -73,13 +73,19 @@ export default class SidebarNavLink extends LightDOMBlockElement {
 
     const dropdownID = `sidebar-nav-link-${this.label.replace(/\W/g, "")}`;
     return html`
+      <style>
+        *:not(:hover) > .hidden-unless-parent-hovered {
+          display: none;
+        }
+      </style>
+
       <div class="btn-group dropup d-flex" role="group">
         ${buttonHTML}
 
         <button
           id=${dropdownID}
           type="button"
-          class="btn btn-light dropdown-toggle dropdown-toggle-split flex-grow-0"
+          class="btn btn-light dropdown-toggle dropdown-toggle-split flex-grow-0 dropdown-button hidden-unless-parent-hovered"
           data-bs-toggle="dropdown"
           data-bs-placement="bottom"
           aria-haspopup="true"
@@ -108,7 +114,7 @@ export default class SidebarNavLink extends LightDOMBlockElement {
     `;
   }
 
-  private clicked(event: Event) {
+  private clicked(event: Event): void {
     event.preventDefault();
 
     const link = event.target as HTMLAnchorElement;
@@ -121,5 +127,15 @@ export default class SidebarNavLink extends LightDOMBlockElement {
         [this.key]: this.value,
       })
     );
+  }
+
+  protected dropdownVisiblityChanged(): void {
+    const dropdownButton = this.renderRoot.querySelector(".dropdown-button");
+    if (!dropdownButton) return;
+
+    const dropdownShown = this.dropdownHosts[0]?.classList.contains("show");
+    if (dropdownShown)
+      dropdownButton.classList.remove("hidden-unless-parent-hovered");
+    else dropdownButton.classList.add("hidden-unless-parent-hovered");
   }
 }
