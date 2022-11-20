@@ -70,7 +70,7 @@ module.exports = {
       "@electron-forge/plugin-webpack",
       {
         devContentSecurityPolicy:
-          "default-src 'self' 'unsafe-inline' data: https://fonts.googleapis.com https://fonts.gstatic.com https://formulae.brew.sh https://storage.googleapis.com/storage.getovert.app/ https://storage.cloud.google.com/storage.getovert.app/; script-src 'self' 'unsafe-eval' 'unsafe-inline' data:; img-src 'self' data: https://99designs-blog.imgix.net",
+          "default-src 'self' 'unsafe-inline' data: https://fonts.googleapis.com https://fonts.gstatic.com https://formulae.brew.sh https://storage.googleapis.com/storage.getovert.app/ https://storage.cloud.google.com/storage.getovert.app/; script-src 'self' 'unsafe-eval' 'unsafe-inline' data:; img-src 'self' data: https://storage.googleapis.com/storage.getovert.app/",
         mainConfig: "./webpack.main.config.js",
         renderer: {
           config: "./webpack.renderer.config.js",

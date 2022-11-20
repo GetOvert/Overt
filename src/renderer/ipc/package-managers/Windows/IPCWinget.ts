@@ -91,6 +91,10 @@ export class WingetPackageInfoAdapter
     return packageInfo.PackageURL;
   }
 
+  packageIconURL(packageInfo: WingetPackageInfo): string | undefined {
+    return undefined;
+  }
+
   isPackageInstalled(packageInfo: WingetPackageInfo): boolean {
     return !!packageInfo.installedVersion?.length;
   }

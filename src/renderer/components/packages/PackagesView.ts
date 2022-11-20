@@ -305,6 +305,8 @@ export default class PackagesView<
                   this.packageInfoAdapter.packageIdentifier(packageInfo);
                 const description =
                   this.packageInfoAdapter.packageDescription(packageInfo);
+                const iconURL =
+                  this.packageInfoAdapter.packageIconURL(packageInfo);
                 const isInstalled =
                   this.packageInfoAdapter.isPackageInstalled(packageInfo);
                 const isOutdated =
@@ -332,6 +334,7 @@ export default class PackagesView<
                           subpage: identifier,
                         }
                       )}
+                      .iconURL=${iconURL}
                       @contextmenu=${() =>
                         window.contextMenu.set([
                           {

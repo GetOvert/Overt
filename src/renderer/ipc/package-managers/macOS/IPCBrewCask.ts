@@ -86,6 +86,16 @@ export class BrewCaskPackageInfoAdapter
     return packageInfo.homepage;
   }
 
+  packageIconURL(packageInfo: BrewCaskPackageInfo): string | undefined {
+    // Bit of a heuristic, but realistically, this shouldn't break
+    const official = !packageInfo.full_token.includes("/");
+
+    const qualifiedName = official
+      ? `${packageInfo.tap}/${packageInfo.token}`
+      : packageInfo.full_token;
+    return `https://storage.googleapis.com/storage.getovert.app/brew/${qualifiedName}.png`;
+  }
+
   isPackageInstalled(packageInfo: BrewCaskPackageInfo): boolean {
     return !!packageInfo.installed;
   }

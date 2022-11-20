@@ -64,6 +64,10 @@ export class BrewPackageInfoAdapter
     return packageInfo.homepage;
   }
 
+  packageIconURL(packageInfo: BrewPackageInfo): string | undefined {
+    return undefined;
+  }
+
   isPackageInstalled(packageInfo: BrewPackageInfo): boolean {
     return !!packageInfo.installed.length;
   }

@@ -5,6 +5,7 @@ export type PackageInfoAdapter<PackageInfo> = {
   packageIdentifier(packageInfo: PackageInfo): string;
   packageDescription(packageInfo: PackageInfo): string;
   packageWebsiteURL(packageInfo: PackageInfo): string | undefined;
+  packageIconURL(packageInfo: PackageInfo): string | undefined;
 
   isPackageInstalled(packageInfo: PackageInfo): boolean;
   isPackageOutdated(packageInfo: PackageInfo): boolean;
