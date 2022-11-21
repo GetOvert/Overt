@@ -15,7 +15,7 @@ Overt **doesn't**:
 
 Overt **does**:
 
-- Give you a catalog of 3000+ apps at your fingertips
+- Give you a catalog of 3,000+ apps at your fingertips
 - Install, update, and uninstall apps with a single click
 - Let you add your own source repositories
 
