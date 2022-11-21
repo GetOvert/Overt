@@ -116,6 +116,8 @@ const brew: IPCBrew = {
   },
 
   async indexSpecific(formulaNames: string[]): Promise<void> {
+    if (!formulaNames.length) return;
+
     const { formulae } = JSON.parse(
       await runBackgroundBrewProcess([
         "info",

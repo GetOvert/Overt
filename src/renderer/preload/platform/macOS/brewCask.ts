@@ -182,6 +182,8 @@ const brewCask: IPCBrewCask = {
   },
 
   async indexSpecific(caskNames: string[]): Promise<void> {
+    if (!caskNames.length) return;
+
     const { casks } = JSON.parse(
       await runBackgroundBrewProcess([
         "info",
