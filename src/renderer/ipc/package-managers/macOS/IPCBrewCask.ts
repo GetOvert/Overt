@@ -120,9 +120,7 @@ export class BrewCaskPackageInfoAdapter
           value: {
             Installed: packageInfo.installed ?? "None",
             Latest: packageInfo.version,
-            Updates: packageInfo.auto_updates
-              ? "Via built-in updater"
-              : "Via Overt",
+            Updates: packageInfo.auto_updates ? "In-app" : "Through Overt",
             "Last updated": packageInfo.updated
               ? new Date(1000 * packageInfo.updated).toLocaleString(undefined, {
                   weekday: "short",
@@ -136,7 +134,7 @@ export class BrewCaskPackageInfoAdapter
           },
         },
         {
-          heading: "Install count",
+          heading: "Installs",
           value:
             packageInfo.installed_30d !== null
               ? {

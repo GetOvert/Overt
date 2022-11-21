@@ -127,7 +127,7 @@ export class BrewPackageInfoAdapter
           },
         },
         {
-          heading: "Requested install count",
+          heading: "Installs (non-dependency)",
           value:
             packageInfo.installed_30d !== null
               ? {
