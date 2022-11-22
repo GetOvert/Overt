@@ -92,6 +92,10 @@ export class BrewPackageInfoAdapter
     return packageInfo.disabled;
   }
 
+  isPackageOvert(packageInfo: BrewPackageInfo): boolean {
+    return false;
+  }
+
   packageDetails(packageInfo: BrewPackageInfo): PackageDetailField[][] {
     return [
       [

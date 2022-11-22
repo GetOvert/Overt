@@ -72,8 +72,10 @@ async function createWindow(): Promise<void> {
     }
   });
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  ipcMain.on("relaunch", () => {
+    app.relaunch();
+    app.quit();
+  });
 
   const ptyProcess =
     process.platform === "win32"

@@ -102,12 +102,25 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
           ),
       },
       {
+        title: "Relaunch",
+        color: "primary",
+
+        shown: this.packageInfoAdapter.isPackageOvert(this.packageInfo),
+
+        enabled: !taskQueue.liveForPackage(packageIdentifier).length,
+
+        onClick: async () => {
+          window.lifecycle.relaunch();
+        },
+      },
+      {
         title: !additionalLaunchables.length
           ? "Launch"
           : `Launch ${mainLaunchable.label}`,
         color: "primary",
 
         shown:
+          !this.packageInfoAdapter.isPackageOvert(this.packageInfo) &&
           this.packageInfoAdapter.isPackageInstalled(this.packageInfo) &&
           !!mainLaunchable,
 

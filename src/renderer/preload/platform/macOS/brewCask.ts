@@ -598,12 +598,9 @@ const brewCask: IPCBrewCask = {
                 cancelButtonTitle: "Later",
 
                 action: () => {
-                  runBackgroundProcess("/bin/sh", [
-                    "-c",
-                    "/usr/bin/osascript -e 'quit app id \"app.getovert.Overt\"'; sleep 0.5; /usr/bin/open -b app.getovert.Overt",
-                  ]);
+                  window.lifecycle.relaunch();
                 },
-                cancel: () => resolve(true),
+                cancel: () => {},
               },
               []
             );

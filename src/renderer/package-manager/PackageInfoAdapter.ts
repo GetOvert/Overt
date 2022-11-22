@@ -13,6 +13,7 @@ export type PackageInfoAdapter<PackageInfo> = {
   isPackageOutdated(packageInfo: PackageInfo): boolean;
   isPackageDeprecated(packageInfo: PackageInfo): boolean;
   isPackageDisabled(packageInfo: PackageInfo): boolean;
+  isPackageOvert(packageInfo: PackageInfo): boolean;
 
   packageDetails(packageInfo: PackageInfo): PackageDetailField[][];
 };

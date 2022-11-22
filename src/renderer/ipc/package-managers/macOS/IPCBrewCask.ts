@@ -121,6 +121,10 @@ export class BrewCaskPackageInfoAdapter
     return false;
   }
 
+  isPackageOvert(packageInfo: BrewCaskPackageInfo): boolean {
+    return packageInfo.token === "overt";
+  }
+
   packageDetails(packageInfo: BrewCaskPackageInfo): PackageDetailField[][] {
     return [
       [

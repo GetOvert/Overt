@@ -122,6 +122,10 @@ export class WingetPackageInfoAdapter
     return false;
   }
 
+  isPackageOvert(packageInfo: WingetPackageInfo): boolean {
+    return false;
+  }
+
   packageDetails(packageInfo: WingetPackageInfo): PackageDetailField[][] {
     return [
       [
