@@ -565,17 +565,50 @@ const brewCask: IPCBrewCask = {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
         if (data.match(/^Password:/im)) {
-          taskQueue.push(
+          taskQueue.push<PromptForPasswordTask>(
             {
               type: "prompt-for-password",
               label: `Authenticate to update ${caskName}`,
               prompt: `The updater for '${caskName}' requires elevated privileges.\n\nEnter your password to allow this.`,
-            } as PromptForPasswordTask,
+            },
             ["before"]
           );
         }
         if (data.match(/(?<!')-- overt-succeeded: cask-upgrade --/)) {
           terminal.offReceive(callbackID);
+
+          if (caskName.match(/[^/]+$/)?.[0] === "overt") {
+            taskQueue.push<ConfirmActionTask>(
+              {
+                type: "confirm-action",
+                label: "Prompt to relaunch Overt",
+
+                promptTitle: `Apply Overt update`,
+                prompt: `Overt has been updated to version ${
+                  brewCask.info(caskName)?.version ?? "(unknown)"
+                }!`,
+                promptCannedMessage: `
+                  <p>
+                    It will be applied at next launch. Relaunch now?
+                  </p>
+                `,
+                url: "https://github.com/GetOvert/Overt/releases",
+                openLinkButtonTitle: "Release Notes",
+                confirmButtonTitle: "Relaunch",
+                cancelButtonTitle: "Later",
+
+                action: () => {
+                  runBackgroundProcess("/bin/sh", [
+                    "-c",
+                    "/usr/bin/osascript -e 'quit app id \"app.getovert.Overt\"'; sleep 0.5; /usr/bin/open -b app.getovert.Overt",
+                  ]);
+                },
+                cancel: () => resolve(true),
+              },
+              []
+            );
+          }
+
           return resolve(true);
         }
         if (data.match(/(?<!')-- overt-failed: cask-upgrade --/)) {
