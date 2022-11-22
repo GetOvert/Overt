@@ -78,7 +78,8 @@ export type ConfirmActionTask = TaskBase & {
     | HTMLTemplateResult
     | string /* Interpreted as html (for preload code, which can't use html`` literals) */
     | null;
-  url: string | null;
+  url?: string | null;
+  openLinkButtonTitle?: string;
   confirmButtonTitle: string;
   cancelButtonTitle: string;
 };

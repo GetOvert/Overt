@@ -21,6 +21,8 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
   modalTitle: string;
 
   @property()
+  openLinkButtonTitle: string = "Go to Site";
+  @property()
   confirmButtonTitle: string;
   @property()
   cancelButtonTitle: string;
@@ -31,8 +33,9 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
   static async runModal(
     prompt: string,
     promptCannedMessage: HTMLTemplateResult | null,
-    url: string | null,
+    url: string | null | undefined,
     title: string,
+    openLinkButtonTitle: string | undefined,
     confirmButtonTitle: string,
     cancelButtonTitle: string
   ): Promise<boolean> {
@@ -46,6 +49,7 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
           .modalPromptCannedMessage=${promptCannedMessage}
           .modalLinkURL=${ifDefined(url)}
           .modalTitle=${title}
+          .openLinkButtonTitle=${ifDefined(openLinkButtonTitle)}
           .confirmButtonTitle=${confirmButtonTitle}
           .cancelButtonTitle=${cancelButtonTitle}
         ></openstore-action-confirmation-modal>
@@ -111,7 +115,7 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
                 href=${this.modalLinkURL}
                 class="btn btn-outline-info me-auto"
                 @click=${this.openModalLinkURL}
-                >Go to site
+                >${this.openLinkButtonTitle}
 
                 <!-- https://icons.getbootstrap.com/icons/box-arrow-up-right/ -->
                 <svg

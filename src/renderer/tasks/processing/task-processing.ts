@@ -68,6 +68,7 @@ const confirmationProcessor = new TaskProcessor(
         : task.promptCannedMessage,
       task.url,
       task.promptTitle,
+      task.openLinkButtonTitle,
       task.confirmButtonTitle,
       task.cancelButtonTitle
     );
