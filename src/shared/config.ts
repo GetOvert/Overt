@@ -7,12 +7,13 @@ export type Config = {
 
   fullIndexIntervalDays: number;
 
+  autoUpdateSelf: boolean;
   homebrewPath: string;
 };
 
 export const config = {
   fallbackAccentColor: "46b04aff",
-  
+
   lightTextOnAccentColor: "f8f5f0",
   darkTextOnAccentColor: "232421",
 };

@@ -117,6 +117,7 @@ async function createWindow(): Promise<void> {
 
       fullIndexIntervalDays: 3,
 
+      autoUpdateSelf: true,
       homebrewPath: existsSync("/opt/homebrew/bin/brew")
         ? "/opt/homebrew"
         : "/usr/local",

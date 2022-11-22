@@ -27,6 +27,8 @@ export class SettingsPane extends BootstrapBlockElement {
   fullIndexIntervalDays: number;
 
   @state()
+  autoUpdateSelf: boolean;
+  @state()
   homebrewPath: string;
 
   protected updated(changedProperties: PropertyValues<this>): void {
@@ -41,6 +43,7 @@ export class SettingsPane extends BootstrapBlockElement {
       "useSystemAccentColor",
       "tintDarkBackgrounds",
       "fullIndexIntervalDays",
+      "autoUpdateSelf",
       "homebrewPath",
     ];
 
@@ -178,6 +181,11 @@ export class SettingsPane extends BootstrapBlockElement {
         </h3>
         <hr aria-hidden="true" />
 
+        ${this.makeCheckbox(
+          "autoUpdateSelf",
+          "Automatically update Overt",
+          "Auto-update the Overt app? Overt may break if you disable this, since underlying package managers will continue to be updated. (Default: Yes)"
+        )}
         ${this.makeTextField(
           "homebrewPath",
           "Homebrew path",

@@ -19,7 +19,11 @@ import {
 } from "ipc/package-managers/macOS/IPCBrewCask";
 import terminal from "preload/shared/terminal";
 import * as taskQueue from "preload/shared/taskQueueIPC";
-import { ConfirmActionTask, PromptForPasswordTask } from "tasks/Task";
+import {
+  ConfirmActionTask,
+  PromptForPasswordTask,
+  UpgradeTask,
+} from "tasks/Task";
 import settings from "preload/shared/settings";
 import path from "path";
 import brew from "./brew";
@@ -197,8 +201,29 @@ const brewCask: IPCBrewCask = {
       "--cask",
       "--greedy-latest",
     ]);
+    const outdatedCaskNames = stdout.split(/\s+/).filter((s) => s);
 
-    await brewCask.indexSpecific(stdout.split(/\s+/).filter((s) => s));
+    await brewCask.indexSpecific(outdatedCaskNames);
+
+    if (await settings.get("autoUpdateSelf")) {
+      const outdatedOvertCaskName = outdatedCaskNames.find(
+        (caskName) => caskName.split("/").at(-1) === "overt"
+      );
+
+      if (outdatedOvertCaskName) {
+        // Auto-update the Overt app
+        taskQueue.push<UpgradeTask>(
+          {
+            type: "upgrade",
+            label: `Auto-update Overt`,
+
+            packageManager: "brew-cask",
+            packageIdentifier: outdatedOvertCaskName,
+          },
+          []
+        );
+      }
+    }
   },
 
   async indexSpecific(caskNames: string[]): Promise<void> {
@@ -577,7 +602,7 @@ const brewCask: IPCBrewCask = {
         if (data.match(/(?<!')-- overt-succeeded: cask-upgrade --/)) {
           terminal.offReceive(callbackID);
 
-          if (caskName.match(/[^/]+$/)?.[0] === "overt") {
+          if (caskName.split("/").at(-1) === "overt") {
             taskQueue.waitUntilDrained().then(() => {
               taskQueue.push<ConfirmActionTask>(
                 {
