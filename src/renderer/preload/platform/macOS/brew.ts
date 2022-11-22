@@ -48,7 +48,7 @@ if (process.platform === "darwin") {
         "installed_90d" INTEGER, -- Install count analytics for last 90 days
         "installed_365d" INTEGER, -- Install count analytics for last 365 days
         "updated" TIMESTAMP, -- Last time the formula was updated
-        "added" TIMESTAMP -- Time the formula was added to the Homebrew
+        "added" TIMESTAMP -- Time the formula was added to Homebrew
       )`
   );
 }
@@ -245,6 +245,10 @@ const brew: IPCBrew = {
   ) {
     const { installed_30d, installed_90d, installed_365d } = analytics ?? {};
 
+    function scaleTimestamp(timestamp: number | undefined) {
+      return timestamp ? 1000 * timestamp : timestamp;
+    }
+
     insertOrReplaceRecords(
       cacheDB(),
       "formulae",
@@ -281,7 +285,7 @@ const brew: IPCBrew = {
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
 
-        updated: updateTimes?.formula?.[formula.full_name],
+        updated: scaleTimestamp(updateTimes?.formula?.[formula.full_name]),
 
         json: JSON.stringify(formula),
       }))

@@ -307,6 +307,11 @@ export default class PackagesView<
                   this.packageInfoAdapter.packageDescription(packageInfo);
                 const iconURL =
                   this.packageInfoAdapter.packageIconURL(packageInfo);
+                const publisher =
+                  this.packageInfoAdapter.packagePublisher(packageInfo);
+                const lastUpdated =
+                  this.packageInfoAdapter.packageLastUpdated(packageInfo);
+
                 const isInstalled =
                   this.packageInfoAdapter.isPackageInstalled(packageInfo);
                 const isOutdated =
@@ -317,7 +322,6 @@ export default class PackagesView<
                     <openstore-card
                       class=${`batch-${this._batchNumber}`}
                       .title=${name}
-                      .subtitle=${identifier !== name ? identifier : ""}
                       .status=${isInstalled
                         ? isOutdated
                           ? "update available"
@@ -328,6 +332,8 @@ export default class PackagesView<
                           ? "info"
                           : "success"
                         : "muted"}
+                      .publisher=${publisher}
+                      .lastUpdated=${lastUpdated}
                       .details=${description}
                       .href=${((window as any).openStore as any).encodeFragment(
                         {

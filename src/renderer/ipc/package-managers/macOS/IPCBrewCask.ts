@@ -32,6 +32,7 @@ export type BrewCaskPackageInfo = {
   installed_30d?: string | null; // TODO: Better typing
   installed_90d?: string | null; // TODO: Better typing
   installed_365d?: string | null; // TODO: Better typing
+  publisher?: string;
   updated?: number;
   // TODO: There are more fields that aren't here yet
 };
@@ -96,6 +97,14 @@ export class BrewCaskPackageInfoAdapter
     return `https://storage.googleapis.com/storage.getovert.app/brew/${qualifiedName}.png`;
   }
 
+  packagePublisher(packageInfo: BrewCaskPackageInfo): string | undefined {
+    return packageInfo.publisher;
+  }
+
+  packageLastUpdated(packageInfo: BrewCaskPackageInfo): number | undefined {
+    return packageInfo.updated;
+  }
+
   isPackageInstalled(packageInfo: BrewCaskPackageInfo): boolean {
     return !!packageInfo.installed;
   }
@@ -122,7 +131,7 @@ export class BrewCaskPackageInfoAdapter
             Latest: packageInfo.version,
             Updates: packageInfo.auto_updates ? "In-app" : "Through Overt",
             "Last updated": packageInfo.updated
-              ? new Date(1000 * packageInfo.updated).toLocaleString(undefined, {
+              ? new Date(packageInfo.updated).toLocaleString(undefined, {
                   weekday: "short",
                   day: "numeric",
                   month: "short",

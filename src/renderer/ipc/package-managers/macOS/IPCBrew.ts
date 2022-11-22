@@ -68,6 +68,14 @@ export class BrewPackageInfoAdapter
     return undefined;
   }
 
+  packagePublisher(packageInfo: BrewPackageInfo): string | undefined {
+    return undefined;
+  }
+
+  packageLastUpdated(packageInfo: BrewPackageInfo): number | undefined {
+    return packageInfo.updated;
+  }
+
   isPackageInstalled(packageInfo: BrewPackageInfo): boolean {
     return !!packageInfo.installed.length;
   }
@@ -115,7 +123,7 @@ export class BrewPackageInfoAdapter
             Installed: packageInfo.installed?.[0]?.version ?? "None",
             "Latest stable": packageInfo.versions?.stable ?? "None",
             "Last updated": packageInfo.updated
-              ? new Date(1000 * packageInfo.updated).toLocaleString(undefined, {
+              ? new Date(packageInfo.updated).toLocaleString(undefined, {
                   weekday: "short",
                   day: "numeric",
                   month: "short",

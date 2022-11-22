@@ -2,6 +2,7 @@ import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import { css, html } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
+import { formatRelative } from "utility/relative-time";
 
 @customElement("openstore-card")
 export default class Card extends BootstrapBlockElement {
@@ -10,9 +11,11 @@ export default class Card extends BootstrapBlockElement {
   @property()
   subtitle = "";
   @property()
-  status = "status";
+  status = "";
   @property()
   statusColor = "muted";
+  @property()
+  lastUpdated?: number;
   @property()
   details = "";
   @property()
@@ -47,7 +50,7 @@ export default class Card extends BootstrapBlockElement {
       }
 
       .card-title {
-        font-size: 1.25rem;
+        font-size: 1.2rem;
       }
     `,
   ];
@@ -65,6 +68,11 @@ export default class Card extends BootstrapBlockElement {
 
             <div class="card-body">
               <h2 class="card-title" style="font-weight: 500">${this.title}</h2>
+              ${this.lastUpdated
+                ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
+                    ${this.lastUpdated ? formatRelative(this.lastUpdated) : ""}
+                  </h3>`
+                : ""}
               ${this.subtitle || this.status
                 ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
                     ${this.subtitle}

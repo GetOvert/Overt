@@ -45,8 +45,9 @@ if (process.platform === "darwin") {
         "installed_30d" INTEGER, -- Install count analytics for last 30 days
         "installed_90d" INTEGER, -- Install count analytics for last 90 days
         "installed_365d" INTEGER, -- Install count analytics for last 365 days
+        "publisher" TEXT, -- Publisher / copyright holder, as parsed from .app copyright string
         "updated" TIMESTAMP, -- Last time the cask was updated
-        "added" TIMESTAMP -- Time the cask was added to the Homebrew
+        "added" TIMESTAMP -- Time the cask was added to Homebrew
       )`
   );
 }
@@ -101,6 +102,25 @@ export type BrewUpdateTimes = {
 export type BrewUpdateTimesResponse = {
   commit: string;
   by_name: BrewUpdateTimes;
+};
+
+type CaskArtifactMeta = {
+  cask: {
+    [fullToken: string]: {
+      copyright: string;
+    };
+  };
+};
+
+type CaskArtifactMetaResponse = {
+  commit: string;
+  by_name: CaskArtifactMeta;
+};
+
+type CaskAuxMetadata = {
+  analytics?: BrewAnalyticsAll;
+  artifactMeta?: CaskArtifactMeta;
+  updateTimes?: BrewUpdateTimes;
 };
 
 // const impl = new (class {
@@ -193,16 +213,13 @@ const brewCask: IPCBrewCask = {
       ])
     );
 
-    const [analytics, updateTimes] = await Promise.all([
-      (brewCask as any)._fetchOfficialAnalytics(),
-      fetchUpdateTimes(),
-    ]);
-
-    await (brewCask as any)._ingestCaskInfo(casks, {
-      analytics,
-      updateTimes,
-      deleteIfUnavailable: caskNames,
-    });
+    await (brewCask as any)._ingestCaskInfo(
+      casks,
+      await (brewCask as any)._fetchAuxMetadata(),
+      {
+        deleteIfUnavailable: caskNames,
+      }
+    );
 
     (brewCask as any)._postIndexing();
   },
@@ -219,15 +236,9 @@ const brewCask: IPCBrewCask = {
       cask.outdated = false;
     }
 
-    const [analytics, updateTimes] = await Promise.all([
-      (brewCask as any)._fetchOfficialAnalytics(),
-      fetchUpdateTimes(),
-    ]);
+    const auxMetadata = await (brewCask as any)._fetchAuxMetadata();
 
-    await (brewCask as any)._ingestCaskInfo(casksFromAPI, {
-      analytics,
-      updateTimes,
-    });
+    await (brewCask as any)._ingestCaskInfo(casksFromAPI, auxMetadata);
 
     // The API response can't tell us what's installed locally,
     // so reindex installed packages as a 2nd step
@@ -240,10 +251,16 @@ const brewCask: IPCBrewCask = {
       ])
     );
 
-    await (brewCask as any)._ingestCaskInfo(casks, {
-      analytics,
-      updateTimes,
-    });
+    await (brewCask as any)._ingestCaskInfo(casks, auxMetadata);
+  },
+
+  async _fetchAuxMetadata(): Promise<CaskAuxMetadata> {
+    const [analytics, artifactMeta, updateTimes] = await Promise.all([
+      (brewCask as any)._fetchOfficialAnalytics(),
+      fetchArtifactMeta(),
+      fetchUpdateTimes(),
+    ]);
+    return { analytics, artifactMeta, updateTimes };
   },
 
   async _fetchOfficialAnalytics(): Promise<BrewAnalyticsAll> {
@@ -299,17 +316,18 @@ const brewCask: IPCBrewCask = {
 
   async _ingestCaskInfo(
     casks: BrewCaskPackageInfo[],
+    { analytics, artifactMeta, updateTimes }: CaskAuxMetadata,
     {
-      analytics,
-      updateTimes,
       deleteIfUnavailable,
     }: {
-      analytics?: BrewAnalyticsAll;
-      updateTimes?: BrewUpdateTimes;
       deleteIfUnavailable?: string[];
     } = {}
   ) {
     const { installed_30d, installed_90d, installed_365d } = analytics ?? {};
+
+    function scaleTimestamp(timestamp: number | undefined) {
+      return timestamp ? 1000 * timestamp : timestamp;
+    }
 
     insertOrReplaceRecords(
       cacheDB(),
@@ -329,6 +347,7 @@ const brewCask: IPCBrewCask = {
         "installed_30d",
         "installed_90d",
         "installed_365d",
+        "publisher",
         "updated",
       ],
       casks.map((cask) => ({
@@ -348,7 +367,8 @@ const brewCask: IPCBrewCask = {
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
 
-        updated: updateTimes?.cask?.[cask.full_token],
+        publisher: artifactMeta?.cask?.[cask.full_token]?.copyright,
+        updated: scaleTimestamp(updateTimes?.cask?.[cask.full_token]),
 
         json: JSON.stringify(cask),
       }))
@@ -383,6 +403,7 @@ const brewCask: IPCBrewCask = {
           casks.installed_30d,
           casks.installed_90d,
           casks.installed_365d,
+          casks.publisher,
           casks.updated
         FROM casks
         WHERE
@@ -391,7 +412,8 @@ const brewCask: IPCBrewCask = {
               (keyword, index) => sql`
                 (casks.full_token LIKE $pattern${index}
                   OR casks.name LIKE $pattern${index}
-                  OR casks.desc LIKE $pattern${index})`
+                  OR casks.desc LIKE $pattern${index}
+                  OR casks.publisher LIKE $pattern${index})`
             )
             .join(sql` AND `)})
           ${(() => {
@@ -425,6 +447,7 @@ const brewCask: IPCBrewCask = {
         installed_90d: row.installed_90d ?? 0,
         installed_365d: row.installed_365d ?? 0,
 
+        publisher: row.publisher,
         updated: row.updated,
       }));
   },
@@ -438,6 +461,7 @@ const brewCask: IPCBrewCask = {
           casks.installed_30d,
           casks.installed_90d,
           casks.installed_365d,
+          casks.publisher,
           casks.updated
         FROM casks
         WHERE
@@ -460,6 +484,7 @@ const brewCask: IPCBrewCask = {
       installed_90d: row.installed_90d,
       installed_365d: row.installed_365d,
 
+      publisher: row.publisher,
       updated: row.updated,
     };
   },
@@ -708,23 +733,18 @@ function dbKeyForSortKey(sortKey: SortKey): string {
   }
 }
 
+async function fetchArtifactMeta(): Promise<CaskArtifactMeta> {
+  const responses: CaskArtifactMetaResponse[] =
+    await fetchFromCloudStorageForAllTaps("artifact-meta.json");
+
+  return {
+    cask: Object.assign({}, ...responses.map(({ by_name }) => by_name?.cask)),
+  };
+}
+
 export async function fetchUpdateTimes(): Promise<BrewUpdateTimes> {
-  const taps: TapInfo[] = JSON.parse(
-    await runBackgroundBrewProcess(["tap-info", "--json=v1", "--installed"])
-  );
-
-  const responses: BrewUpdateTimesResponse[] = (
-    await Promise.all(
-      taps.map(async ({ name }) => {
-        const res = await fetch(
-          `https://storage.googleapis.com/storage.getovert.app/brew/${name}/update-times.json`
-        );
-        if (!res.ok) return null;
-
-        return await res.json();
-      })
-    )
-  ).filter((x) => x);
+  const responses: BrewUpdateTimesResponse[] =
+    await fetchFromCloudStorageForAllTaps("update-times.json");
 
   return {
     formula: Object.assign(
@@ -733,6 +753,27 @@ export async function fetchUpdateTimes(): Promise<BrewUpdateTimes> {
     ),
     cask: Object.assign({}, ...responses.map(({ by_name }) => by_name?.cask)),
   };
+}
+
+async function fetchFromCloudStorageForAllTaps<ResponseBody extends object>(
+  fileName: string
+): Promise<ResponseBody[]> {
+  const tapNames: string[] = (await runBackgroundBrewProcess(["tap"]))
+    .split(/\r?\n/)
+    .filter((x) => x);
+
+  return (
+    await Promise.all(
+      tapNames.map(async (name) => {
+        const res = await fetch(
+          `https://storage.googleapis.com/storage.getovert.app/brew/${name}/${fileName}`
+        );
+        if (!res.ok) return null;
+
+        return await res.json();
+      })
+    )
+  ).filter((x) => x);
 }
 
 export async function runBackgroundBrewProcess(

@@ -6,6 +6,8 @@ export type PackageInfoAdapter<PackageInfo> = {
   packageDescription(packageInfo: PackageInfo): string;
   packageWebsiteURL(packageInfo: PackageInfo): string | undefined;
   packageIconURL(packageInfo: PackageInfo): string | undefined;
+  packagePublisher(packageInfo: PackageInfo): string | undefined;
+  packageLastUpdated(packageInfo: PackageInfo): number | undefined;
 
   isPackageInstalled(packageInfo: PackageInfo): boolean;
   isPackageOutdated(packageInfo: PackageInfo): boolean;

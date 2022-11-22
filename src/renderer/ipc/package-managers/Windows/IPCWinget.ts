@@ -95,6 +95,14 @@ export class WingetPackageInfoAdapter
     return undefined;
   }
 
+  packagePublisher(packageInfo: WingetPackageInfo): string | undefined {
+    return packageInfo.Publisher;
+  }
+
+  packageLastUpdated(packageInfo: WingetPackageInfo): number | undefined {
+    return undefined;
+  }
+
   isPackageInstalled(packageInfo: WingetPackageInfo): boolean {
     return !!packageInfo.installedVersion?.length;
   }

@@ -10,8 +10,9 @@ const cachePath = Buffer.from(
   "base64"
 ).toString();
 
-const cacheDir = path.join(cachePath, "Overt_v4");
+const cacheDir = path.join(cachePath, "Overt_v5");
 const oldCacheDirs = [
+  path.join(cachePath, "Overt_v4"),
   path.join(cachePath, "OpenStore_v3"),
   path.join(cachePath, "OpenStore_v2"),
   path.join(cachePath, "OpenStore_v1"),

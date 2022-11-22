@@ -34,6 +34,7 @@ export type Button = {
 export abstract class ProductView extends BootstrapBlockElement {
   protected abstract readonly subtitle: string;
   protected abstract readonly description: string;
+  protected abstract readonly publisher: string | undefined;
   protected abstract readonly websiteURL: string | undefined;
   protected abstract shouldCauseRerender(successfulTask: QueuedTask): boolean;
   protected abstract canLinkToPackageName(packageName: string): boolean;
@@ -109,7 +110,9 @@ export abstract class ProductView extends BootstrapBlockElement {
   render() {
     return html`
       <div class="mx-4">
-        <p class="fs-slightly-larger text-muted text-center mt-1 mb-2">
+        <p
+          class="d-flex flex-column gap-1 fs-slightly-larger text-center mt-1 mb-2"
+        >
           <a
             href=${this.websiteURL}
             data-bs-toggle="tooltip"
@@ -119,10 +122,9 @@ export abstract class ProductView extends BootstrapBlockElement {
               e.preventDefault();
               window.openExternalLink.open(this.websiteURL!);
             }}
-            >${this.websiteURL}</a
           >
-        </p>
-        <p class="fs-slightly-larger text-center" style="white-space: no-wrap">
+            ${this.publisher || this.websiteURL}
+          </a>
           ${this.description}
         </p>
 
