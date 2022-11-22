@@ -21,6 +21,7 @@ import terminal from "preload/shared/terminal";
 import * as taskQueue from "preload/shared/taskQueueIPC";
 import {
   ConfirmActionTask,
+  InstallTask,
   PromptForPasswordTask,
   UpgradeTask,
 } from "tasks/Task";
@@ -206,12 +207,26 @@ const brewCask: IPCBrewCask = {
     await brewCask.indexSpecific(outdatedCaskNames);
 
     if (await settings.get("autoUpdateSelf")) {
-      const outdatedOvertCaskName = outdatedCaskNames.find(
-        (caskName) => caskName.split("/").at(-1) === "overt"
-      );
+      const stdout = await runBackgroundBrewProcess(["list", "--cask"]);
+      const installedCaskNames = stdout.split(/\s+/).filter((s) => s);
 
-      if (outdatedOvertCaskName) {
-        // Auto-update the Overt app
+      const isOvert = (caskName: string) =>
+        caskName.split("/").at(-1) === "overt";
+      const overtCaskName = installedCaskNames.find(isOvert);
+      const outdatedOvertCaskName = outdatedCaskNames.find(isOvert);
+
+      if (!overtCaskName) {
+        taskQueue.push<InstallTask>(
+          {
+            type: "install",
+            label: `Auto-subscribe to Overt cask`,
+
+            packageManager: "brew-cask",
+            packageIdentifier: "getovert/tap/overt",
+          },
+          []
+        );
+      } else if (outdatedOvertCaskName) {
         taskQueue.push<UpgradeTask>(
           {
             type: "upgrade",
