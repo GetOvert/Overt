@@ -97,12 +97,21 @@ export default class Card extends BootstrapBlockElement {
         `
       : "";
   }
+  
+  static iconValidityCache: Record<string, boolean> = {};
 
   private async isIconValid(): Promise<boolean> {
     if (!this.iconURL) return false;
+    
+    if (this.iconURL in Card.iconValidityCache) {
+      return Card.iconValidityCache[this.iconURL];
+    }
 
     const response = await fetch(this.iconURL);
-    return response.ok;
+    const valid = response.ok;
+    
+    Card.iconValidityCache[this.iconURL] = valid;
+    return valid;
   }
 
   private clicked(event: Event) {
