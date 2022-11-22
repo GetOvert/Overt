@@ -16,19 +16,19 @@ export class Row extends BootstrapBlockElement {
         grid-template-columns: repeat(1, 1fr);
       }
 
-      @media (min-width: 700px) {
+      @media (min-width: 920px) {
         .openstore-row-container {
           grid-template-columns: repeat(2, 1fr);
         }
       }
 
-      @media (min-width: 1024px) {
+      @media (min-width: 1300px) {
         .openstore-row-container {
           grid-template-columns: repeat(3, 1fr);
         }
       }
 
-      @media (min-width: 1400px) {
+      @media (min-width: 1680px) {
         .openstore-row-container {
           grid-template-columns: repeat(4, 1fr);
         }

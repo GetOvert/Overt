@@ -56,14 +56,14 @@ export default class Card extends BootstrapBlockElement {
     return html`
       <a
         href=${this.href}
-        class="openstore-card-link openstore-jsnav-link col-lg-8 user-select-none"
+        class="openstore-card-link openstore-jsnav-link user-select-none"
         @click=${this.clicked}
       >
         <div class="card bg-light shadow-sm my-3">
-          <div class="row g-0 ms-lg-2 align-items-center">
+          <div class="row flex-nowrap g-0 ms-lg-2 align-items-center">
             ${until(this.renderIcon(), "")}
 
-            <div class="card-body col-lg-8">
+            <div class="card-body">
               <h2 class="card-title" style="font-weight: 500">${this.title}</h2>
               ${this.subtitle || this.status
                 ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
@@ -87,7 +87,7 @@ export default class Card extends BootstrapBlockElement {
   private async renderIcon() {
     return (await this.isIconValid())
       ? html`
-          <div class="col-lg-4 p-3">
+          <div class="p-2" style="width: 5rem">
             <img
               src=${this.iconURL}
               class="img-fluid"
