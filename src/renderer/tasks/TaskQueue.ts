@@ -127,3 +127,8 @@ const taskQueue = new TaskQueue();
 export default taskQueue;
 
 window.taskQueueIPC.onTaskQueueCreated(taskQueue.push.bind(taskQueue));
+taskQueue.addObserver(() => {
+  if (!taskQueue.liveTasks.length) {
+    window.taskQueueIPC.onTaskQueueDrained();
+  }
+});

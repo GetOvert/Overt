@@ -13,4 +13,6 @@ export interface IPCTaskQueue {
       notify: TaskNotifyPoints
     ) => void
   ): Promise<void>;
+
+  onTaskQueueDrained(): void;
 }

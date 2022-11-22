@@ -578,32 +578,34 @@ const brewCask: IPCBrewCask = {
           terminal.offReceive(callbackID);
 
           if (caskName.match(/[^/]+$/)?.[0] === "overt") {
-            taskQueue.push<ConfirmActionTask>(
-              {
-                type: "confirm-action",
-                label: "Prompt to relaunch Overt",
+            taskQueue.waitUntilDrained().then(() => {
+              taskQueue.push<ConfirmActionTask>(
+                {
+                  type: "confirm-action",
+                  label: "Prompt to relaunch Overt",
 
-                promptTitle: `Apply Overt update`,
-                prompt: `Overt has been updated to version ${
-                  brewCask.info(caskName)?.version ?? "(unknown)"
-                }!`,
-                promptCannedMessage: `
-                  <p>
-                    It will be applied at next launch. Relaunch now?
-                  </p>
-                `,
-                url: "https://github.com/GetOvert/Overt/releases",
-                openLinkButtonTitle: "Release Notes",
-                confirmButtonTitle: "Relaunch",
-                cancelButtonTitle: "Later",
+                  promptTitle: `Apply Overt update`,
+                  prompt: `Overt has been updated to version ${
+                    brewCask.info(caskName)?.version ?? "(unknown)"
+                  }!`,
+                  promptCannedMessage: `
+                      <p>
+                        It will be applied at next launch. Relaunch now?
+                      </p>
+                    `,
+                  url: "https://github.com/GetOvert/Overt/releases",
+                  openLinkButtonTitle: "Release Notes",
+                  confirmButtonTitle: "Relaunch",
+                  cancelButtonTitle: "Later",
 
-                action: () => {
-                  window.lifecycle.relaunch();
+                  action: () => {
+                    window.lifecycle.relaunch();
+                  },
+                  cancel: () => {},
                 },
-                cancel: () => {},
-              },
-              []
-            );
+                []
+              );
+            });
           }
 
           return resolve(true);
