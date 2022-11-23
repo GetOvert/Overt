@@ -30,7 +30,7 @@ export default class Card extends BootstrapBlockElement {
   static styles = [
     BootstrapBlockElement.styles,
     css`
-      .user-select-none {
+      .user-drag-none {
         -webkit-user-drag: none;
       }
 
@@ -50,7 +50,15 @@ export default class Card extends BootstrapBlockElement {
       }
 
       .card-title {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
+      }
+      .card-subtitle {
+        font-size: 0.85rem;
+      }
+      
+      .package-icon {
+        width: 5rem;
+        padding: 0.25rem;
       }
     `,
   ];
@@ -59,7 +67,7 @@ export default class Card extends BootstrapBlockElement {
     return html`
       <a
         href=${this.href}
-        class="openstore-card-link openstore-jsnav-link user-select-none"
+        class="openstore-card-link openstore-jsnav-link user-drag-none"
         @click=${this.clicked}
       >
         <div class="card bg-light shadow-sm my-3">
@@ -95,7 +103,7 @@ export default class Card extends BootstrapBlockElement {
   private async renderIcon() {
     return (await this.isIconValid())
       ? html`
-          <div class="p-2" style="width: 5rem">
+          <div class="package-icon">
             <img
               src=${this.iconURL}
               class="img-fluid"
@@ -105,19 +113,19 @@ export default class Card extends BootstrapBlockElement {
         `
       : "";
   }
-  
+
   static iconValidityCache: Record<string, boolean> = {};
 
   private async isIconValid(): Promise<boolean> {
     if (!this.iconURL) return false;
-    
+
     if (this.iconURL in Card.iconValidityCache) {
       return Card.iconValidityCache[this.iconURL];
     }
 
     const response = await fetch(this.iconURL);
     const valid = response.ok;
-    
+
     Card.iconValidityCache[this.iconURL] = valid;
     return valid;
   }
