@@ -11,8 +11,10 @@ taskQueue.addObserver(async (queuedTask: QueuedTask) => {
   ) {
     switch (queuedTask.state) {
       case "running":
-        new Notification(queuedTask.task.label, { body: "⏱ Started" }).onclick =
-          onNotificationClicked;
+        new Notification(queuedTask.task.label, {
+          body: "⏱ Started",
+          silent: true,
+        }).onclick = onNotificationClicked;
         break;
     }
   }
@@ -22,12 +24,15 @@ taskQueue.addObserver(async (queuedTask: QueuedTask) => {
   ) {
     switch (queuedTask.state) {
       case "failed":
-        new Notification(queuedTask.task.label, { body: "❌ Failed" }).onclick =
-          onNotificationClicked;
+        new Notification(queuedTask.task.label, {
+          body: "❌ Failed",
+          silent: true,
+        }).onclick = onNotificationClicked;
         break;
       case "succeeded":
         new Notification(queuedTask.task.label, {
           body: "✅ Completed",
+          silent: true,
         }).onclick = onNotificationClicked;
         break;
     }
