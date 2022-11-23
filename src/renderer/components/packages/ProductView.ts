@@ -9,9 +9,9 @@ import {
   Part,
   PropertyValues,
 } from "lit";
-import { directive, DirectiveParameters } from "lit/directive.js";
+import { directive } from "lit/directive.js";
 import { repeat } from "lit/directives/repeat.js";
-import { until, UntilDirective } from "lit/directives/until.js";
+import { UntilDirective } from "lit/directives/until.js";
 import {
   PackageDetailField,
   PackageDetailFieldValue,
@@ -19,6 +19,7 @@ import {
 
 export type Button = {
   title: string | HTMLTemplateResult;
+  icon?: string | HTMLTemplateResult;
   color: string;
 
   shown: boolean;
@@ -141,7 +142,15 @@ export abstract class ProductView extends BootstrapBlockElement {
 
                 return shownButtons.map(
                   (
-                    { title, color, enabled, loading, onClick, moreActions },
+                    {
+                      title,
+                      icon,
+                      color,
+                      enabled,
+                      loading,
+                      onClick,
+                      moreActions,
+                    },
                     index
                   ) => {
                     const shownMoreActions: Button[] = (
@@ -159,7 +168,7 @@ export abstract class ProductView extends BootstrapBlockElement {
                         ?disabled=${!enabled}
                         @click=${onClick}
                       >
-                        ${title}
+                        ${title} <span class="ms-1">${icon}</span>
                         ${loading
                           ? html`<span
                               class="spinner-border spinner-border-sm text-white ms-2"
