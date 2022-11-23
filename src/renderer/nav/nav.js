@@ -13,7 +13,8 @@ new MutationObserver(() => {
     .forEach((backLink) => {
       if (!backLink.openStoreHandlerSetForBackLink) {
         backLink.openStoreHandlerSetForBackLink = true;
-        backLink.addEventListener("click", async () => {
+        backLink.addEventListener("click", (event) => {
+          event.preventDefault();
           window.history.back();
         });
       }
