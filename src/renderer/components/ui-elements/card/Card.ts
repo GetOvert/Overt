@@ -15,8 +15,6 @@ export default class Card extends BootstrapBlockElement {
   @property()
   statusColor = "muted";
   @property()
-  lastUpdated?: number;
-  @property()
   details = "";
   @property()
   href = "#";
@@ -76,11 +74,6 @@ export default class Card extends BootstrapBlockElement {
 
             <div class="card-body">
               <h2 class="card-title" style="font-weight: 500">${this.title}</h2>
-              ${this.lastUpdated
-                ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
-                    ${this.lastUpdated ? formatRelative(this.lastUpdated) : ""}
-                  </h3>`
-                : ""}
               ${this.subtitle || this.status
                 ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
                     ${this.subtitle}

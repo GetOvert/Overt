@@ -19,6 +19,7 @@ import {
   packageManagerForName,
 } from "package-manager/PackageManagerRegistry";
 import Sidebar from "components/sidebar/Sidebar";
+import { formatRelative } from "utility/relative-time";
 
 const fetchedChunkSize = 25;
 let lastOffset = 0;
@@ -307,8 +308,6 @@ export default class PackagesView<
                   this.packageInfoAdapter.packageDescription(packageInfo);
                 const iconURL =
                   this.packageInfoAdapter.packageIconURL(packageInfo);
-                const publisher =
-                  this.packageInfoAdapter.packagePublisher(packageInfo);
                 const lastUpdated =
                   this.packageInfoAdapter.packageLastUpdated(packageInfo);
 
@@ -332,8 +331,9 @@ export default class PackagesView<
                           ? "info"
                           : "success"
                         : "muted"}
-                      .publisher=${publisher}
-                      .lastUpdated=${lastUpdated}
+                      .subtitle=${lastUpdated
+                        ? formatRelative(lastUpdated)
+                        : ""}
                       .details=${description}
                       .href=${((window as any).openStore as any).encodeFragment(
                         {
