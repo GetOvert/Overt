@@ -33,6 +33,10 @@ export default class Sidebar extends BootstrapBlockElement {
         border-bottom: var(--bs-border-width) var(--bs-border-style)
           var(--bs-border-color);
       }
+
+      a {
+        -webkit-user-drag: none;
+      }
     `,
   ];
 
