@@ -99,7 +99,7 @@ export default class Card extends BootstrapBlockElement {
           <div class="package-icon">
             <img
               src=${this.iconURL}
-              class="img-fluid"
+              class="img-fluid user-drag-none"
               aria-label="Icon for ${this.title}"
             />
           </div>
