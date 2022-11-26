@@ -87,6 +87,10 @@ export class WingetPackageInfoAdapter
     return packageInfo.ShortDescription;
   }
 
+  packageSourceRepsitoryName(packageInfo: WingetPackageInfo): string {
+    return "Windows Package Manager";
+  }
+
   packageWebsiteURL(packageInfo: WingetPackageInfo): string | undefined {
     return packageInfo.PackageURL;
   }

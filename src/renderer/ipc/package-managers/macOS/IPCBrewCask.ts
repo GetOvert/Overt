@@ -83,6 +83,10 @@ export class BrewCaskPackageInfoAdapter
     return packageInfo.desc;
   }
 
+  packageSourceRepsitoryName(packageInfo: BrewCaskPackageInfo): string {
+    return packageInfo.tap;
+  }
+
   packageWebsiteURL(packageInfo: BrewCaskPackageInfo): string | undefined {
     return packageInfo.homepage;
   }

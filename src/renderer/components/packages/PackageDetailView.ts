@@ -48,6 +48,10 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
     return this.packageInfoAdapter.packageDescription(this.packageInfo);
   }
 
+  protected get sourceRepositoryName(): string {
+    return this.packageInfoAdapter.packageSourceRepsitoryName(this.packageInfo);
+  }
+
   protected get publisher(): string | undefined {
     return this.packageInfoAdapter.packagePublisher(this.packageInfo);
   }

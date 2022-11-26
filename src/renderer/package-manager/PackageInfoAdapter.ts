@@ -4,6 +4,7 @@ export type PackageInfoAdapter<PackageInfo> = {
   packageName(packageInfo: PackageInfo): string;
   packageIdentifier(packageInfo: PackageInfo): string;
   packageDescription(packageInfo: PackageInfo): string;
+  packageSourceRepsitoryName(packageInfo: PackageInfo): string;
   packageWebsiteURL(packageInfo: PackageInfo): string | undefined;
   packageIconURL(packageInfo: PackageInfo): string | undefined;
   packagePublisher(packageInfo: PackageInfo): string | undefined;

@@ -35,6 +35,7 @@ export type Button = {
 export abstract class ProductView extends BootstrapBlockElement {
   protected abstract readonly subtitle: string;
   protected abstract readonly description: string;
+  protected abstract readonly sourceRepositoryName: string;
   protected abstract readonly publisher: string | undefined;
   protected abstract readonly websiteURL: string | undefined;
   protected abstract shouldCauseRerender(successfulTask: QueuedTask): boolean;
@@ -116,13 +117,14 @@ export abstract class ProductView extends BootstrapBlockElement {
         >
           <a
             href=${this.websiteURL}
+            class="p-1"
             data-bs-toggle="tooltip"
             data-bs-placement="bottom"
-            title="Go to official website"
-            @click=${(e: Event) => {
-              e.preventDefault();
-              window.openExternalLink.open(this.websiteURL!);
-            }}
+            data-bs-custom-class="tooltip-wide"
+            data-bs-container="body"
+            title="Go to official website${this.publisher &&
+            ` — ${this.websiteURL}`}"
+            @click=${this.openExternalLink}
           >
             ${this.publisher || this.websiteURL}
           </a>
@@ -271,6 +273,34 @@ export abstract class ProductView extends BootstrapBlockElement {
                 </div>
               `
           )}
+          ${this.websiteURL?.includes("getovert.app")
+            ? ""
+            : html`
+                <hr class="mt-5 mb-4" />
+                <h3 class="h5">FYI</h3>
+                <div class="d-flex gap-2 h6 ms-2 mt-2 mb-4">
+                  <p>
+                    Overt is not affiliated with or endorsed by the publisher of
+                    this software. This package is provided by the
+                    ${this.sourceRepositoryName} source repository.
+                  </p>
+                  <p>
+                    If you own this software and do not want its logo shown
+                    here, please open an issue at
+                    <span class="text-nowrap"
+                      >${this.renderExternalLink(
+                        "https://github.com/GetOvert/package-meta/issues",
+                        "GetOvert/package-meta on GitHub"
+                      )}</span
+                    >.
+                  </p>
+                  <p>
+                    If you own this software and do not want it listed here at
+                    all, please contact the maintainer(s) of the
+                    ${this.sourceRepositoryName} source repository.
+                  </p>
+                </div>
+              `}
         </div>
       </div>
     `;
@@ -348,6 +378,42 @@ export abstract class ProductView extends BootstrapBlockElement {
 
   private isLitTemplateResult(value: object): value is HTMLTemplateResult {
     return (value as any)["_$litType$"] !== undefined;
+  }
+
+  private renderExternalLink(url: string, label: string) {
+    return html`
+      <a href=${url} @click=${this.openExternalLink}>
+        ${label}
+
+        <!-- https://icons.getbootstrap.com/icons/box-arrow-up-right/ -->
+        <svg
+          aria-label="External link"
+          style="transform: scale(0.8) translateY(-3px)"
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          class="bi bi-box-arrow-up-right"
+          viewBox="0 0 16 16"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"
+          />
+          <path
+            fill-rule="evenodd"
+            d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"
+          />
+        </svg>
+      </a>
+    `;
+  }
+
+  private openExternalLink(event: Event) {
+    event.preventDefault();
+    window.openExternalLink.open(
+      (event.target as HTMLElement).closest("a")!.href
+    );
   }
 }
 

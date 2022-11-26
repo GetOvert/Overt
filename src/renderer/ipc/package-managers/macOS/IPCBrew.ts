@@ -60,6 +60,10 @@ export class BrewPackageInfoAdapter
     return packageInfo.desc;
   }
 
+  packageSourceRepsitoryName(packageInfo: BrewPackageInfo): string {
+    return packageInfo.tap;
+  }
+
   packageWebsiteURL(packageInfo: BrewPackageInfo): string | undefined {
     return packageInfo.homepage;
   }
