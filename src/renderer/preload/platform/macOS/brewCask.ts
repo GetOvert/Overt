@@ -856,7 +856,10 @@ export async function runBackgroundBrewProcess(
 }
 
 export async function getBrewExecutablePath(): Promise<string> {
-  return path.join(await settings.get("homebrewPath"), "bin", "brew");
+  const homebrewPath = await settings.get("homebrewPath");
+  if (!homebrewPath) throw new Error("Homebrew is not configured!");
+
+  return path.join(homebrewPath, "bin", "brew");
 }
 
 export async function getQuarantineFlags(): Promise<string[]> {
