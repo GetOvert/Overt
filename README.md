@@ -51,8 +51,6 @@ Use `npm start` to build and run the app in dev/debug mode. Hot reload doesn't w
 
 #### Build a release version
 
-Comment out the `osxNotarize` section in [forge.config.js](forge.config.js), then:
-
 ```sh
 npm run make-for-arm64
 # or
