@@ -56,7 +56,7 @@ import {
 } from "tasks/Task";
 import { allPackageMangers } from "package-manager/PackageManagerRegistry";
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
   (window as any).openStore.updateWindowLocationFragment({
     source:
       window.platform.getNodePlatformString() === "darwin"
@@ -73,14 +73,28 @@ window.addEventListener("load", () => {
       label: `Rebuild source list (${packageManager})`,
     } as ReindexSourceRepositoriesTask);
   }
-  for (const packageManager of allPackageMangers) {
-    taskQueue.push({
-      packageManager,
-      type: "reindex-all",
-      label: `Rebuild catalog if too old (${packageManager})`,
-      condition: "if-too-old",
-    } as ReindexAllTask);
+
+  if (await window.settings.get("indexOnNextLaunch")) {
+    await window.settings.set("indexOnNextLaunch", false);
+
+    for (const packageManager of allPackageMangers) {
+      taskQueue.push({
+        packageManager,
+        type: "reindex-all",
+        label: `Rebuild catalog (${packageManager})`,
+      } as ReindexAllTask);
+    }
+  } else {
+    for (const packageManager of allPackageMangers) {
+      taskQueue.push({
+        packageManager,
+        type: "reindex-all",
+        label: `Rebuild catalog if too old (${packageManager})`,
+        condition: "if-too-old",
+      } as ReindexAllTask);
+    }
   }
+
   for (const packageManager of allPackageMangers) {
     taskQueue.push({
       packageManager,

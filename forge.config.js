@@ -87,6 +87,12 @@ module.exports = {
                 js: "preload/preload.ts",
               },
             },
+            {
+              html: "setup/setup.html",
+              js: "setup/setup.ts",
+              name: "setup_window",
+              nodeIntegration: true,
+            },
           ],
         },
       },

@@ -8,7 +8,12 @@ export type Config = {
   fullIndexIntervalDays: number;
 
   autoUpdateSelf: boolean;
-  homebrewPath: string;
+  showSetupOnNextLaunch: boolean;
+  indexOnNextLaunch: boolean;
+} & PackageManagersConfig;
+
+export type PackageManagersConfig = {
+  homebrewPath?: string;
 };
 
 export const config = {

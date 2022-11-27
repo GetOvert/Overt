@@ -186,10 +186,11 @@ export class SettingsPane extends BootstrapBlockElement {
           "Automatically update Overt",
           "Auto-update the Overt app? Overt may break if you disable this, since underlying package managers will continue to be updated. (Default: Yes)"
         )}
-        ${this.makeTextField(
-          "homebrewPath",
-          "Homebrew path",
-          "Path to root directory of the Homebrew installation to use. The standard location for arm64 (“Apple silicon”) architecture is /opt/homebrew, and the standard location for x86_64 (“Intel”) architecture is /usr/local. There are two reasons to change this setting: 1) You want to switch Homebrew architectures on an arm64 Mac; 2) You have installed Homebrew in a custom location."
+        ${this.makeButton(
+          "Set Up Package Managers",
+          "Relaunch Overt into initial setup mode to configure package managers.",
+          "primary",
+          this.enterSetup.bind(this)
         )}
       </div>
     `;
@@ -370,5 +371,10 @@ export class SettingsPane extends BootstrapBlockElement {
         ["before", "after"]
       );
     }
+  }
+
+  private enterSetup() {
+    window.settings.set("showSetupOnNextLaunch", true);
+    window.lifecycle.relaunch();
   }
 }

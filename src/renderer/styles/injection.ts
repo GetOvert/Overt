@@ -2,12 +2,14 @@ import Color from "color";
 import { config } from "shared/config";
 
 export const injectColors = async () => {
-  const [useSystemAccentColor, tintDarkBackgrounds] = await Promise.all([
-    window.settings.get("useSystemAccentColor"),
-    window.settings.get("tintDarkBackgrounds"),
-  ]);
+  const [useSystemAccentColor, tintDarkBackgrounds] = window.settings
+    ? await Promise.all([
+        window.settings.get("useSystemAccentColor"),
+        window.settings.get("tintDarkBackgrounds"),
+      ])
+    : [false, false];
 
-  const systemAccentColor = new Color(window.theme.getAccentColor());
+  const systemAccentColor = new Color(window.theme.accentColor);
   const fallbackAccentColor = new Color(`#${config.fallbackAccentColor}`);
 
   const accentColor = useSystemAccentColor
@@ -43,7 +45,7 @@ export const injectColors = async () => {
 };
 
 injectColors();
-window.settings.onChange(
+window.settings?.onChange(
   ["useSystemAccentColor", "tintDarkBackgrounds"],
   injectColors
 );

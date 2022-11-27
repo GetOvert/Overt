@@ -5,5 +5,5 @@ declare global {
 }
 
 export interface IPCTheme {
-  getAccentColor(): string;
+  readonly accentColor: string;
 }
