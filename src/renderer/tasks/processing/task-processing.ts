@@ -134,12 +134,12 @@ const packageActionsProcessor = new TaskProcessor(
         break;
     }
 
-    taskQueue.push({
+    taskQueue.push<ReindexTask>({
       type: "reindex",
       label: `Index ${packageIdentifiersOfTask(task)}`,
       packageManager: packageManagerName,
-      packageIdentifiers: packageIdentifiersOfTask(task),
-    } as ReindexTask);
+      packageIdentifiers: packageIdentifiersOfTask(task) ?? [],
+    });
 
     return success ? "succeeded" : "failed";
   }

@@ -4,6 +4,8 @@ import { customElement, state } from "lit/decorators.js";
 import taskQueue from "tasks/TaskQueue";
 import {
   AddSourceRepositoryTask,
+  PackageManagerTaskBase,
+  QueuedTask,
   ReindexAllTask,
   RemoveSourceRepositoryTask,
 } from "tasks/Task";
@@ -332,29 +334,55 @@ export class SettingsPane extends BootstrapBlockElement {
       "Catalog Sources"
     );
 
-    for (const {
-      action,
-      sourceRepository: { packageManager, name, url },
-    } of sourceRepositoryChanges) {
-      switch (action) {
-        case "add":
-          taskQueue.push({
-            type: "add-source-repository",
-            label: `Add source ${name} to ${packageManager}`,
-            packageManager,
-            name,
-            url,
-          } as AddSourceRepositoryTask);
-          break;
-        case "remove":
-          taskQueue.push({
-            type: "remove-source-repository",
-            label: `Remove source ${name} from ${packageManager}`,
-            packageManager,
-            name,
-          } as RemoveSourceRepositoryTask);
-          break;
-      }
+    const results = await Promise.all(
+      sourceRepositoryChanges.map(
+        ({ action, sourceRepository: { packageManager, name, url } }) => {
+          switch (action) {
+            case "add":
+              return taskQueue.push({
+                type: "add-source-repository",
+                label: `Add source ${name} to ${packageManager}`,
+                packageManager,
+                name,
+                url,
+              } as AddSourceRepositoryTask);
+            case "remove":
+              return taskQueue.push({
+                type: "remove-source-repository",
+                label: `Remove source ${name} from ${packageManager}`,
+                packageManager,
+                name,
+              } as RemoveSourceRepositoryTask);
+          }
+        }
+      )
+    );
+
+    const packageManagerNames = new Set(
+      results
+        .filter(({ state }) => state === "succeeded")
+        .flatMap(({ task }: QueuedTask) => {
+          const taskPackageManagerName = (task as PackageManagerTaskBase)
+            .packageManager;
+
+          // In the case of Homebrew, we need brew-cask to be indexed as well.
+          // TODO: Abstract this case
+          return taskPackageManagerName === "brew"
+            ? ["brew", "brew-cask"]
+            : [taskPackageManagerName];
+        })
+    );
+    for (const packageManagerName of packageManagerNames) {
+      taskQueue.push<ReindexAllTask>(
+        {
+          type: "reindex-all",
+          label: `Rebuild catalog (${packageManagerName})`,
+          packageManager: packageManagerName,
+          condition: "always",
+          wipeIndexFirst: true,
+        },
+        ["before", "after"]
+      );
     }
   }
 
