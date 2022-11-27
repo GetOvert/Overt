@@ -113,6 +113,7 @@ type CaskArtifactMeta = {
   cask: {
     [fullToken: string]: {
       copyright: string;
+      publisher: string;
     };
   };
 };
@@ -407,7 +408,7 @@ const brewCask: IPCBrewCask = {
           ?.toString()
           .replaceAll(/[^\d]/g, ""),
 
-        publisher: artifactMeta?.cask?.[cask.full_token]?.copyright,
+        publisher: artifactMeta?.cask?.[cask.full_token]?.publisher,
         updated: scaleTimestamp(updateTimes?.cask?.[cask.full_token]),
 
         json: JSON.stringify(cask),
