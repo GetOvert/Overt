@@ -70,6 +70,7 @@ export function cacheDB_updateLastFullIndexJsTimestamp(): void {
 let _cacheDB: Database.Database;
 export function cacheDB() {
   _cacheDB = new Database(cacheDBPath);
+  _cacheDB.pragma("journal_mode = WAL");
 
   for (const schema of allSchema) {
     _cacheDB.prepare(schema).run();
