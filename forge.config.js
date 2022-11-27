@@ -90,10 +90,6 @@ module.exports = {
           ],
         },
       },
-      "@electron-forge/plugin-electronegativity",
-      {
-        isSarif: true,
-      },
     ],
   ],
 };
