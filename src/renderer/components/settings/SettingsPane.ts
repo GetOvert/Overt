@@ -120,12 +120,6 @@ export class SettingsPane extends BootstrapBlockElement {
           "Use macOS Gatekeeper",
           "Ask Gatekeeper to check downloads? Blocks known malware and some legitimate software. (Default: Yes)"
         )}
-        ${this.makeButton(
-          "Sources",
-          "Add or remove software sources. Only add sources you trust.",
-          "primary",
-          this.showSourceRepositories.bind(this)
-        )}
 
         <h3
           data-bs-toggle="tooltip"
@@ -166,9 +160,15 @@ export class SettingsPane extends BootstrapBlockElement {
           }
         )}
         ${this.makeButton(
+          "Edit Sources",
+          "Add or remove software sources. Only add sources you trust.",
+          "primary",
+          this.showSourceRepositories.bind(this)
+        )}
+        ${this.makeButton(
           "Rebuild Now",
           "Replace the catalog with a fresh copy. This will take a few seconds, or a minute or two if you're offline.",
-          "secondary",
+          "info",
           this.rebuildIndex.bind(this)
         )}
 
@@ -328,7 +328,7 @@ export class SettingsPane extends BootstrapBlockElement {
     const sourceRepositoryChanges = await SourceRepositoriesModal.runModal(
       await window.sourceRepositories.all(),
       "Each source is associated with a package manager, and has a unique name and repository URL.\nYou can use any supported package manager that is currently installed.",
-      "Sources"
+      "Catalog Sources"
     );
 
     for (const {
