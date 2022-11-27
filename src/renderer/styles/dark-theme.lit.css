@@ -48,6 +48,10 @@
     --bs-modal-box-shadow: var(--box-shadow-sm) !important;
   }
 
+  .text-bg-primary {
+    color: var(--bs-dark) !important;
+  }
+
   .btn-secondary {
     --bs-btn-color: var(--bs-black);
     --bs-btn-bg: var(--bs-secondary);
@@ -106,6 +110,10 @@
     --bs-btn-active-border-color: var(--bs-success);
     --bs-btn-disabled-color: var(--bs-success-disabled);
     --bs-btn-disabled-border-color: var(--bs-success-disabled);
+  }
+
+  .btn-warning {
+    --bs-btn-color: var(--bs-black);
   }
 
   .btn-info {
