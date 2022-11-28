@@ -45,7 +45,7 @@ To develop Overt, use [Visual Studio Code](https://code.visualstudio.com/) (avai
 - [Inline HTML](https://marketplace.visualstudio.com/items?itemName=pushqrdx.inline-html) — highlights and allows Prettier to format Lit's `html` and `css` template literals
 - [vscode-sql-template-literal](https://marketplace.visualstudio.com/items?itemName=forbeslindesay.vscode-sql-template-literal) — highlights `sql` template literals
 
-Clone this repository and run `npm i` to install packages.
+Clone this repository and run `npm run install-for-arm64` or `npm run install-for-x86_64` to install packages.
 
 Use `npm start` to build and run the app in dev/debug mode. Hot reload doesn't work correctly at the moment, so you should quit the app and re-run `npm start` when you make changes.
 
