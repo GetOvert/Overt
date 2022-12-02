@@ -11,6 +11,10 @@
     {
       "name": "renderer",
       "path": "src/renderer"
+    },
+    {
+      "name": "shared",
+      "path": "src/shared"
     }
   ],
   "settings": {}
