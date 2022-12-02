@@ -30,7 +30,7 @@ if (process.platform === "win32") {
         "name" TEXT NOT NULL COLLATE NOCASE,
         "id" TEXT COLLATE NOCASE PRIMARY KEY,
         "version" TEXT NOT NULL,
-        "desc" TEXT COLLATE NOCASE PRIMARY KEY,
+        "desc" TEXT NOT NULL,
         "json" TEXT NOT NULL,
         "installed_version" TEXT,
       )`
@@ -127,16 +127,26 @@ const winget: IPCWinget = {
     insertOrReplaceRecords(
       cacheDB(),
       "winget_packages",
-      ["name", "id", "version", "json", "installed_version"],
-      packages.map((package_) => ({
-        name: package_.PackageName,
-        id: package_.PackageIdentifier,
-        version: package_.PackageVersion,
+      ["name", "id", "version", "desc", "json", "installed_version"],
+      packages
+        // Ensure NOT NULL constraints will be satisfied
+        .filter(
+          (package_) =>
+            package_.PackageName &&
+            package_.PackageIdentifier &&
+            package_.PackageVersion &&
+            package_.ShortDescription
+        )
+        .map((package_) => ({
+          name: package_.PackageName,
+          id: package_.PackageIdentifier,
+          version: package_.PackageVersion,
+          desc: package_.ShortDescription,
 
-        json: JSON.stringify(package_),
+          json: JSON.stringify(package_),
 
-        installed_version: package_.installedVersion,
-      }))
+          installed_version: package_.installedVersion,
+        }))
     );
 
     if (deleteIfUnavailable) {

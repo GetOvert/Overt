@@ -267,28 +267,35 @@ const brew: IPCBrew = {
         "installed_365d",
         "updated",
       ],
-      formulae.map((formula) => ({
-        ...formula,
-        version: formula.versions.stable,
-        installed: formula.installed[0]?.version,
-        outdated: +formula.outdated,
+      formulae
+        // Ensure NOT NULL constraints will be satisfied
+        .filter((formula) => formula.name && formula.full_name && formula.tap)
+        .map((formula) => ({
+          ...formula,
+          version: formula.versions.stable,
+          installed: formula.installed[0]?.version,
+          outdated: +formula.outdated,
 
-        installed_30d: installed_30d?.formulae?.[formula.full_name]?.[0]?.count
-          ?.toString()
-          .replaceAll(/[^\d]/g, ""),
-        installed_90d: installed_90d?.formulae?.[formula.full_name]?.[0]?.count
-          ?.toString()
-          .replaceAll(/[^\d]/g, ""),
-        installed_365d: installed_365d?.formulae?.[
-          formula.full_name
-        ]?.[0]?.count
-          ?.toString()
-          .replaceAll(/[^\d]/g, ""),
+          installed_30d: installed_30d?.formulae?.[
+            formula.full_name
+          ]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, ""),
+          installed_90d: installed_90d?.formulae?.[
+            formula.full_name
+          ]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, ""),
+          installed_365d: installed_365d?.formulae?.[
+            formula.full_name
+          ]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, ""),
 
-        updated: scaleTimestamp(updateTimes?.formula?.[formula.full_name]),
+          updated: scaleTimestamp(updateTimes?.formula?.[formula.full_name]),
 
-        json: JSON.stringify(formula),
-      }))
+          json: JSON.stringify(formula),
+        }))
     );
 
     if (deleteIfUnavailable) {

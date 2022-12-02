@@ -391,28 +391,33 @@ const brewCask: IPCBrewCask = {
         "publisher",
         "updated",
       ],
-      casks.map((cask) => ({
-        ...cask,
-        name: JSON.stringify(cask.name),
-        installed: cask.installed,
-        outdated: +cask.outdated,
-        auto_updates: cask.auto_updates ? 1 : 0,
+      casks
+        // Ensure NOT NULL constraints will be satisfied
+        .filter((cask) => cask.token && cask.full_token && cask.tap)
+        .map((cask) => ({
+          ...cask,
+          name: JSON.stringify(cask.name),
+          installed: cask.installed,
+          outdated: +cask.outdated,
+          auto_updates: cask.auto_updates ? 1 : 0,
 
-        installed_30d: installed_30d?.formulae?.[cask.full_token]?.[0]?.count
-          ?.toString()
-          .replaceAll(/[^\d]/g, ""),
-        installed_90d: installed_90d?.formulae?.[cask.full_token]?.[0]?.count
-          ?.toString()
-          .replaceAll(/[^\d]/g, ""),
-        installed_365d: installed_365d?.formulae?.[cask.full_token]?.[0]?.count
-          ?.toString()
-          .replaceAll(/[^\d]/g, ""),
+          installed_30d: installed_30d?.formulae?.[cask.full_token]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, ""),
+          installed_90d: installed_90d?.formulae?.[cask.full_token]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, ""),
+          installed_365d: installed_365d?.formulae?.[
+            cask.full_token
+          ]?.[0]?.count
+            ?.toString()
+            .replaceAll(/[^\d]/g, ""),
 
-        publisher: artifactMeta?.cask?.[cask.full_token]?.publisher,
-        updated: scaleTimestamp(updateTimes?.cask?.[cask.full_token]),
+          publisher: artifactMeta?.cask?.[cask.full_token]?.publisher,
+          updated: scaleTimestamp(updateTimes?.cask?.[cask.full_token]),
 
-        json: JSON.stringify(cask),
-      }))
+          json: JSON.stringify(cask),
+        }))
     );
 
     if (deleteIfUnavailable) {
