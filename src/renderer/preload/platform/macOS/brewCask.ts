@@ -31,6 +31,7 @@ import brew from "./brew";
 import { getFullIndexIntervalInSeconds, runBackgroundProcess } from "../shared";
 import { Launchable } from "ipc/package-managers/IPCPackageManager";
 import * as plist from "plist";
+import lifecycle from "preload/shared/lifecycle";
 
 if (process.platform === "darwin") {
   cacheDB_addSchema(
@@ -234,7 +235,7 @@ const brewCask: IPCBrewCask = {
             label: `Auto-update Overt`,
 
             packageManager: "brew-cask",
-            packageIdentifier: outdatedOvertCaskName,
+            packageIdentifier: "getovert/tap/overt",
           },
           []
         );
@@ -645,7 +646,7 @@ const brewCask: IPCBrewCask = {
                   cancelButtonTitle: "Later",
 
                   action: () => {
-                    window.lifecycle.relaunch();
+                    lifecycle.relaunch();
                   },
                   cancel: () => {},
                 },
