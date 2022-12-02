@@ -282,7 +282,7 @@ export abstract class ProductView extends BootstrapBlockElement {
                   <p>
                     Overt is not affiliated with or endorsed by the publisher of
                     this software. This package is provided by the
-                    ${this.sourceRepositoryName} source repository.
+                    ${this.sourceRepositoryName} catalog source.
                   </p>
                   <p>
                     If you own this software and do not want its logo shown
@@ -297,7 +297,7 @@ export abstract class ProductView extends BootstrapBlockElement {
                   <p>
                     If you own this software and do not want it listed here at
                     all, please contact the maintainer(s) of the
-                    ${this.sourceRepositoryName} source repository.
+                    ${this.sourceRepositoryName} catalog source.
                   </p>
                 </div>
               `}
