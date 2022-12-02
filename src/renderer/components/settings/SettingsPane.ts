@@ -162,16 +162,16 @@ export class SettingsPane extends BootstrapBlockElement {
           }
         )}
         ${this.makeButton(
-          "Edit Sources",
-          "Add or remove software sources. Only add sources you trust.",
-          "primary",
-          this.showSourceRepositories.bind(this)
-        )}
-        ${this.makeButton(
           "Rebuild Now",
           "Replace the catalog with a fresh copy. This will take a few seconds, or a minute or two if you're offline.",
           "info",
           this.rebuildIndex.bind(this)
+        )}
+        ${this.makeButton(
+          "Edit Sources",
+          "Add or remove software sources. Only add sources you trust.",
+          "primary",
+          this.showSourceRepositories.bind(this)
         )}
 
         <h3
