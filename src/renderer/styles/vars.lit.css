@@ -1,0 +1,4 @@
+:root,
+:host {
+  --sidebar-width: min(max(25vw, 240px), 280px);
+}

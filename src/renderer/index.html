@@ -74,7 +74,7 @@
       <openstore-floating-pane
         id="openstore-settings-pane"
         anchorPoint='{ "top": "56px", "left": "10px" }'
-        width="max(25vw, 240px)"
+        width="var(--sidebar-width)"
         height="calc(98vh - 56px)"
       >
         <openstore-settings-pane></openstore-settings-pane>
@@ -83,7 +83,7 @@
       <openstore-floating-pane
         id="openstore-tasks-pane"
         anchorPoint='{ "top": "56px", "left": "10px" }'
-        width="max(25vw, 240px)"
+        width="var(--sidebar-width)"
         height="calc(98vh - 56px)"
       >
         <openstore-tasks-pane></openstore-tasks-pane>
@@ -92,7 +92,7 @@
       <openstore-floating-pane
         id="openstore-terminal-pane"
         anchorPoint='{ "top": "56px", "right": "10px" }'
-        width="calc(100vw - max(25vw, 240px) - 20px)"
+        width="calc(100vw - var(--sidebar-width) - 20px)"
         height="calc(98vh - 56px)"
       >
         <div class="overflow-auto">

@@ -227,7 +227,7 @@ export default class PackagesView<
         top: 56px;
         left: 0;
 
-        width: max(25vw, 240px);
+        width: var(--sidebar-width);
         height: calc(100vh - 56px);
       }
 
@@ -235,7 +235,7 @@ export default class PackagesView<
         top: 56px;
         right: 0;
 
-        width: calc(100vw - max(25vw, 240px));
+        width: calc(100vw - var(--sidebar-width));
         height: calc(100vh - 56px);
       }
     `,
