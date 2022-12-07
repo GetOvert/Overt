@@ -1,23 +1,20 @@
 <div align="center">
-  <img src="icons/overt-app-icon.png" alt="Overt app icon" width="20%">
+  <h1>Overt<br/><sub>open app store</sub></h1>
 </div>
 
-# Overt <small>_beta_</small>
-
-## An open app store for macOS
-
-Overt helps you find, install, and manage your favorite apps.
+Explore, install, and manage your favourite software with a **free and open app store** for macOS.
 
 Overt **doesn't**:
 
-- Restrict app features
 - Process payments
+- Restrict app features
+- Remove apps arbitrarily
 
 Overt **does**:
 
-- Give you a catalog of 3,000+ apps at your fingertips
-- Install, update, and uninstall apps with a single click
-- Let you add your own source repositories
+- Offer 3,000+ apps by default
+- Support external catalogs
+- 1-click install/update/uninstall
 
 <a href="https://getovert.app/about">About</a> • <a href="https://getovert.app/install">Install</a>
 
@@ -69,3 +66,7 @@ npm run bump-{major,minor,patch}
 # (this command will fail and print a help message without certain env vars set)
 npm run distribute-macos
 ```
+
+<div align="center">
+  <img src="icons/overt-app-icon.png" alt="Overt app icon" width="88">
+</div>
