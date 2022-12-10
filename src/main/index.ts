@@ -5,6 +5,7 @@ import {
   ipcMain,
   IpcMainEvent,
   MenuItemConstructorOptions,
+  session,
   systemPreferences,
 } from "electron";
 import { Config, config } from "shared/config";
@@ -168,6 +169,30 @@ async function createMainWindow(): Promise<void> {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on("ready", () => {
+  // Specify our Content Security Policy (CSP)
+  // https://www.electronjs.org/docs/latest/tutorial/security#csp-http-headers
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        "Content-Security-Policy": [
+          `
+            default-src none;
+            script-src 'self' 'unsafe-inline' ${
+              /* ^ TODO: Remove 'unsafe-inline' once no inline event handlers are left in index.html  */
+              /* https://www.electronjs.org/docs/latest/api/app#appispackaged-readonly */
+              app.isPackaged ? "" : `'unsafe-eval'`
+            };
+            connect-src 'self' https://storage.googleapis.com/storage.getovert.app/ https://formulae.brew.sh;
+            style-src 'self' 'unsafe-inline' data: https://fonts.googleapis.com;
+            font-src 'self' https://fonts.gstatic.com;
+            img-src 'self' data: https://storage.googleapis.com/storage.getovert.app/
+          `,
+        ],
+      },
+    });
+  });
+
   // Register ourselves as a URL scheme handler
   app.setAsDefaultProtocolClient("overt");
 
