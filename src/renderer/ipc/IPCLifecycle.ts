@@ -5,5 +5,5 @@ declare global {
 }
 
 export interface IPCLifecycle {
-  relaunch(): Promise<void>;
+  relaunch(): void;
 }

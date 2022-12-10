@@ -1,4 +1,5 @@
 import { html, HTMLTemplateResult } from "lit";
+import { Broadcast } from "../../shared/Broadcast";
 
 export type QueuedTask = {
   task: Task;
@@ -31,6 +32,8 @@ export function isDeadTaskState(
 export type TaskNotifyPoints = ("before" | "after")[];
 
 export type Task =
+  | ReceiveBroadcastsTask
+  | ShowBroadcastTask
   | PromptForPasswordTask
   | ConfirmActionTask
   | ReindexAllTask
@@ -59,6 +62,16 @@ export type PackageManagerTask =
 export type TaskBase = {
   label: string;
   type: string;
+};
+
+export type ReceiveBroadcastsTask = TaskBase & {
+  type: "receive-broadcasts";
+};
+export type ShowBroadcastTask = TaskBase & {
+  type: "show-broadcast";
+  broadcast: Broadcast;
+  index: number;
+  total: number;
 };
 
 export type PromptForPasswordTask = TaskBase & {
@@ -145,6 +158,10 @@ export function urlInTask(task: Task): string | null {
 
 export function describeTask(task: Task): string {
   switch (task.type) {
+    case "receive-broadcasts":
+      return `check for messages from Overt`;
+    case "show-broadcast":
+      return `show a message from Overt`;
     case "prompt-for-password":
       return `ask for password with prompt "${task.prompt}"`;
     case "confirm-action":

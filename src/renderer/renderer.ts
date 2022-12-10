@@ -50,6 +50,7 @@ import "components/modal/PasswordPromptModal";
 
 import taskQueue from "tasks/TaskQueue";
 import {
+  ReceiveBroadcastsTask,
   ReindexAllTask,
   ReindexOutdatedTask,
   ReindexSourceRepositoriesTask,
@@ -66,40 +67,46 @@ window.addEventListener("load", async () => {
     sort: "installed-30d",
   });
 
+  taskQueue.push<ReceiveBroadcastsTask>({
+    type: "receive-broadcasts",
+    label: "Check for messages from Overt",
+  });
+
   for (const packageManager of allPackageMangers) {
-    taskQueue.push({
+    taskQueue.push<ReindexSourceRepositoriesTask>({
       packageManager,
       type: "reindex-source-repositories",
       label: `Rebuild source list (${packageManager})`,
-    } as ReindexSourceRepositoriesTask);
+    });
   }
 
   if (await window.settings.get("indexOnNextLaunch")) {
     await window.settings.set("indexOnNextLaunch", false);
 
     for (const packageManager of allPackageMangers) {
-      taskQueue.push({
+      taskQueue.push<ReindexAllTask>({
         packageManager,
         type: "reindex-all",
         label: `Rebuild catalog (${packageManager})`,
-      } as ReindexAllTask);
+        condition: "always",
+      });
     }
   } else {
     for (const packageManager of allPackageMangers) {
-      taskQueue.push({
+      taskQueue.push<ReindexAllTask>({
         packageManager,
         type: "reindex-all",
         label: `Rebuild catalog if too old (${packageManager})`,
         condition: "if-too-old",
-      } as ReindexAllTask);
+      });
     }
   }
 
   for (const packageManager of allPackageMangers) {
-    taskQueue.push({
+    taskQueue.push<ReindexOutdatedTask>({
       packageManager,
       type: "reindex-outdated",
       label: `Check for updates (${packageManager})`,
-    } as ReindexOutdatedTask);
+    });
   }
 });

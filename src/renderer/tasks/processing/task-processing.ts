@@ -10,8 +10,11 @@ import {
   TaskType,
   Task,
   DeadTaskState,
+  ShowBroadcastTask,
 } from "../Task";
 import taskQueue from "../TaskQueue";
+import BroadcastModal from "components/modal/BroadcastModal";
+import broadcasts from "preload/shared/broadcasts";
 
 class TaskProcessor<TaskTypes extends TaskType[]> {
   constructor(
@@ -23,11 +26,11 @@ class TaskProcessor<TaskTypes extends TaskType[]> {
     taskQueue.addObserver(this.startProcessingIfNeeded.bind(this));
   }
 
-  private _processing = false;
+  #processing = false;
 
   private async startProcessingIfNeeded() {
-    if (this._processing) return;
-    this._processing = true;
+    if (this.#processing) return;
+    this.#processing = true;
 
     let queuedTask: QueuedTask | null = null;
     try {
@@ -36,12 +39,52 @@ class TaskProcessor<TaskTypes extends TaskType[]> {
       }
     } catch (error) {
       console.error(error);
-      if (queuedTask) taskQueue.remove(queuedTask, "failed");
-    } finally {
-      this._processing = false;
+
+      if (queuedTask) {
+        // Skip and move on
+        taskQueue.remove(queuedTask, "failed");
+        this.startProcessingIfNeeded();
+      }
     }
+
+    this.#processing = false;
   }
 }
+
+const receiveBroadcastsProcessor = new TaskProcessor(
+  ["receive-broadcasts"],
+  async () => {
+    const broadcasts = await window.broadcasts.fetchNew();
+
+    broadcasts.forEach((broadcast, index) => {
+      taskQueue.push<ShowBroadcastTask>({
+        type: "show-broadcast",
+        label: "Show message from Overt",
+        broadcast,
+        index,
+        total: broadcasts.length,
+      });
+    });
+
+    return "succeeded";
+  }
+);
+
+const showBroadcastsProcessor = new TaskProcessor(
+  ["show-broadcast"],
+  async ({ broadcast, index, total }) => {
+    await BroadcastModal.runModal({
+      title: `Message from Overt (${index + 1}/${total})`,
+      body: broadcast.body,
+      url: broadcast.url,
+      cta: broadcast.cta,
+    });
+
+    await window.broadcasts.markAsSeen(broadcast);
+
+    return "succeeded";
+  }
+);
 
 const promptForPasswordProcessor = new TaskProcessor(
   ["prompt-for-password"],

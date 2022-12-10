@@ -1,70 +1,57 @@
 import { Modal } from "bootstrap";
 import LightDOMBlockElement from "components/abstract/LightDOMBlockElement";
-import { html, HTMLTemplateResult, nothing, PropertyValues, render } from "lit";
+import { html, PropertyValues, render } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { ifDefined } from "lit/directives/if-defined.js";
 import { createRef, Ref, ref } from "lit/directives/ref.js";
 
-@customElement("openstore-action-confirmation-modal")
-export default class ActionConfirmationModal extends LightDOMBlockElement {
+@customElement("openstore-broadcast-modal")
+export default class BroadcastModal extends LightDOMBlockElement {
   get customElementName(): string {
-    return "openstore-action-confirmation-modal";
+    return "openstore-broadcast-modal";
   }
 
   @property()
-  modalPrompt: string;
+  title: string;
   @property()
-  modalPromptCannedMessage?: HTMLTemplateResult | null;
+  body: string;
   @property()
-  modalLinkURL: string | null;
+  url?: string;
   @property()
-  modalTitle: string;
+  cta: string = "Go to Site";
 
-  @property()
-  openLinkButtonTitle: string = "Go to Site";
-  @property()
-  confirmButtonTitle: string;
-  @property()
-  cancelButtonTitle: string;
+  private resolve?: () => void;
 
-  private resolve?: (shouldContinue: boolean) => void;
-  private reject?: (error: any) => void;
-
-  static async runModal(
-    prompt: string,
-    promptCannedMessage: HTMLTemplateResult | null,
-    url: string | null | undefined,
-    title: string,
-    openLinkButtonTitle: string | undefined,
-    confirmButtonTitle: string,
-    cancelButtonTitle: string
-  ): Promise<boolean> {
+  static async runModal({
+    title,
+    body,
+    url,
+    cta,
+  }: {
+    title: string;
+    body: string;
+    url?: string;
+    cta?: string;
+  }): Promise<void> {
     const modalContainer = document.querySelector(
       "#modalContainer"
     ) as HTMLElement;
     render(
       html`
-        <openstore-action-confirmation-modal
-          .modalPrompt=${prompt}
-          .modalPromptCannedMessage=${promptCannedMessage}
-          .modalLinkURL=${ifDefined(url)}
-          .modalTitle=${title}
-          .openLinkButtonTitle=${ifDefined(openLinkButtonTitle)}
-          .confirmButtonTitle=${confirmButtonTitle}
-          .cancelButtonTitle=${cancelButtonTitle}
-        ></openstore-action-confirmation-modal>
+        <openstore-broadcast-modal
+          .title=${title}
+          .body=${body}
+          .url=${url}
+          .cta=${cta}
+        ></openstore-broadcast-modal>
       `,
       modalContainer
     );
-    return (
-      modalContainer.lastElementChild as ActionConfirmationModal
-    )._runModal();
+    return (modalContainer.lastElementChild as BroadcastModal).runModal();
   }
 
-  private async _runModal(): Promise<boolean> {
-    return new Promise((resolve, reject) => {
+  private async runModal(): Promise<void> {
+    return new Promise((resolve) => {
       this.resolve = resolve;
-      this.reject = reject;
     });
   }
 
@@ -95,7 +82,7 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
           <form class="modal-content">
             <div class="modal-header">
               <h5 class="modal-title h6" id="actionConfirmationModalLabel">
-                ${this.modalTitle}
+                ${this.title}
               </h5>
               <button
                 type="button"
@@ -106,16 +93,15 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
               ></button>
             </div>
             <div class="modal-body">
-              <p style="white-space: pre-wrap">${this.modalPrompt}</p>
-              ${this.modalPromptCannedMessage}
+              <p style="white-space: pre-wrap">${this.body}</p>
             </div>
             <div class="modal-footer">
-              ${this.modalLinkURL &&
+              ${this.url &&
               html`<a
-                href=${this.modalLinkURL}
+                href=${this.url}
                 class="btn btn-outline-info me-auto"
-                @click=${this.openModalLinkURL}
-                >${this.openLinkButtonTitle}
+                @click=${this.openURL}
+                >${this.cta}
 
                 <!-- https://icons.getbootstrap.com/icons/box-arrow-up-right/ -->
                 <svg
@@ -144,14 +130,7 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
                 class="btn btn-light"
                 data-bs-dismiss="modal"
               >
-                ${this.cancelButtonTitle}
-              </button>
-              <button
-                type="button"
-                class="btn btn-primary"
-                @click=${this.confirm}
-              >
-                ${this.confirmButtonTitle}
+                Dismiss
               </button>
             </div>
           </form>
@@ -160,26 +139,15 @@ export default class ActionConfirmationModal extends LightDOMBlockElement {
     `;
   }
 
-  private openModalLinkURL(event: Event) {
+  private openURL(event: Event) {
     event.preventDefault();
 
-    if (!this.modalLinkURL) return;
-    window.openExternalLink.open(this.modalLinkURL);
-  }
-
-  private confirm(event: Event) {
-    event.preventDefault();
-
-    this.resolve?.(true);
-
-    // Prevent repeated call in onDismiss()
-    this.resolve = this.reject = undefined;
-
-    Modal.getInstance(this.modalRoot.value!)?.hide();
+    if (!this.url) return;
+    window.openExternalLink.open(this.url);
   }
 
   private onDismiss() {
-    this.resolve?.(false);
+    this.resolve?.();
 
     const modalContainer = document.querySelector(
       "#modalContainer"
