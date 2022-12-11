@@ -14,7 +14,6 @@ import {
 } from "../Task";
 import taskQueue from "../TaskQueue";
 import BroadcastModal from "components/modal/BroadcastModal";
-import broadcasts from "preload/shared/broadcasts";
 
 class TaskProcessor<TaskTypes extends TaskType[]> {
   constructor(

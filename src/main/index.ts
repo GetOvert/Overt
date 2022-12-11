@@ -202,6 +202,8 @@ app.on("ready", () => {
     app.quit();
   });
 
+  ipcMain.handle("app-version.get", () => app.getVersion());
+
   store = new ElectronStore<Config & PersistentStorage>({
     defaults: {
       sendNativeNotifications: true,

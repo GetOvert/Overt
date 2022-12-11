@@ -63,6 +63,7 @@
     "bootswatch": "^5.2.2",
     "clone-deep": "^4.0.1",
     "color": "^4.2.3",
+    "compare-versions": "^5.0.1",
     "electron-context-menu": "^3.5.0",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.1.0",

@@ -4,8 +4,9 @@ export type BroadcastIdentity = {
 };
 
 export type Broadcast = BroadcastIdentity & {
-  from: Date;
-  to: Date;
+  from?: Date;
+  to?: Date;
+  version?: string;
 
   body: string;
   url?: string;

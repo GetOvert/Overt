@@ -1,3 +1,5 @@
+import { satisfies } from "compare-versions";
+import { app, ipcRenderer } from "electron";
 import { IPCBroadcasts } from "ipc/IPCBroadcasts";
 import { Broadcast, BroadcastIdentity } from "../../../shared/Broadcast";
 import persistentStorage from "./persistentStorage";
@@ -9,6 +11,9 @@ export default {
         `https://storage.googleapis.com/storage.getovert.app/broadcasts.json`
       )
     ).json();
+
+    const nowTime = new Date().getTime();
+    const appVersion = await ipcRenderer.invoke("app-version.get");
 
     const broadcasts = rawBroadcasts
       .filter(({ v }) => v === 1)
@@ -22,9 +27,20 @@ export default {
         })
       )
       .filter(({ from, to }) => {
-        const nowTime = new Date().getTime();
-        return from.getTime() <= nowTime && nowTime < to.getTime();
-      });
+        return (
+          (!from || from.getTime() <= nowTime) &&
+          (!to || to.getTime() > nowTime)
+        );
+      })
+      .filter(({ version }) => {
+        try {
+          return !version || satisfies(appVersion, version);
+        } catch (error) {
+          console.error(error);
+          return false;
+        }
+      })
+      .reverse();
 
     const seen = Object.fromEntries(
       ((await persistentStorage.get("seenBroadcasts")) ?? []).map(
