@@ -8,6 +8,8 @@ export type Broadcast = BroadcastIdentity & {
   to?: Date;
   version?: string;
 
+  persistent?: boolean;
+
   body: string;
   url?: string;
   cta?: string;

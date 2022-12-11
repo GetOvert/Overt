@@ -47,7 +47,9 @@ export default {
         (broadcast) => [broadcast.name, broadcast]
       )
     );
-    return broadcasts.filter(({ name }) => !seen[name]);
+    return broadcasts.filter(
+      ({ name, persistent }) => !seen[name] || persistent
+    );
   },
 
   async markAsSeen({ v, name }) {
