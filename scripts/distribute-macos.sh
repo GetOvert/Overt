@@ -26,7 +26,7 @@ version="${version:1}"
 arm64_sha256="$(openssl sha256 -binary "out/make/zip/darwin/arm64/Overt-darwin-arm64-$version.zip" | xxd -p -c 256)"
 x86_64_sha256="$(openssl sha256 -binary "out/make/zip/darwin/x64/Overt-darwin-x64-$version.zip" | xxd -p -c 256)"
 
-tap_repo="$(brew --repo getovert/tap)"
+tap_repo="$(brew --repo homebrew/cask)"
 cask_definition_file="$tap_repo/Casks/overt.rb"
 
 # I'm sorry

@@ -224,7 +224,7 @@ const brewCask: IPCBrewCask = {
             label: `Auto-subscribe to Overt cask`,
 
             packageManager: "brew-cask",
-            packageIdentifier: "getovert/tap/overt",
+            packageIdentifier: "overt",
           },
           []
         );
@@ -235,7 +235,7 @@ const brewCask: IPCBrewCask = {
             label: `Auto-update Overt`,
 
             packageManager: "brew-cask",
-            packageIdentifier: "getovert/tap/overt",
+            packageIdentifier: "overt",
           },
           []
         );
