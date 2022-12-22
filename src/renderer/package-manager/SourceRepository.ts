@@ -1,7 +1,7 @@
 export type SourceRepository = {
   packageManager: SourceRepositoryPackageManager;
   name: string;
-  url: string;
+  url?: string | null;
 };
 
 export type SourceRepositoryChange = {

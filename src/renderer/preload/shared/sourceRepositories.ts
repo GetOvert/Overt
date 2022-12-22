@@ -8,7 +8,7 @@ cacheDB_addSchema(
     CREATE TABLE IF NOT EXISTS "source_repositories" (
       "package_manager" TEXT NOT NULL,
       "name" TEXT NOT NULL,
-      "url" TEXT NOT NULL
+      "url" TEXT
     )`
 );
 
