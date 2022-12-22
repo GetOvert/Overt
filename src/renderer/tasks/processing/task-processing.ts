@@ -42,11 +42,12 @@ class TaskProcessor<TaskTypes extends TaskType[]> {
       if (queuedTask) {
         // Skip and move on
         taskQueue.remove(queuedTask, "failed");
+        this.#processing = false;
         this.startProcessingIfNeeded();
       }
+    } finally {
+      this.#processing = false;
     }
-
-    this.#processing = false;
   }
 }
 
