@@ -9,6 +9,8 @@ export default class IconButton extends BootstrapBlockElement {
 
   @property({ type: Boolean })
   active = false;
+  @property({ type: Boolean })
+  disabled?: boolean;
 
   static styles = [BootstrapBlockElement.styles];
 
@@ -16,6 +18,7 @@ export default class IconButton extends BootstrapBlockElement {
     return html`
       <button
         class="btn ${this.btnClass} ${this.active ? "active" : ""}"
+        ?disabled=${this.disabled}
         style="padding-top: 2px"
       >
         <slot>

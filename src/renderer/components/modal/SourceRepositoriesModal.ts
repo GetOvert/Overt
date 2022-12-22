@@ -247,7 +247,9 @@ export default class SourceRepositoriesModal extends LightDOMBlockElement {
                                         class="mx-1 list-item-contextual"
                                         btn-class="btn-primary"
                                         style="width: 2.5rem"
-                                        @click=${() => this.editItem(index)}
+                                        @click=${() =>
+                                          item.url && this.editItem(index)}
+                                        ?disabled=${!item.url}
                                         aria-label="Edit"
                                       >
                                         <!-- https://icons.getbootstrap.com/icons/pencil-square/ -->
