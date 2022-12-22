@@ -21,7 +21,7 @@ import {
 import Sidebar from "components/sidebar/Sidebar";
 import { formatRelative } from "utility/relative-time";
 
-const fetchedChunkSize = 25;
+const fetchedChunkSize = 26;
 let lastOffset = 0;
 
 let lastScrollY = 0;
