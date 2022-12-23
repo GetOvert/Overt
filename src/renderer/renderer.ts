@@ -32,7 +32,10 @@ import "styles/injection";
 
 import "nav/nav";
 
+import "components/accessibility/KeyboardNavSkipLinks";
 import "components/sidebar/Sidebar";
+import "components/top-bar/TopBar";
+import "components/top-bar/SearchBar";
 import "components/packages/PackagesView";
 import "components/packages/PackageDetailView";
 import "components/settings/SettingsPane";

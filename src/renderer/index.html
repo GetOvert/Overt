@@ -14,57 +14,9 @@
       Welcome to Overt! Please note that keyboard navigation and screen reader
       support is preliminary and best-effort at this time.
     </p>
+    <overt-keyboard-nav-skip-links></overt-keyboard-nav-skip-links>
 
-    <nav class="visually-hidden-focusable nav nav-pills mx-2">
-      <a
-        class="nav-link"
-        href="#"
-        onclick="event.preventDefault(); document.querySelector('#search-bar').focus()"
-      >
-        Skip to search
-      </a>
-    </nav>
-
-    <header class="sticky-top bg-light">
-      <nav class="navbar navbar-light">
-        <div class="container-fluid">
-          <div
-            class="d-flex"
-            style="
-              width: 25vw;
-              min-width: 200px;
-              padding-left: 0.25rem;
-              margin-right: 0.5rem;
-            "
-          >
-            <openstore-settings-button
-              class="me-auto"
-              style="margin-left: -0.35rem"
-            ></openstore-settings-button>
-
-            <openstore-tasks-button
-              class="ms-auto px-4"
-              style="margin-right: -0.5rem"
-            ></openstore-tasks-button>
-          </div>
-
-          <form
-            class="d-flex"
-            style="flex: 1 0 40vw"
-            onsubmit="event.preventDefault()"
-          >
-            <input
-              id="search-bar"
-              class="form-control me-2"
-              type="search"
-              placeholder="Search"
-              aria-label="Search"
-              oninput="event.preventDefault(); window.openStore.updateWindowLocationFragment({ ...window.openStore.decodeFragment(window.location.hash), search: event.target.value ?? '', subpage: null });"
-            />
-          </form>
-        </div>
-      </nav>
-    </header>
+    <overt-top-bar></overt-top-bar>
 
     <div class="container-fluid">
       <openstore-floating-pane

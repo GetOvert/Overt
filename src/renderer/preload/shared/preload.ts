@@ -1,3 +1,4 @@
+import TopBar from "components/top-bar/TopBar";
 import { contextBridge, ipcRenderer } from "electron";
 import broadcasts from "./broadcasts";
 import contextMenu from "./contextMenu";
@@ -28,9 +29,8 @@ contextBridge.exposeInMainWorld("theme", theme);
 contextBridge.exposeInMainWorld("url", url);
 
 ipcRenderer.on("focus_search_bar", () => {
-  const searchBar = document.querySelector("#search-bar") as HTMLInputElement;
-  searchBar.focus();
-  searchBar.select();
+  const topBar = document.querySelector("overt-top-bar") as TopBar;
+  topBar.dispatchEvent(new Event("focusSearchBar"));
 });
 
 ipcRenderer.on("toggle_settings", () => {
@@ -43,6 +43,6 @@ ipcRenderer.on("show_settings", () => {
 });
 
 ipcRenderer.on("toggle_tasks", () => {
-  const settingsButton = document.querySelector("openstore-tasks-button")!;
-  settingsButton.dispatchEvent(new Event("togglePaneShown"));
+  const tasksButton = document.querySelector("openstore-tasks-button")!;
+  tasksButton.dispatchEvent(new Event("togglePaneShown"));
 });
