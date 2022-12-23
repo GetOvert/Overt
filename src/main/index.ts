@@ -179,9 +179,9 @@ app.on("ready", () => {
         "Content-Security-Policy": [
           `
             default-src none;
-            script-src 'self' 'unsafe-inline' ${
-              /* ^ TODO: Remove 'unsafe-inline' once no inline event handlers are left in index.html  */
-              /* https://www.electronjs.org/docs/latest/api/app#appispackaged-readonly */
+            script-src 'self' ${
+              // Allow use of source maps during development:
+              // https://www.electronjs.org/docs/latest/api/app#appispackaged-readonly
               app.isPackaged ? "" : `'unsafe-eval'`
             };
             connect-src 'self' https://storage.googleapis.com/storage.getovert.app/ https://formulae.brew.sh;
