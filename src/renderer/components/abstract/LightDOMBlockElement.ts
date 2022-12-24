@@ -55,7 +55,6 @@ export default abstract class LightDOMBlockElement extends BaseElement {
         /(^|(?<=,))/,
         ` ${this.customElementName} `
       );
-      console.log(selectorText)
     }
   }
 
