@@ -48,7 +48,9 @@ export default class TasksButton extends BootstrapBlockElement {
   }
 
   get settingsButton(): SettingsButton {
-    return document.querySelector("openstore-settings-button")!;
+    return document
+      .querySelector("overt-top-bar")!
+      .shadowRoot!.querySelector("openstore-settings-button")!;
   }
 
   constructor() {
