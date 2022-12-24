@@ -64,7 +64,7 @@ export default abstract class BaseElement extends LitElement {
     this.popperDropdowns = [];
   }
 
-  protected dropdownVisiblityChanged() {}
+  protected dropdownVisibilityChanged() {}
 
   private toggleDropdown(event: Event) {
     const host = (event.target as HTMLElement).closest(
@@ -75,7 +75,7 @@ export default abstract class BaseElement extends LitElement {
     if (!host.classList.contains("show")) {
       setTimeout(() => {
         Dropdown.getInstance(host)?.show();
-        this.dropdownVisiblityChanged();
+        this.dropdownVisibilityChanged();
       });
     }
   }
@@ -84,7 +84,7 @@ export default abstract class BaseElement extends LitElement {
     this.popperDropdowns.forEach((dropdown) => {
       dropdown.hide();
     });
-    this.dropdownVisiblityChanged();
+    this.dropdownVisibilityChanged();
   }
 
   private keyDown(event: KeyboardEvent) {

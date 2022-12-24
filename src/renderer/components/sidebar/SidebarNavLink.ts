@@ -123,7 +123,7 @@ export default class SidebarNavLink extends LightDOMBlockElement {
     );
   }
 
-  protected dropdownVisiblityChanged(): void {
+  protected dropdownVisibilityChanged(): void {
     const dropdownButton = this.renderRoot.querySelector(".dropdown-button");
     if (!dropdownButton) return;
 
