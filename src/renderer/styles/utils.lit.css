@@ -1,0 +1,6 @@
+*:not(:hover) > .hidden-unless-parent-hovered:not(:focus-within) {
+  display: none;
+}
+*:not(:hover) > .transparent-unless-parent-hovered:not(:focus-within) {
+  opacity: 0;
+}

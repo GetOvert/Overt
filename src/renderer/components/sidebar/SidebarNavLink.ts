@@ -73,12 +73,6 @@ export default class SidebarNavLink extends LightDOMBlockElement {
 
     const dropdownID = `sidebar-nav-link-${this.label.replace(/\W/g, "")}`;
     return html`
-      <style>
-        *:not(:hover) > .hidden-unless-parent-hovered {
-          display: none;
-        }
-      </style>
-
       <div class="btn-group dropup d-flex" role="group">
         ${buttonHTML}
 

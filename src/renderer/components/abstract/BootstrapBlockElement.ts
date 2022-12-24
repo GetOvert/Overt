@@ -7,6 +7,7 @@ import bootstrap from "styles/vendor/bootstrap.lit.css";
 import BaseElement from "./BaseElement";
 import bootstrapOverrides from "styles/bootstrap-overrides.lit.css";
 import darkTheme from "styles/dark-theme.lit.css";
+import utils from "styles/utils.lit.css";
 import vars from "styles/vars.lit.css";
 
 export default class BootstrapBlockElement extends BaseElement {
@@ -15,6 +16,7 @@ export default class BootstrapBlockElement extends BaseElement {
     bootstrap,
     bootstrapOverrides,
     darkTheme,
+    utils,
     vars,
     css`
       :host {
