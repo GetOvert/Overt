@@ -2,7 +2,8 @@ import BootstrapBlockElement from "components/abstract/BootstrapBlockElement";
 import { css, html } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
 import { until } from "lit/directives/until.js";
-import { formatRelative } from "utility/relative-time";
+import "./CardActionButtons";
+import { CardAction } from "./CardActionButtons";
 
 @customElement("openstore-card")
 export default class Card extends BootstrapBlockElement {
@@ -22,6 +23,9 @@ export default class Card extends BootstrapBlockElement {
   @property()
   iconURL?: string;
 
+  @property()
+  actions?: CardAction[];
+
   @query(".openstore-card-link")
   private readonly linkElement: HTMLAnchorElement | null;
 
@@ -36,14 +40,19 @@ export default class Card extends BootstrapBlockElement {
       .card * {
         z-index: 2;
       }
-      .card:hover::before,
-      .openstore-card-link:focus-visible .card::before {
+      .card::before {
         content: "";
         position: absolute;
         z-index: 1;
         width: 100%;
         height: 100%;
+
         background: var(--accent-color-dark);
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .card:hover::before,
+      .openstore-card-link:focus-visible .card::before {
         opacity: 20%;
       }
 
@@ -53,7 +62,7 @@ export default class Card extends BootstrapBlockElement {
       .card-subtitle {
         font-size: 0.85rem;
       }
-      
+
       .package-icon {
         width: 5rem;
         padding: 0.25rem;
@@ -68,12 +77,15 @@ export default class Card extends BootstrapBlockElement {
         class="openstore-card-link openstore-jsnav-link user-drag-none"
         @click=${this.clicked}
       >
-        <div class="card bg-light shadow-sm my-3">
-          <div class="row flex-nowrap g-0 ms-lg-2 align-items-center">
+        <div class="card flex-row bg-light shadow-sm my-3">
+          <div
+            class="d-flex flex-nowrap align-items-center ms-lg-2 flex-grow-1"
+          >
             ${until(this.renderIcon(), "")}
 
             <div class="card-body">
               <h2 class="card-title" style="font-weight: 500">${this.title}</h2>
+
               ${this.subtitle || this.status
                 ? html`<h3 class="h5 card-subtitle mb-2 text-muted">
                     ${this.subtitle}
@@ -88,6 +100,12 @@ export default class Card extends BootstrapBlockElement {
               <p class="card-text text-dark">${this.details}</p>
             </div>
           </div>
+
+          <overt-card-action-buttons
+            class="transparent-unless-parent-hovered"
+            style="transition: opacity 0.2s"
+            .actions=${this.actions}
+          ></overt-card-action-buttons>
         </div>
       </a>
     `;
@@ -96,7 +114,7 @@ export default class Card extends BootstrapBlockElement {
   private async renderIcon() {
     return (await this.isIconValid())
       ? html`
-          <div class="package-icon">
+          <div class="package-icon flex-shrink-0">
             <img
               src=${this.iconURL}
               class="img-fluid user-drag-none"

@@ -20,6 +20,13 @@ import {
 } from "package-manager/PackageManagerRegistry";
 import Sidebar from "components/sidebar/Sidebar";
 import { formatRelative } from "utility/relative-time";
+import { CardAction } from "components/ui-elements/card/CardActionButtons";
+import {
+  installPackage,
+  uninstallPackage,
+  upgradePackage,
+} from "./package-events";
+import { Icons } from "components/Icons";
 
 const fetchedChunkSize = 26;
 let lastOffset = 0;
@@ -78,22 +85,15 @@ export default class PackagesView<
 
   private taskQueueChanged(updatedTask: QueuedTask) {
     if (
-      updatedTask.state === "succeeded" &&
-      ["reindex-all", "reindex-outdated", "reindex"].includes(
-        updatedTask.task.type
-      )
-    ) {
-      this._reset();
-      this._loadApps(lastOffset + fetchedChunkSize);
-    }
-
-    if (
       updatedTask.state === "running" &&
       updatedTask.task.type === "reindex-all" &&
       (updatedTask as unknown as ReindexAllTask).wipeIndexFirst
     ) {
-      this._reset();
+      return this._reset();
     }
+
+    this._reset();
+    this._loadApps(lastOffset + fetchedChunkSize);
   }
 
   private get _currentlyIndexing(): boolean {
@@ -299,7 +299,7 @@ export default class PackagesView<
             : "d-none"}"
         >
           <openstore-css-grid>
-            ${repeat(this._appGenerators, (appGenerator) =>
+            ${this._appGenerators.map((appGenerator) =>
               asyncAppend(appGenerator, (packageInfo: PackageInfo) => {
                 const name = this.packageInfoAdapter.packageName(packageInfo);
                 const identifier =
@@ -308,6 +308,8 @@ export default class PackagesView<
                   this.packageInfoAdapter.packageDescription(packageInfo);
                 const iconURL =
                   this.packageInfoAdapter.packageIconURL(packageInfo);
+                const websiteURL =
+                  this.packageInfoAdapter.packageWebsiteURL(packageInfo);
                 const lastUpdated =
                   this.packageInfoAdapter.packageLastUpdated(packageInfo);
 
@@ -315,6 +317,8 @@ export default class PackagesView<
                   this.packageInfoAdapter.isPackageInstalled(packageInfo);
                 const isOutdated =
                   this.packageInfoAdapter.isPackageOutdated(packageInfo);
+                const isOvert =
+                  this.packageInfoAdapter.isPackageOvert(packageInfo);
 
                 return html`
                   <openstore-col class="mx-2">
@@ -341,29 +345,138 @@ export default class PackagesView<
                         }
                       )}
                       .iconURL=${iconURL}
+                      .actions=${[
+                        {
+                          tooltip: "Install",
+                          icon: Icons.install({
+                            style: "transform: scale(1.05) translateY(-1px)",
+                          }),
+                          color: "primary",
+
+                          shown: !isInstalled,
+
+                          enabled: !taskQueue.liveForPackage(identifier).length,
+                          loading: !!taskQueue.liveForPackage(
+                            identifier,
+                            "install"
+                          ).length,
+
+                          run: () => {
+                            installPackage(
+                              this.packageManager.name,
+                              identifier,
+                              name
+                            );
+                          },
+                        },
+                        {
+                          tooltip: "Launch",
+                          icon: Icons.launch({
+                            style: "transform: translateY(-1px)",
+                          }),
+                          color: "success",
+
+                          shown: isInstalled && !isOvert,
+
+                          enabled: !taskQueue.liveForPackage(identifier).length,
+
+                          run: async () => {
+                            const [mainLaunchable] =
+                              await this.packageManager.launchables(
+                                packageInfo
+                              );
+
+                            if (!mainLaunchable) {
+                              return window.alert(
+                                `Couldn't find any launchable apps for ${name}.`
+                              );
+                            }
+
+                            await window.openProduct.openApp(
+                              mainLaunchable.path
+                            );
+                          },
+                        },
+                        {
+                          tooltip: "Relaunch",
+                          icon: Icons.relaunch(),
+                          color: "success",
+
+                          shown: isInstalled && isOvert,
+
+                          enabled: !taskQueue.liveForPackage(identifier).length,
+
+                          run: () => {
+                            window.lifecycle.relaunch();
+                          },
+                        },
+                        {
+                          tooltip: "Update",
+                          icon: Icons.upgrade(),
+                          color: "primary",
+
+                          shown: isInstalled && isOutdated,
+
+                          enabled: !taskQueue.liveForPackage(identifier).length,
+                          loading: !!taskQueue.liveForPackage(
+                            identifier,
+                            "upgrade"
+                          ).length,
+
+                          run: () => {
+                            upgradePackage(
+                              this.packageManager.name,
+                              identifier,
+                              name
+                            );
+                          },
+                        },
+                        {
+                          tooltip: "Uninstall",
+                          icon: Icons.uninstall({
+                            style: "transform: scale(1.6) translateY(-0.75px)",
+                          }),
+                          color: "danger",
+
+                          shown: isInstalled,
+
+                          enabled: !taskQueue.liveForPackage(identifier).length,
+                          loading:
+                            (console.log(
+                              !!taskQueue.liveForPackage(
+                                identifier,
+                                "uninstall"
+                              ).length
+                            ),
+                            !!taskQueue.liveForPackage(identifier, "uninstall")
+                              .length),
+
+                          run: () => {
+                            uninstallPackage(
+                              this.packageManager.name,
+                              identifier,
+                              name
+                            );
+                          },
+                        },
+                        {
+                          tooltip: "Go to site",
+                          icon: Icons.externalLink({
+                            style: "transform: translate(1px, -2px)",
+                          }),
+                          color: "info",
+
+                          shown: !isInstalled && !!websiteURL,
+
+                          enabled: true,
+
+                          run: () => {
+                            window.openExternalLink.open(websiteURL!);
+                          },
+                        },
+                      ] satisfies CardAction[]}
                       @contextmenu=${() =>
                         window.contextMenu.set([
-                          {
-                            label: "Install",
-                            enabled: !isInstalled,
-                            callback: "install",
-                            args: [this.packageManager.name, identifier, name],
-                          },
-                          {
-                            label: "Update",
-                            enabled: isInstalled && isOutdated,
-                            callback: "upgrade",
-                            args: [this.packageManager.name, identifier, name],
-                          },
-                          {
-                            label: "Uninstall",
-                            enabled: isInstalled,
-                            callback: "uninstall",
-                            args: [this.packageManager.name, identifier, name],
-                          },
-                          {
-                            type: "separator",
-                          },
                           {
                             label: "Reindex",
                             callback: "reindex",
