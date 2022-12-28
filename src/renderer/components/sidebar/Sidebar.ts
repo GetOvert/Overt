@@ -74,8 +74,17 @@ export default class Sidebar extends BootstrapBlockElement {
                   key="source"
                   .options=${[
                     {
+                      value: "scoop",
+                      label: "scoop",
+                    },
+                  ]}
+                ></openstore-sidebar-nav-link>
+                <openstore-sidebar-nav-link
+                  key="source"
+                  .options=${[
+                    {
                       value: "winget",
-                      label: "Windows Package Manager (winget)",
+                      label: "winget",
                     },
                   ]}
                 ></openstore-sidebar-nav-link>

@@ -13,7 +13,11 @@ export type Config = {
 } & PackageManagersConfig;
 
 export type PackageManagersConfig = {
+  // macOS
   homebrewPath?: string;
+
+  // Windows
+  scoopPath?: string;
 };
 
 export const config = {

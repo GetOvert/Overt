@@ -65,7 +65,7 @@ window.addEventListener("load", async () => {
     source:
       window.platform.getNodePlatformString() === "darwin"
         ? "brew-cask"
-        : "winget",
+        : "scoop",
     filter: "all",
     sort: "installed-30d",
   });
