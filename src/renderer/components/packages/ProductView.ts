@@ -338,7 +338,9 @@ export abstract class ProductView extends BootstrapBlockElement {
             Object.entries(value),
             ([key, subvalue]) => html`
               <dt>${key}:</dt>
-              <dd>${subvalue}</dd>
+              <dd>
+                ${this.htmlForFieldValue(subvalue, valuesArePackageNames)}
+              </dd>
             `
           )}
         </dl>
