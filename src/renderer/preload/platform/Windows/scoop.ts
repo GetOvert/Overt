@@ -18,6 +18,7 @@ import {
   IPCScoop,
   ScoopExport,
   ScoopPackageInfo,
+  SortKey,
 } from "ipc/package-managers/Windows/IPCScoop";
 import { getFullIndexIntervalInSeconds, runBackgroundProcess } from "../shared";
 import { Launchable } from "ipc/package-managers/IPCPackageManager";
@@ -33,6 +34,12 @@ if (process.platform === "win32") {
         "bucket" TEXT NOT NULL COLLATE NOCASE,
 
         "description" TEXT,
+
+        "official_name" TEXT, -- Full user-facing name, copied from executable's file description
+        "publisher" TEXT, -- Publisher / copyright holder, as parsed from executable's copyright string
+        "updated" TIMESTAMP, -- Last time the app manifest was updated
+        "added" TIMESTAMP, -- Time the app manifest was added to Scoop
+
         "manifest_json" TEXT,
         "export_json" TEXT,
 
@@ -42,6 +49,39 @@ if (process.platform === "win32") {
 }
 
 let indexListeners = new Set<() => void>();
+
+export type ScoopUpdateTimes = {
+  app: {
+    [fullName: string]: number;
+  };
+};
+
+export type ScoopUpdateTimesResponse = {
+  commit: string;
+  by_name: ScoopUpdateTimes;
+};
+
+type ScoopArtifactMeta = {
+  app: {
+    [fullToken: string]: {
+      official_name: string;
+      product_name: string;
+      copyright: string;
+      trademarks: string;
+      publisher: string;
+    };
+  };
+};
+
+type ScoopArtifactMetaResponse = {
+  commit: string;
+  by_name: ScoopArtifactMeta;
+};
+
+type ScoopAuxMetadata = {
+  artifactMeta?: ScoopArtifactMeta;
+  updateTimes?: ScoopUpdateTimes;
+};
 
 const scoop: IPCScoop = {
   name: "scoop",
@@ -97,11 +137,16 @@ const scoop: IPCScoop = {
           const manifestFilenames = await readdir(manifestsDir);
 
           return await Promise.all(
-            manifestFilenames.map(
-              async (manifestFilename): Promise<ScoopPackageInfo> => {
+            manifestFilenames
+              .filter((name) => name.endsWith(".json"))
+              .map(async (manifestFilename): Promise<ScoopPackageInfo> => {
                 const name = basename(manifestFilename, ".json");
-                const manifest = JSON.parse(
-                  await readFile(manifestFilename, { encoding: "utf-8" })
+                const manifest = await catchErrors(async () =>
+                  JSON.parse(
+                    await readFile(path.join(manifestsDir, manifestFilename), {
+                      encoding: "utf-8",
+                    })
+                  )
                 );
                 const installed = installedAppsByName[name];
 
@@ -111,27 +156,23 @@ const scoop: IPCScoop = {
                   manifest,
                   installed,
                 };
-              }
-            )
+              })
           );
         })
       )
     ).flat(1);
 
-    (scoop as any)._ingestPackageInfo(undefined, newPackageInfos);
+    (scoop as any)._ingestAppInfo(
+      newPackageInfos,
+      await (scoop as any)._fetchAuxMetadata()
+    );
 
     (scoop as any)._postIndexing();
     cacheDB_updateLastFullIndexJsTimestamp();
   },
 
   async indexOutdated(): Promise<void> {
-    const stdout = await runBackgroundScoopProcess([
-      "upgrade",
-      ...scoopCommonArguments(),
-      ...scoopInstallationCommandArguments(),
-    ]);
-
-    await scoop.indexSpecific(stdout.split(/\s+/).filter((s) => s));
+    // FIXME: Implement
   },
 
   async indexSpecific(packageNames: string[]): Promise<void> {
@@ -144,15 +185,23 @@ const scoop: IPCScoop = {
       export_.apps.map((app) => [app.Name, app])
     );
 
-    const newPackageInfos: ScoopPackageInfo[] = await Promise.all(
+    const newPackageInfos: (ScoopPackageInfo | undefined)[] = await Promise.all(
       packageNames.map(async (name) => {
         const installed = installedAppsByName[name];
-        const bucket = installed.Source;
+        if (!installed) return undefined;
 
-        const manifest = JSON.parse(
-          await readFile(await getScoopAppManifestPath(bucket, name), {
-            encoding: "utf-8",
-          })
+        const bucket = installed.Source;
+        if (!bucket) {
+          // App has "Install failed" status
+          return undefined;
+        }
+
+        const manifest = await catchErrors(async () =>
+          JSON.parse(
+            await readFile(await getScoopAppManifestPath(bucket, name), {
+              encoding: "utf-8",
+            })
+          )
         );
 
         return {
@@ -163,10 +212,29 @@ const scoop: IPCScoop = {
         };
       })
     );
+    if (newPackageInfos.some((x) => !x)) {
+      // Not installed, so we don't know which bucket this app is supposed to be from
+      // An easy solution is to just reindex everything in this case,
+      // which is kind of quick for Scoop anyway
+      // FIXME: Do this properly to improve speed & reliability
+      return await scoop.indexAll();
+    }
 
-    (scoop as any)._ingestPackageInfo(packageNames, newPackageInfos);
+    (scoop as any)._ingestAppInfo(
+      newPackageInfos,
+      await (scoop as any)._fetchAuxMetadata(),
+      { deleteIfUnavailable: packageNames }
+    );
 
     (scoop as any)._postIndexing();
+  },
+
+  async _fetchAuxMetadata(): Promise<ScoopAuxMetadata> {
+    const [artifactMeta, updateTimes] = await Promise.all([
+      fetchArtifactMeta(),
+      fetchUpdateTimes(),
+    ]);
+    return { artifactMeta, updateTimes };
   },
 
   _postIndexing(): void {
@@ -174,21 +242,37 @@ const scoop: IPCScoop = {
     indexListeners.clear();
   },
 
-  async _ingestPackageInfo(
-    packages: ScoopPackageInfo[],
+  async _ingestAppInfo(
+    apps: ScoopPackageInfo[],
+    { artifactMeta, updateTimes }: ScoopAuxMetadata,
     {
       deleteIfUnavailable,
     }: {
       deleteIfUnavailable?: string[];
-    }
+    } = {}
   ) {
-    console.dir(packages);
+    function scaleTimestamp(timestamp: number | undefined) {
+      return timestamp ? 1000 * timestamp : timestamp;
+    }
 
     insertOrReplaceRecords(
       cacheDB(),
       "scoop_apps",
-      ["id", "name", "bucket", "description", "manifest_json", "export_json"],
-      packages
+      [
+        "id",
+        "name",
+        "bucket",
+
+        "description",
+
+        "official_name",
+        "publisher",
+        "updated",
+
+        "manifest_json",
+        "export_json",
+      ],
+      apps
         // Ensure NOT NULL constraints will be satisfied
         .filter((app) => app.name && app.bucket)
         .map((app) => ({
@@ -197,6 +281,13 @@ const scoop: IPCScoop = {
           bucket: app.bucket,
 
           description: app.manifest?.description,
+
+          official_name:
+            artifactMeta?.app?.[`${app.bucket}/${app.name}`]?.official_name,
+          publisher:
+            artifactMeta?.app?.[`${app.bucket}/${app.name}`]?.publisher,
+          updated: scaleTimestamp(updateTimes?.app?.[app.name]),
+
           manifest_json: JSON.stringify(app.manifest),
           export_json: JSON.stringify(app.installed),
         }))
@@ -227,6 +318,13 @@ const scoop: IPCScoop = {
       .prepare(
         sql`
         SELECT
+          scoop_apps.name,
+          scoop_apps.bucket,
+
+          scoop_apps.official_name,
+          scoop_apps.publisher,
+          scoop_apps.updated,
+
           scoop_apps.manifest_json,
           scoop_apps.export_json
         FROM scoop_apps
@@ -235,7 +333,9 @@ const scoop: IPCScoop = {
             .map(
               (keyword, index) => sql`
                 (scoop_apps.id LIKE $pattern${index}
-                  OR scoop_apps.desc LIKE $pattern${index})`
+                  OR scoop_apps.official_name LIKE $pattern${index}
+                  OR scoop_apps.description LIKE $pattern${index})
+                  OR scoop_apps.publisher LIKE $pattern${index}`
             )
             .join(sql` AND `)})
           ${(() => {
@@ -250,7 +350,7 @@ const scoop: IPCScoop = {
                 return sql`AND scoop_apps.outdated`;
             }
           })()}
-        ORDER BY scoop_apps.id DESC
+        ORDER BY scoop_apps.${dbKeyForSortKey(sortBy)} DESC
         LIMIT $l OFFSET $o
       `
       )
@@ -261,7 +361,20 @@ const scoop: IPCScoop = {
         l: limit,
         o: offset,
       })
-      .all();
+      .all()
+      .map((row) => ({
+        rowid: row.rowid,
+
+        name: row.name,
+        bucket: row.bucket,
+
+        official_name: row.official_name,
+        publisher: row.publisher,
+        updated: row.updated,
+
+        manifest: JSON.parse(row.manifest_json),
+        installed: JSON.parse(row.export_json),
+      }));
   },
 
   info(packageName: string): ScoopPackageInfo | null {
@@ -271,11 +384,17 @@ const scoop: IPCScoop = {
         SELECT
           scoop_apps.name,
           scoop_apps.bucket,
+
+          scoop_apps.official_name,
+          scoop_apps.publisher,
+          scoop_apps.updated,
+
           scoop_apps.manifest_json,
-          scoop_apps.export_json,
+          scoop_apps.export_json
         FROM scoop_apps
         WHERE
-          scoop_apps.id = $packageName
+          scoop_apps.id = $packageName OR
+          scoop_apps.name = $packageName
         LIMIT 1
       `
       )
@@ -290,6 +409,10 @@ const scoop: IPCScoop = {
 
       name: row.name,
       bucket: row.bucket,
+
+      official_name: row.official_name,
+      publisher: row.publisher,
+      updated: row.updated,
 
       manifest: JSON.parse(row.manifest_json),
       installed: JSON.parse(row.export_json),
@@ -310,14 +433,15 @@ const scoop: IPCScoop = {
       });
 
       terminal.send(
-        quote([
-          await getScoopExecutablePath(),
-          "install",
-          packageName,
-          ...scoopCommonArguments(),
-          ...scoopInstallationCommandArguments(),
-        ]) +
-          "; if ($?) { echo '-- overt-succeeded: scoop-install --' } else { echo '-- overt-failed: scoop-install --' }\n"
+        (await getScoopExecutablePath()) +
+          " " +
+          quote([
+            "install",
+            packageName,
+            ...scoopCommonArguments(),
+            ...scoopInstallationCommandArguments(),
+          ]) +
+          '; if ($?) { echo "-`- overt-succeeded: scoop-install -`-" } else { echo "-`- overt-failed: scoop-install -`-" }\r\n'
       );
     });
   },
@@ -325,25 +449,26 @@ const scoop: IPCScoop = {
   async upgrade(packageName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
-        if (data.match(/(?<!')-- overt-succeeded: scoop-upgrade --/)) {
+        if (data.match(/-- overt-succeeded: scoop-upgrade --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- overt-failed: scoop-upgrade --/)) {
+        if (data.match(/-- overt-failed: scoop-upgrade --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
       });
 
       terminal.send(
-        quote([
-          await getScoopExecutablePath(),
-          "update",
-          packageName,
-          ...scoopCommonArguments(),
-          ...scoopInstallationCommandArguments(),
-        ]) +
-          "; if ($?) { echo '-- overt-succeeded: scoop-upgrade --' } else { echo '-- overt-failed: scoop-upgrade --' }\n"
+        (await getScoopExecutablePath()) +
+          " " +
+          quote([
+            "update",
+            packageName,
+            ...scoopCommonArguments(),
+            ...scoopInstallationCommandArguments(),
+          ]) +
+          '; if ($?) { echo "-`- overt-succeeded: scoop-upgrade -`-" } else { echo "-`- overt-failed: scoop-upgrade -`-" }\r\n'
       );
     });
   },
@@ -351,19 +476,21 @@ const scoop: IPCScoop = {
   async uninstall(packageName: string): Promise<boolean> {
     return new Promise(async (resolve, reject) => {
       const callbackID = terminal.onReceive((data) => {
-        if (data.match(/(?<!')-- overt-succeeded: scoop-uninstall --/)) {
+        if (data.match(/-- overt-succeeded: scoop-uninstall --/)) {
           terminal.offReceive(callbackID);
           return resolve(true);
         }
-        if (data.match(/(?<!')-- overt-failed: scoop-uninstall --/)) {
+        if (data.match(/-- overt-failed: scoop-uninstall --/)) {
           terminal.offReceive(callbackID);
           return resolve(false);
         }
       });
 
       terminal.send(
-        quote([await getScoopExecutablePath(), "uninstall", packageName]) +
-          "; if ($?) { echo '-- overt-succeeded: scoop-uninstall --' } else { echo '-- overt-failed: scoop-uninstall --' }\n"
+        (await getScoopExecutablePath()) +
+          " " +
+          quote(["uninstall", packageName]) +
+          '; if ($?) { echo "-`- overt-succeeded: scoop-uninstall -`-" } else { echo "-`- overt-failed: scoop-uninstall -`-" }\r\n'
       );
     });
   },
@@ -388,6 +515,16 @@ const scoop: IPCScoop = {
   },
 };
 
+async function catchErrors<Result>(
+  block: () => Promise<Result>
+): Promise<Result | undefined> {
+  try {
+    return await block();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 function scoopCommonArguments(): string[] {
   return [];
 }
@@ -396,8 +533,61 @@ function scoopInstallationCommandArguments(): string[] {
   return [];
 }
 
+function dbKeyForSortKey(sortKey: SortKey): string {
+  switch (sortKey) {
+    case "updated":
+      return "updated";
+    case "added":
+    default:
+      return "added";
+  }
+}
+
+async function fetchArtifactMeta(): Promise<ScoopArtifactMeta> {
+  const responses: ScoopArtifactMetaResponse[] =
+    await fetchFromCloudStorageForAllBuckets("artifact-meta.json");
+
+  return {
+    app: Object.assign({}, ...responses.map(({ by_name }) => by_name?.app)),
+  };
+}
+
+export async function fetchUpdateTimes(): Promise<ScoopUpdateTimes> {
+  const responses: ScoopUpdateTimesResponse[] =
+    await fetchFromCloudStorageForAllBuckets("update-times.json");
+
+  return {
+    app: Object.assign({}, ...responses.map(({ by_name }) => by_name?.app)),
+  };
+}
+
+async function fetchFromCloudStorageForAllBuckets<ResponseBody extends object>(
+  fileName: string
+): Promise<ResponseBody[]> {
+  const export_: ScoopExport = JSON.parse(
+    await runBackgroundScoopProcess(["export"])
+  );
+  const bucketNames = export_.buckets.map(({ Name }) => Name);
+
+  return (
+    await Promise.all(
+      bucketNames.map(async (name) => {
+        const res = await fetch(
+          `https://storage.googleapis.com/storage.getovert.app/scoop/${name}/${fileName}`
+        );
+        if (!res.ok) return null;
+
+        return await res.json();
+      })
+    )
+  ).filter((x) => x);
+}
+
 async function runBackgroundScoopProcess(args: string[]): Promise<string> {
-  return await runBackgroundProcess(await getScoopExecutablePath(), args);
+  return await runBackgroundProcess("powershell.exe", [
+    await getScoopExecutablePath(),
+    ...args,
+  ]);
 }
 
 async function getScoopExecutablePath(): Promise<string> {

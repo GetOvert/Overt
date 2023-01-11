@@ -14,13 +14,17 @@ declare global {
 }
 
 // TODO: SortKey
-export type IPCScoop = IPCPackageManager<ScoopPackageInfo, "">;
+export type IPCScoop = IPCPackageManager<ScoopPackageInfo, SortKey>;
 
 export type ScoopPackageInfo = {
   rowid?: number;
 
   name: string;
   bucket: string;
+
+  official_name?: string;
+  publisher?: string;
+  updated?: number;
 
   manifest?: ScoopManifest;
   installed?: ScoopExportApp;
@@ -31,14 +35,19 @@ export type ScoopManifest = {
   version: string;
   description: string;
   homepage: string;
-  license: string;
+  license:
+    | string
+    | {
+        identifier: string;
+        url?: string;
+      };
 
   "##"?: string;
   architecture?: any;
   autoupdate?: any;
   bin?: string | string[];
   checkver?: any;
-  depends?: string[];
+  depends?: string | string[];
   env_add_path?: string | string[];
   env_set?: string | string[];
   extract_dir?: string | string[];
@@ -54,7 +63,7 @@ export type ScoopManifest = {
   pre_uninstall?: string | string[];
   psmodule?: any;
   shortcuts?: any;
-  suggest?: string[];
+  suggest?: Record<string, string | string[]>;
   uninstaller?: any;
   url?: string | string[];
 };
@@ -77,9 +86,9 @@ export type ScoopExportBucket = {
 
 export type ScoopExportApp = {
   Info: string;
-  Source: string;
+  Source: string | null;
   Name: string;
-  Version: string;
+  Version: string | null;
   Updated: string;
 };
 
@@ -87,7 +96,10 @@ export class ScoopPackageInfoAdapter
   implements PackageInfoAdapter<ScoopPackageInfo>
 {
   packageName(packageInfo: ScoopPackageInfo): string {
-    return packageInfo.name;
+    return (
+      (packageInfo.bucket === "extras" && packageInfo.official_name) ||
+      packageInfo.name
+    );
   }
 
   packageIdentifier(packageInfo: ScoopPackageInfo): string {
@@ -95,7 +107,7 @@ export class ScoopPackageInfoAdapter
   }
 
   packageDescription(packageInfo: ScoopPackageInfo): string {
-    return packageInfo.manifest?.description ?? "[Removed]";
+    return packageInfo.manifest?.description ?? "";
   }
 
   packageSourceRepsitoryName(packageInfo: ScoopPackageInfo): string {
@@ -107,15 +119,16 @@ export class ScoopPackageInfoAdapter
   }
 
   packageIconURL(packageInfo: ScoopPackageInfo): string | undefined {
-    return undefined;
+    const qualifiedName = `${packageInfo.bucket}/${packageInfo.name}`;
+    return `https://storage.googleapis.com/storage.getovert.app/scoop/${qualifiedName}.png`;
   }
 
   packagePublisher(packageInfo: ScoopPackageInfo): string | undefined {
-    return undefined;
+    return packageInfo.publisher;
   }
 
   packageLastUpdated(packageInfo: ScoopPackageInfo): number | undefined {
-    return undefined;
+    return packageInfo.updated;
   }
 
   isPackageInstalled(packageInfo: ScoopPackageInfo): boolean {
@@ -123,14 +136,19 @@ export class ScoopPackageInfoAdapter
   }
 
   isPackageOutdated(packageInfo: ScoopPackageInfo): boolean {
-    return (
-      !!packageInfo.manifest &&
-      !!packageInfo.installed &&
-      compareVersions(
-        packageInfo.installed.Version,
-        packageInfo.manifest.version
-      ) > 0
-    );
+    try {
+      return (
+        typeof packageInfo.manifest?.version === "string" &&
+        typeof packageInfo.installed?.Version === "string" &&
+        compareVersions(
+          packageInfo.installed.Version,
+          packageInfo.manifest.version
+        ) > 0
+      );
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 
   isPackageDeprecated(packageInfo: ScoopPackageInfo): boolean {
@@ -146,6 +164,16 @@ export class ScoopPackageInfoAdapter
   }
 
   packageDetails(packageInfo: ScoopPackageInfo): PackageDetailField[][] {
+    const licenseIdentifiers =
+      (typeof packageInfo.manifest?.license === "object"
+        ? packageInfo.manifest.license.identifier
+        : packageInfo.manifest?.license
+      )?.split(/[,|]/) ?? [];
+    const licenseURL =
+      typeof packageInfo.manifest?.license === "object"
+        ? packageInfo.manifest.license.url
+        : undefined;
+
     return [
       [
         {
@@ -163,30 +191,60 @@ export class ScoopPackageInfoAdapter
       ],
       [
         {
-          heading: "Depends on",
-          value: packageInfo.manifest?.depends?.length
-            ? html`<ul>
-                ${repeat(
-                  packageInfo.manifest.depends ?? [],
-                  (appIdentifier) => html`<li>${appIdentifier}</li>`
-                )}
-              </ul>`
-            : null,
+          heading: "Identifier",
+          value: packageInfo.name,
+        },
+        {
+          heading: "License",
+          value: licenseURL
+            ? html`
+                <ul>
+                  ${repeat(
+                    licenseIdentifiers,
+                    (identifier) => html`
+                      <li>
+                        <a
+                          href=${licenseURL}
+                          @click=${(event: Event) => {
+                            event.preventDefault();
+                            window.openExternalLink.open(licenseURL);
+                          }}
+                        >
+                          ${identifier}
+                        </a>
+                      </li>
+                    `
+                  )}
+                </ul>
+              `
+            : licenseIdentifiers,
+        },
+        {
+          heading: "Notes",
+          value: Array.isArray(packageInfo.manifest?.notes)
+            ? packageInfo.manifest?.notes.join("\n")
+            : packageInfo.manifest?.notes,
+        },
+        {
+          heading: "Requires",
+          value: [packageInfo.manifest?.depends ?? []].flat(1),
           valuesArePackageNames: true,
         },
         {
-          heading: "Improved by installing",
-          value: packageInfo.manifest?.suggest?.length
-            ? html`<ul>
-                ${repeat(
-                  packageInfo.manifest.suggest ?? [],
-                  (appIdentifier) => html`<li>${appIdentifier}</li>`
-                )}
-              </ul>`
-            : null,
+          heading: "May require",
+          value: Object.fromEntries(
+            Object.entries(packageInfo.manifest?.suggest ?? {}).map(
+              ([feature, packageIdentifiers]) => [
+                feature,
+                [packageIdentifiers].flat(1),
+              ]
+            )
+          ),
           valuesArePackageNames: true,
         },
       ],
     ];
   }
 }
+
+export type SortKey = "updated" | "added";
