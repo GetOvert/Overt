@@ -37,7 +37,7 @@ export default class TopBar extends BootstrapBlockElement {
 
   protected render() {
     return html`
-      <header class="sticky-top bg-light">
+      <header class="bg-light">
         <nav class="navbar navbar-light">
           <div class="container-fluid">
             <div class="d-flex pane-button-sizing">
