@@ -3,7 +3,7 @@ import { IPCPackageManager } from "../IPCPackageManager";
 import { ScoopPackageInfoAdapter } from "./IPCScoop";
 import { WingetPackageInfoAdapter } from "./IPCWinget";
 
-export const allPackageMangers = ["scoop", "winget"];
+export const allPackageMangers = ["scoop"/*, "winget"*/];
 
 export function packageManagerForName(
   name: string
