@@ -330,6 +330,8 @@ export abstract class ProductView extends BootstrapBlockElement {
     }
 
     if (typeof value === "object" && !this.isLitTemplateResult(value)) {
+      if (!Object.keys(value).length) return null;
+
       return html`
         <dl>
           ${repeat(
