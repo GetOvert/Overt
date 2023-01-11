@@ -32,7 +32,7 @@ if (process.platform === "win32") {
         "version" TEXT NOT NULL,
         "desc" TEXT NOT NULL,
         "json" TEXT NOT NULL,
-        "installed_version" TEXT,
+        "installed_version" TEXT
       )`
   );
 }
