@@ -245,7 +245,11 @@ app.on("ready", () => {
 
   try {
     if (store.get("showSetupOnNextLaunch")) throw null;
-    accessSync(`${store.get("homebrewPath")}/bin/brew`, constants.X_OK);
+    if (process.platform === "darwin") {
+      accessSync(`${store.get("homebrewPath")}/bin/brew`, constants.X_OK);
+    } else {
+      accessSync(`${store.get("scoopPath")}/shims/scoop.ps1`, constants.X_OK);
+    }
 
     // OK! We have a package manager
     createMainWindow();
