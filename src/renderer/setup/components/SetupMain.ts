@@ -11,6 +11,8 @@ import { join } from "lit/directives/join.js";
 export default class SetupMain extends BootstrapBlockElement {
   @state()
   homebrewPath?: string;
+  @state()
+  scoopPath?: string;
 
   @state()
   fieldFocus = new Set<keyof PackageManagersConfig>();
