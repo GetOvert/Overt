@@ -167,9 +167,10 @@ const brewCask: IPCBrewCask = {
     } catch (e) {}
 
     const nowTime = new Date().getTime();
+    const timeSinceIndexBuilt =
+      (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000;
     const indexTooOld =
-      (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
-      (await getFullIndexIntervalInSeconds());
+      timeSinceIndexBuilt > (await getFullIndexIntervalInSeconds());
 
     if (
       !indexExists ||
@@ -284,16 +285,29 @@ const brewCask: IPCBrewCask = {
 
     // The API response can't tell us what's installed locally,
     // so reindex installed packages as a 2nd step
-    const { casks } = JSON.parse(
-      await runBackgroundBrewProcess([
-        "info",
-        "--json=v2",
-        "--cask",
-        "--installed",
-      ])
-    );
+    const { casks: casksFromLocalRepos }: { casks: BrewCaskPackageInfo[] } =
+      JSON.parse(
+        await runBackgroundBrewProcess([
+          "info",
+          "--json=v2",
+          "--cask",
+          "--installed",
+        ])
+      );
 
-    await (brewCask as any)._ingestCaskInfo(casks, auxMetadata);
+    // If `tap` is null, check if it should really be "homebrew/cask" (#39)
+    const caskTokensFromAPI = new Set(casksFromAPI.map(({ token }) => token));
+    for (const cask of casksFromLocalRepos) {
+      if (
+        cask.tap === null &&
+        cask.full_token === cask.token &&
+        caskTokensFromAPI.has(cask.token)
+      ) {
+        cask.tap = "homebrew/cask";
+      }
+    }
+
+    await (brewCask as any)._ingestCaskInfo(casksFromLocalRepos, auxMetadata);
   },
 
   async _fetchAuxMetadata(): Promise<CaskAuxMetadata> {
