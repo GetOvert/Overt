@@ -58,9 +58,10 @@ const winget: IPCWinget = {
     } catch (e) {}
 
     const nowTime = new Date().getTime();
+    const lastFullIndexTime = cacheDB_lastFullIndexJsTimestamp("winget");
+    const secondsSinceIndexBuilt = (nowTime - lastFullIndexTime) / 1000;
     const indexTooOld =
-      (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
-      (await getFullIndexIntervalInSeconds());
+      secondsSinceIndexBuilt > (await getFullIndexIntervalInSeconds());
 
     if (
       !indexExists ||
@@ -82,7 +83,7 @@ const winget: IPCWinget = {
     (winget as any)._ingestPackageInfo(undefined, manifests);
 
     (winget as any)._postIndexing();
-    cacheDB_updateLastFullIndexJsTimestamp();
+    cacheDB_updateLastFullIndexJsTimestamp("winget");
   },
 
   async indexOutdated(): Promise<void> {

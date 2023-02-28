@@ -167,10 +167,10 @@ const brewCask: IPCBrewCask = {
     } catch (e) {}
 
     const nowTime = new Date().getTime();
-    const timeSinceIndexBuilt =
-      (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000;
+    const lastFullIndexTime = cacheDB_lastFullIndexJsTimestamp("brew-cask");
+    const secondsSinceIndexBuilt = (nowTime - lastFullIndexTime) / 1000;
     const indexTooOld =
-      timeSinceIndexBuilt > (await getFullIndexIntervalInSeconds());
+      secondsSinceIndexBuilt > (await getFullIndexIntervalInSeconds());
 
     if (
       !indexExists ||
@@ -196,7 +196,7 @@ const brewCask: IPCBrewCask = {
     ]);
 
     (brewCask as any)._postIndexing();
-    cacheDB_updateLastFullIndexJsTimestamp();
+    cacheDB_updateLastFullIndexJsTimestamp("brew-cask");
   },
 
   async indexOutdated(): Promise<void> {

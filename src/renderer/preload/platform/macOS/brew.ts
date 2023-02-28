@@ -74,9 +74,10 @@ const brew: IPCBrew = {
     } catch (e) {}
 
     const nowTime = new Date().getTime();
+    const lastFullIndexTime = cacheDB_lastFullIndexJsTimestamp("brew");
+    const secondsSinceIndexBuilt = (nowTime - lastFullIndexTime) / 1000;
     const indexTooOld =
-      (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
-      (await getFullIndexIntervalInSeconds());
+      secondsSinceIndexBuilt > (await getFullIndexIntervalInSeconds());
 
     if (
       !indexExists ||
@@ -102,7 +103,7 @@ const brew: IPCBrew = {
     ]);
 
     (brew as any)._postIndexing();
-    cacheDB_updateLastFullIndexJsTimestamp();
+    cacheDB_updateLastFullIndexJsTimestamp("brew");
   },
 
   async indexOutdated(): Promise<void> {
