@@ -7,7 +7,9 @@ export type Config = {
 
   fullIndexIntervalDays: number;
 
+  verboseLogging: boolean;
   autoUpdateSelf: boolean;
+
   showSetupOnNextLaunch: boolean;
   indexOnNextLaunch: boolean;
 } & PackageManagersConfig;

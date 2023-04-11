@@ -25,6 +25,7 @@ import {
   BrewUpdateTimes,
   fetchUpdateTimes,
   getBrewExecutablePath,
+  getVerboseFlags,
   runBackgroundBrewProcess,
   TapInfo,
 } from "./brewCask";
@@ -446,6 +447,7 @@ const brew: IPCBrew = {
         quote([
           await getBrewExecutablePath(),
           "install",
+          ...(await getVerboseFlags()),
           "--formula",
           formulaName,
         ]) +
@@ -481,6 +483,7 @@ const brew: IPCBrew = {
         quote([
           await getBrewExecutablePath(),
           "upgrade",
+          ...(await getVerboseFlags()),
           "--formula",
           formulaName,
         ]) +
@@ -516,6 +519,7 @@ const brew: IPCBrew = {
         quote([
           await getBrewExecutablePath(),
           "uninstall",
+          ...(await getVerboseFlags()),
           "--formula",
           formulaName,
         ]) +
@@ -578,7 +582,13 @@ const brew: IPCBrew = {
       });
 
       terminal.send(
-        quote([await getBrewExecutablePath(), "tap", name, url]) +
+        quote([
+          await getBrewExecutablePath(),
+          "tap",
+          ...(await getVerboseFlags()),
+          name,
+          url,
+        ]) +
           " && echo '-- overt-succeeded: tap --' || echo '-- overt-failed: tap --'\n"
       );
     });
@@ -602,7 +612,12 @@ const brew: IPCBrew = {
       });
 
       terminal.send(
-        quote([await getBrewExecutablePath(), "untap", name]) +
+        quote([
+          await getBrewExecutablePath(),
+          "untap",
+          ...(await getVerboseFlags()),
+          name,
+        ]) +
           " && echo '-- overt-succeeded: untap --' || echo '-- overt-failed: untap --'\n"
       );
     });

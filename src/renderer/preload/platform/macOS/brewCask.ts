@@ -610,6 +610,7 @@ const brewCask: IPCBrewCask = {
         quote([
           await getBrewExecutablePath(),
           "install",
+          ...(await getVerboseFlags()),
           force ? "--force" : "--adopt",
           ...(await getQuarantineFlags()),
           "--cask",
@@ -681,6 +682,7 @@ const brewCask: IPCBrewCask = {
         quote([
           await getBrewExecutablePath(),
           "upgrade",
+          ...(await getVerboseFlags()),
           ...(await getQuarantineFlags()),
           "--cask",
           caskName,
@@ -720,6 +722,7 @@ const brewCask: IPCBrewCask = {
         quote([
           await getBrewExecutablePath(),
           "uninstall",
+          ...(await getVerboseFlags()),
           ...(zap ? ["--zap"] : []),
           "--cask",
           caskName,
@@ -888,6 +891,10 @@ export async function getQuarantineFlags(): Promise<string[]> {
       (await settings.get("validateCodeSignatures")) ? "" : "no-"
     }quarantine`,
   ];
+}
+
+export async function getVerboseFlags(): Promise<string[]> {
+  return (await settings.get("verboseLogging")) ? ["-v"] : [];
 }
 
 export default brewCask;
