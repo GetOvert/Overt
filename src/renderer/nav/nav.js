@@ -7,20 +7,6 @@ window.addEventListener("popstate", () => {
   );
 });
 
-new MutationObserver(() => {
-  document
-    .querySelectorAll(".openstore-jsnav-back-link")
-    .forEach((backLink) => {
-      if (!backLink.openStoreHandlerSetForBackLink) {
-        backLink.openStoreHandlerSetForBackLink = true;
-        backLink.addEventListener("click", (event) => {
-          event.preventDefault();
-          window.history.back();
-        });
-      }
-    });
-}).observe(document.body, { attributes: true, childList: true, subtree: true });
-
 window.openStore.encodeFragment = (routeParams) => {
   return "#" + encodeURIComponent(JSON.stringify(routeParams));
 };
@@ -69,55 +55,10 @@ window.openStore.displayPage = async (page, subpage, target) => {
 
   if (subpage) page = await page.getSubpage(subpage);
 
-  if (page) {
-    const pageTitleDocumentFragment = document
-      .querySelector("#openstore-template-page-title")
-      .content.cloneNode(true);
-
-    // Change page title
-    if (page.title) {
-      pageTitleDocumentFragment.querySelector(
-        "#openstore-page-title"
-      ).textContent = page.title;
-    } else {
-      for (const child of pageTitleDocumentFragment.children) {
-        child.classList.add("d-none");
-      }
-    }
-
-    // Control "back" link visibility
-    pageTitleDocumentFragment
-      .querySelectorAll(".openstore-jsnav-back-link")
-      .forEach((backLink) => {
-        if (page.isSubpage) {
-          backLink.classList.remove("d-none");
-        } else {
-          backLink.classList.add("d-none");
-        }
-      });
-
-    target.replaceChildren(pageTitleDocumentFragment);
-
-    if (page.isSubpage) {
-      window.scrollTo({ top: 0 });
-    }
-  }
-
-  // Display loading template
-  const loadingDocumentFragment = document
-    .querySelector("#openstore-template-loading")
-    .content.cloneNode(true);
-  loadingDocumentFragment.querySelector(".openstore-loading-container").id =
-    "displayPage-loading-indicator";
-  target.append(loadingDocumentFragment);
-
   const renderingContainer = document.createElement("div");
 
   // Let the page do its setup
   if (page && page.onNavigatedTo) await page.onNavigatedTo(renderingContainer);
 
   target.append(renderingContainer);
-
-  // Remove loading template
-  target.querySelector("#displayPage-loading-indicator")?.remove();
 };

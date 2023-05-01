@@ -37,6 +37,10 @@ export default class PackageDetailView<PackageInfo> extends ProductView {
     return packageInfoAdapterForPackageManagerName(this.packageManagerName);
   }
 
+  get title(): string {
+    return this.packageInfoAdapter.packageName(this.packageInfo);
+  }
+
   protected get subtitle(): string {
     const name = this.packageInfoAdapter.packageName(this.packageInfo);
     const identifier = this.packageInfoAdapter.packageIdentifier(

@@ -529,8 +529,6 @@ export default class PackagesView<
 }
 
 (window as any).openStore.pages["apps"] = {
-  title: "",
-
   _currentPackageManager: null,
   _currentPackageInfoAdapter: null,
 
@@ -554,7 +552,6 @@ export default class PackagesView<
     const packageInfo = this._currentPackageManager.info(packageIdentifier);
 
     return {
-      title: this._currentPackageInfoAdapter.packageName(packageInfo),
       isSubpage: true,
 
       async onNavigatedTo(content: HTMLElement) {

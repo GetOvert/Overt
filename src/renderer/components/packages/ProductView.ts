@@ -33,6 +33,7 @@ export type Button = {
 };
 
 export abstract class ProductView extends BootstrapBlockElement {
+  abstract readonly title: string;
   protected abstract readonly subtitle: string;
   protected abstract readonly description: string;
   protected abstract readonly sourceRepositoryName: string;
@@ -52,6 +53,8 @@ export abstract class ProductView extends BootstrapBlockElement {
     taskQueue.addObserver(this.taskQueueObserver);
 
     document.addEventListener("keydown", this.keydown);
+
+    window.scrollTo({ top: 0 });
   }
 
   disconnectedCallback(): void {
@@ -111,6 +114,106 @@ export abstract class ProductView extends BootstrapBlockElement {
 
   render() {
     return html`
+      <div
+        class="container-fluid d-flex flex-row justify-content-center align-items-end flex-nowrap sticky-top bg-light pt-1 pb-2"
+        style="top: 53px"
+      >
+        <nav
+          class="d-flex justify-content-start ms-4 me-auto"
+          style="flex: 1"
+          aria-label="Go back"
+        >
+          <a
+            href="#"
+            class="btn btn-link fs-3 text-decoration-none p-0"
+            style="-webkit-user-drag: none"
+            tabindex="0"
+            @click=${(event: Event) => {
+              event.preventDefault();
+              window.history.back();
+            }}
+          >
+            <svg
+              version="1.1"
+              xmlns="http://www.w3.org/2000/svg"
+              width="34"
+              height="34"
+              viewBox="0, 0, 128, 128"
+              color="inherit"
+            >
+              <g id="Layer_2">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="64"
+                  fill="none"
+                  stroke="currentcolor"
+                  stroke-width="20"
+                  clip-path="url(#back-arrow-bg-circle-clip)"
+                />
+                <clipPath id="back-arrow-bg-circle-clip">
+                  <circle cx="64" cy="64" r="64" />
+                </clipPath>
+              </g>
+              <g id="Layer_1">
+                <g>
+                  <path
+                    d="M98.178,64.412 L32,64.412"
+                    fill="none"
+                    stroke="currentcolor"
+                    stroke-width="12"
+                  />
+                  <path
+                    fill="currentcolor"
+                    d="M97.096,69.912 C93.782,69.912 91.096,67.225 91.096,63.912 C91.096,60.598 93.782,57.912 97.096,57.912 C100.41,57.912 103.096,60.598 103.096,63.912 C103.096,67.225 100.41,69.912 97.096,69.912 z"
+                  />
+                </g>
+                <g>
+                  <path
+                    d="M53.293,85.696 L31.064,63.467"
+                    fill="none"
+                    stroke="currentcolor"
+                    stroke-width="12"
+                  />
+                  <path
+                    fill="currentcolor"
+                    d="M57.11,81.028 C54.767,78.685 50.968,78.685 48.625,81.028 C46.282,83.371 46.282,87.17 48.625,89.513 C50.968,91.857 54.767,91.857 57.11,89.513 C59.453,87.17 59.453,83.371 57.11,81.028 z"
+                  />
+                </g>
+                <g>
+                  <path
+                    d="M53.253,43.304 L31.064,65.493"
+                    fill="none"
+                    stroke="currentcolor"
+                    stroke-width="12"
+                  />
+                  <path
+                    fill="currentcolor"
+                    d="M57.07,46.972 C54.727,49.315 50.928,49.315 48.585,46.972 C46.242,44.629 46.242,40.83 48.585,38.487 C50.928,36.143 54.727,36.143 57.07,38.487 C59.413,40.83 59.413,44.629 57.07,46.972 z"
+                  />
+                </g>
+                <path
+                  fill="currentcolor"
+                  d="M34.927,67.835 C32.76,70.002 29.247,70.002 27.08,67.835 C24.913,65.668 24.913,62.155 27.08,59.989 C29.247,57.822 32.76,57.822 34.927,59.989 C37.093,62.155 37.093,65.668 34.927,67.835 z"
+                />
+              </g>
+            </svg>
+          </a>
+        </nav>
+        <div
+          class="d-flex justify-content-center text-center text-nowrap mt-4"
+          style="flex: 1"
+        >
+          <h1 id="openstore-page-title" class="mb-0" style="font-weight: 500">
+            ${this.title}
+          </h1>
+        </div>
+        <span
+          class="d-flex justify-content-end ms-auto me-4"
+          style="flex: 1"
+        ></span>
+      </div>
+
       <div class="mx-4">
         <p
           class="d-flex flex-column gap-1 fs-slightly-larger text-center mt-1 mb-2"
