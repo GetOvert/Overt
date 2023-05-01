@@ -43,7 +43,7 @@ export function cacheDB_addSchema(schema: string) {
 }
 
 type CacheDBMeta = {
-  lastFullIndexJsTimestamp?: number;
+  lastFullIndexJsTimestamp?: Record<string /* package manager key */, number>;
 };
 
 function cacheDB_loadMeta(): CacheDBMeta {
@@ -58,13 +58,24 @@ function cacheDB_saveMeta(meta: CacheDBMeta) {
   fs.writeFileSync(cacheMetaPath, JSON.stringify(meta));
 }
 
-export function cacheDB_lastFullIndexJsTimestamp(): number {
-  return cacheDB_loadMeta()?.lastFullIndexJsTimestamp ?? new Date().getTime();
+export function cacheDB_lastFullIndexJsTimestamp(
+  packageManagerKey: string
+): number {
+  return (
+    cacheDB_loadMeta()?.lastFullIndexJsTimestamp?.[packageManagerKey] ??
+    new Date().getTime()
+  );
 }
-export function cacheDB_updateLastFullIndexJsTimestamp(): void {
+export function cacheDB_updateLastFullIndexJsTimestamp(
+  packageManagerKey: string
+): void {
+  const oldMeta = cacheDB_loadMeta();
   cacheDB_saveMeta({
-    ...cacheDB_loadMeta(),
-    lastFullIndexJsTimestamp: new Date().getTime(),
+    ...oldMeta,
+    lastFullIndexJsTimestamp: {
+      ...oldMeta.lastFullIndexJsTimestamp,
+      [packageManagerKey]: new Date().getTime(),
+    },
   });
 }
 

@@ -214,7 +214,9 @@ app.on("ready", () => {
 
       fullIndexIntervalDays: 3,
 
+      verboseLogging: false,
       autoUpdateSelf: true,
+
       showSetupOnNextLaunch: true,
       indexOnNextLaunch: true,
     },

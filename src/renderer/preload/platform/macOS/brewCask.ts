@@ -167,9 +167,10 @@ const brewCask: IPCBrewCask = {
     } catch (e) {}
 
     const nowTime = new Date().getTime();
+    const lastFullIndexTime = cacheDB_lastFullIndexJsTimestamp("brew-cask");
+    const secondsSinceIndexBuilt = (nowTime - lastFullIndexTime) / 1000;
     const indexTooOld =
-      (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
-      (await getFullIndexIntervalInSeconds());
+      secondsSinceIndexBuilt > (await getFullIndexIntervalInSeconds());
 
     if (
       !indexExists ||
@@ -195,7 +196,7 @@ const brewCask: IPCBrewCask = {
     ]);
 
     (brewCask as any)._postIndexing();
-    cacheDB_updateLastFullIndexJsTimestamp();
+    cacheDB_updateLastFullIndexJsTimestamp("brew-cask");
   },
 
   async indexOutdated(): Promise<void> {
@@ -284,16 +285,29 @@ const brewCask: IPCBrewCask = {
 
     // The API response can't tell us what's installed locally,
     // so reindex installed packages as a 2nd step
-    const { casks } = JSON.parse(
-      await runBackgroundBrewProcess([
-        "info",
-        "--json=v2",
-        "--cask",
-        "--installed",
-      ])
-    );
+    const { casks: casksFromLocalRepos }: { casks: BrewCaskPackageInfo[] } =
+      JSON.parse(
+        await runBackgroundBrewProcess([
+          "info",
+          "--json=v2",
+          "--cask",
+          "--installed",
+        ])
+      );
 
-    await (brewCask as any)._ingestCaskInfo(casks, auxMetadata);
+    // If `tap` is null, check if it should really be "homebrew/cask" (#39)
+    const caskTokensFromAPI = new Set(casksFromAPI.map(({ token }) => token));
+    for (const cask of casksFromLocalRepos) {
+      if (
+        cask.tap === null &&
+        cask.full_token === cask.token &&
+        caskTokensFromAPI.has(cask.token)
+      ) {
+        cask.tap = "homebrew/cask";
+      }
+    }
+
+    await (brewCask as any)._ingestCaskInfo(casksFromLocalRepos, auxMetadata);
   },
 
   async _fetchAuxMetadata(): Promise<CaskAuxMetadata> {
@@ -596,6 +610,7 @@ const brewCask: IPCBrewCask = {
         quote([
           await getBrewExecutablePath(),
           "install",
+          ...(await getVerboseFlags()),
           force ? "--force" : "--adopt",
           ...(await getQuarantineFlags()),
           "--cask",
@@ -667,6 +682,7 @@ const brewCask: IPCBrewCask = {
         quote([
           await getBrewExecutablePath(),
           "upgrade",
+          ...(await getVerboseFlags()),
           ...(await getQuarantineFlags()),
           "--cask",
           caskName,
@@ -706,6 +722,7 @@ const brewCask: IPCBrewCask = {
         quote([
           await getBrewExecutablePath(),
           "uninstall",
+          ...(await getVerboseFlags()),
           ...(zap ? ["--zap"] : []),
           "--cask",
           caskName,
@@ -874,6 +891,10 @@ export async function getQuarantineFlags(): Promise<string[]> {
       (await settings.get("validateCodeSignatures")) ? "" : "no-"
     }quarantine`,
   ];
+}
+
+export async function getVerboseFlags(): Promise<string[]> {
+  return (await settings.get("verboseLogging")) ? ["-v"] : [];
 }
 
 export default brewCask;

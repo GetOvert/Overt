@@ -29,9 +29,9 @@ export class SettingsPane extends BootstrapBlockElement {
   fullIndexIntervalDays: number;
 
   @state()
-  autoUpdateSelf: boolean;
+  verboseLogging: boolean;
   @state()
-  homebrewPath: string;
+  autoUpdateSelf: boolean;
 
   protected updated(changedProperties: PropertyValues<this>): void {
     this.addPopperTooltips();
@@ -45,8 +45,8 @@ export class SettingsPane extends BootstrapBlockElement {
       "useSystemAccentColor",
       "tintDarkBackgrounds",
       "fullIndexIntervalDays",
+      "verboseLogging",
       "autoUpdateSelf",
-      "homebrewPath",
     ];
 
     const valueEntries = await Promise.all(
@@ -183,6 +183,11 @@ export class SettingsPane extends BootstrapBlockElement {
         </h3>
         <hr aria-hidden="true" />
 
+        ${this.makeCheckbox(
+          "verboseLogging",
+          "Request detailed log output",
+          "Pass “verbose” flag to package managers, requesting more detailed output? (Default: No)"
+        )}
         ${this.makeCheckbox(
           "autoUpdateSelf",
           "Automatically update Overt",

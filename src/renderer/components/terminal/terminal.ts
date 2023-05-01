@@ -20,4 +20,16 @@ webglAddon.onContextLoss(() => webglAddon.dispose());
 xterm.open(document.querySelector("#terminal")!);
 xterm.loadAddon(webglAddon);
 
+xterm.write(
+  `<<━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+This is the Log view, which shows the raw results of interactions with
+package managers for major tasks, including installs, updates, and uninstalls.
+
+Please note that non-destructive package manager interactions used
+to update the catalog are not shown here, as they are performed
+concurrently in the background.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`.replace(/\n/g, "\r\n")
+);
+
 window.terminal.onReceive((data) => xterm.write(data));

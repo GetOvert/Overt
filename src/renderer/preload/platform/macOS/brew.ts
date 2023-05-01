@@ -25,6 +25,7 @@ import {
   BrewUpdateTimes,
   fetchUpdateTimes,
   getBrewExecutablePath,
+  getVerboseFlags,
   runBackgroundBrewProcess,
   TapInfo,
 } from "./brewCask";
@@ -74,9 +75,10 @@ const brew: IPCBrew = {
     } catch (e) {}
 
     const nowTime = new Date().getTime();
+    const lastFullIndexTime = cacheDB_lastFullIndexJsTimestamp("brew");
+    const secondsSinceIndexBuilt = (nowTime - lastFullIndexTime) / 1000;
     const indexTooOld =
-      (nowTime - cacheDB_lastFullIndexJsTimestamp()) / 1000 >
-      (await getFullIndexIntervalInSeconds());
+      secondsSinceIndexBuilt > (await getFullIndexIntervalInSeconds());
 
     if (
       !indexExists ||
@@ -102,7 +104,7 @@ const brew: IPCBrew = {
     ]);
 
     (brew as any)._postIndexing();
-    cacheDB_updateLastFullIndexJsTimestamp();
+    cacheDB_updateLastFullIndexJsTimestamp("brew");
   },
 
   async indexOutdated(): Promise<void> {
@@ -445,6 +447,7 @@ const brew: IPCBrew = {
         quote([
           await getBrewExecutablePath(),
           "install",
+          ...(await getVerboseFlags()),
           "--formula",
           formulaName,
         ]) +
@@ -480,6 +483,7 @@ const brew: IPCBrew = {
         quote([
           await getBrewExecutablePath(),
           "upgrade",
+          ...(await getVerboseFlags()),
           "--formula",
           formulaName,
         ]) +
@@ -515,6 +519,7 @@ const brew: IPCBrew = {
         quote([
           await getBrewExecutablePath(),
           "uninstall",
+          ...(await getVerboseFlags()),
           "--formula",
           formulaName,
         ]) +
@@ -577,7 +582,13 @@ const brew: IPCBrew = {
       });
 
       terminal.send(
-        quote([await getBrewExecutablePath(), "tap", name, url]) +
+        quote([
+          await getBrewExecutablePath(),
+          "tap",
+          ...(await getVerboseFlags()),
+          name,
+          url,
+        ]) +
           " && echo '-- overt-succeeded: tap --' || echo '-- overt-failed: tap --'\n"
       );
     });
@@ -601,7 +612,12 @@ const brew: IPCBrew = {
       });
 
       terminal.send(
-        quote([await getBrewExecutablePath(), "untap", name]) +
+        quote([
+          await getBrewExecutablePath(),
+          "untap",
+          ...(await getVerboseFlags()),
+          name,
+        ]) +
           " && echo '-- overt-succeeded: untap --' || echo '-- overt-failed: untap --'\n"
       );
     });
