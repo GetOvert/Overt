@@ -28,6 +28,12 @@ export type BrewCaskPackageInfo = {
   conflicts_with?: any; // TODO: Better typing
   aliases?: string[];
   outdated: boolean;
+  deprecated: boolean;
+  deprecation_date?: string | null;
+  deprecation_reason?: string | null;
+  disabled: boolean;
+  disable_date?: string | null;
+  disable_reason?: string | null;
   artifacts: BrewCaskArtifact[];
   installed_30d?: string | null; // TODO: Better typing
   installed_90d?: string | null; // TODO: Better typing
@@ -118,11 +124,11 @@ export class BrewCaskPackageInfoAdapter
   }
 
   isPackageDeprecated(packageInfo: BrewCaskPackageInfo): boolean {
-    return false;
+    return packageInfo.deprecated;
   }
 
   isPackageDisabled(packageInfo: BrewCaskPackageInfo): boolean {
-    return false;
+    return packageInfo.disabled;
   }
 
   isPackageOvert(packageInfo: BrewCaskPackageInfo): boolean {
