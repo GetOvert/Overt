@@ -64,9 +64,15 @@ async function createMainWindow(): Promise<void> {
     webPreferences: {
       additionalArguments: [
         `Overt.accentColor=${accentColor}`,
-        `Overt.cachePath=${Buffer.from(app.getPath("cache")).toString(
-          "base64"
-        )}`,
+        `Overt.cachePath=${Buffer.from(
+          app.getPath(
+            // This path constant is not officially documented (or at least not anymore).
+            // However, it gets us what we need, and there are no obvious reasons for it to be removed.
+            // https://github.com/electron/electron/blob/2745771a22dc7aec4364fec758804e0b7f230357/shell/browser/api/electron_api_app.cc#L378
+            // On macOS, this gives "~/Library/Caches".
+            "cache" as any
+          )
+        ).toString("base64")}`,
       ],
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
       sandbox: false,
