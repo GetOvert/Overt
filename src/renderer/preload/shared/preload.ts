@@ -34,15 +34,24 @@ ipcRenderer.on("focus_search_bar", () => {
 });
 
 ipcRenderer.on("toggle_settings", () => {
-  const settingsButton = document.querySelector("openstore-settings-button")!;
+  const topBar = document.querySelector("overt-top-bar") as TopBar;
+  const settingsButton = topBar.shadowRoot!.querySelector(
+    "openstore-settings-button"
+  )!;
   settingsButton.dispatchEvent(new Event("togglePaneShown"));
 });
 ipcRenderer.on("show_settings", () => {
-  const settingsButton = document.querySelector("openstore-settings-button")!;
+  const topBar = document.querySelector("overt-top-bar") as TopBar;
+  const settingsButton = topBar.shadowRoot!.querySelector(
+    "openstore-settings-button"
+  )!;
   settingsButton.dispatchEvent(new Event("showPane"));
 });
 
 ipcRenderer.on("toggle_tasks", () => {
-  const tasksButton = document.querySelector("openstore-tasks-button")!;
+  const topBar = document.querySelector("overt-top-bar") as TopBar;
+  const tasksButton = topBar.shadowRoot!.querySelector(
+    "openstore-tasks-button"
+  )!;
   tasksButton.dispatchEvent(new Event("togglePaneShown"));
 });
