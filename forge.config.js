@@ -22,12 +22,11 @@ module.exports = {
           // Name of certificate to sign with
           identity: process.env.CODESIGN_IDENTITY,
 
-          "hardened-runtime": true,
-          // Silence false positive warning message
-          "gatekeeper-assess": false,
-          entitlements: "entitlements.plist",
-          "entitlements-inherit": "entitlements.plist",
-          "signature-flags": "library",
+          optionsForFile: () => ({
+            entitlements: "entitlements.plist",
+            hardenedRuntime: true,
+            signatureFlags: "library",
+          }),
         }
       : undefined,
     osxNotarize: process.env.NOTARIZE_APPLE_ID
@@ -58,21 +57,11 @@ module.exports = {
       name: "@electron-forge/maker-zip",
       platforms: ["darwin"],
     },
-    {
-      name: "@electron-forge/maker-deb",
-      config: {
-        mimeType: ["x-scheme-handler/overt"],
-      },
-    },
-    {
-      name: "@electron-forge/maker-rpm",
-      config: {},
-    },
   ],
   plugins: [
-    [
-      "@electron-forge/plugin-webpack",
-      {
+    {
+      name: "@electron-forge/plugin-webpack",
+      config: {
         mainConfig: "./webpack.main.config.js",
         renderer: {
           config: "./webpack.renderer.config.js",
@@ -94,6 +83,6 @@ module.exports = {
           ],
         },
       },
-    ],
+    },
   ],
 };
