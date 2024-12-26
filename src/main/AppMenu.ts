@@ -16,7 +16,7 @@ export function initAppMenu() {
                 {
                   label: "Preferences…",
                   accelerator: "CmdOrCtrl+,",
-                  click(menuItem, browserWindow) {
+                  click(menuItem, browserWindow: BrowserWindow) {
                     browserWindow?.webContents.send("show_settings");
                   },
                 },
@@ -79,21 +79,21 @@ export function initAppMenu() {
           {
             label: "Back",
             accelerator: "CmdOrCtrl+[",
-            click(menuItem, browserWindow) {
-              browserWindow?.webContents.goBack();
+            click(menuItem, browserWindow: BrowserWindow) {
+              browserWindow?.webContents.navigationHistory.goBack();
             },
           },
           {
             label: "Forward",
             accelerator: "CmdOrCtrl+]",
-            click(menuItem, browserWindow) {
-              browserWindow?.webContents.goForward();
+            click(menuItem, browserWindow: BrowserWindow) {
+              browserWindow?.webContents.navigationHistory.goForward();
             },
           },
           {
             label: "Focus Search Bar",
             accelerator: "CmdOrCtrl+F",
-            click(menuItem, browserWindow) {
+            click(menuItem, browserWindow: BrowserWindow) {
               browserWindow?.webContents.send("focus_search_bar");
             },
           },
@@ -101,14 +101,14 @@ export function initAppMenu() {
           {
             label: "Toggle Tasks Pane",
             accelerator: "CmdOrCtrl+Alt+T",
-            click(menuItem, browserWindow) {
+            click(menuItem, browserWindow: BrowserWindow) {
               browserWindow?.webContents.send("toggle_tasks");
             },
           },
           {
             label: "Toggle Settings Pane",
             accelerator: "CmdOrCtrl+Alt+,",
-            click(menuItem, browserWindow) {
+            click(menuItem, browserWindow: BrowserWindow) {
               browserWindow?.webContents.send("toggle_settings");
             },
           },
