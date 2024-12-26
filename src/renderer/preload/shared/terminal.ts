@@ -1,7 +1,8 @@
-import { ipcRenderer } from "electron";
+import { ipcRenderer, IpcRendererEvent } from "electron";
 import { IPCTerminal } from "ipc/IPCTerminal";
 
-const callbackShims: Map<number, (e: Event, data: string) => void> = new Map();
+const callbackShims: Map<number, (e: IpcRendererEvent, data: string) => void> =
+  new Map();
 let nextCallbackID = 1;
 
 export default {
@@ -10,7 +11,7 @@ export default {
   },
 
   onReceive(callback: (data: string) => void): number {
-    const shim = (e: Event, data: string) => {
+    const shim = (e: IpcRendererEvent, data: string) => {
       callback(data);
     };
 
