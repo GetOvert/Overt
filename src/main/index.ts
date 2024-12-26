@@ -69,6 +69,7 @@ async function createMainWindow(): Promise<void> {
         )}`,
       ],
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      sandbox: false,
     },
 
     show: false,
