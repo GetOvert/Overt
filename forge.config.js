@@ -29,14 +29,10 @@ module.exports = {
           }),
         }
       : undefined,
-    osxNotarize: process.env.NOTARIZE_APPLE_ID
+    osxNotarize: process.env.NOTARIZE_KEYCHAIN_PROFILE
       ? {
-          // Email address of Apple ID
-          appleId: process.env.NOTARIZE_APPLE_ID,
-
-          // App-specific password for the Apple ID, or a reference like "@keychain:AC_PASSWORD"
-          // (https://github.com/electron/electron-notarize#safety-when-using-appleidpassword)
-          appleIdPassword: process.env.NOTARIZE_PASSWORD,
+          tool: "notarytool",
+          keychainProfile: process.env.NOTARIZE_KEYCHAIN_PROFILE,
         }
       : undefined,
     protocols: [
