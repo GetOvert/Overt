@@ -16,7 +16,7 @@ module.exports = {
     icon: "./icons/overt-app-icon",
     appBundleId: "app.getovert.Overt",
     appCategoryType: "public.app-category.utilities",
-    appCopyright: "© 2022 Overt Contributors",
+    appCopyright: "© 2022–2024 Overt Contributors",
     osxSign: process.env.CODESIGN_IDENTITY
       ? {
           // Name of certificate to sign with
