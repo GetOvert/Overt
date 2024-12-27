@@ -28,10 +28,10 @@
     "forge": "./forge.config.js"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.4.1",
-    "@electron-forge/maker-squirrel": "^6.4.1",
-    "@electron-forge/maker-zip": "^6.4.1",
-    "@electron-forge/plugin-webpack": "^6.4.1",
+    "@electron-forge/cli": "6.4.1",
+    "@electron-forge/maker-squirrel": "6.4.1",
+    "@electron-forge/maker-zip": "6.4.1",
+    "@electron-forge/plugin-webpack": "6.4.1",
     "@types/better-sqlite3": "^7.6.0",
     "@types/bootstrap": "^5.2.4",
     "@types/clone-deep": "^4.0.1",
