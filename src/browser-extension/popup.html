@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootswatch@5.2.2/dist/sandstone/bootstrap.min.css"
+      integrity="sha384-EFDBp0SPck8Z+AQ7szytGzVc4SXie1Iw5FODNMfggACk3m6bjDm2vigwpBiTIHNN"
+      crossorigin="anonymous"
+    />
+    <style>
+      @import "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap";
+      @import "https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css";
+
+      /* What follows is a pared-down version of bootstrap-overrides.lit.css: */
+
+      /* Overrides rule in Bootstrap's _reboot.scss */
+      :root {
+        scroll-behavior: auto !important;
+      }
+
+      /* Revert visual changes in Bootstrap 5.2 */
+      * {
+        --bs-border-radius: 0.25rem !important;
+        --bs-btn-border-radius: var(--bs-border-radius) !important;
+        --bs-dropdown-border-radius: var(--bs-border-radius) !important;
+        --bs-nav-tabs-border-radius: var(--bs-border-radius) !important;
+        --bs-nav-pills-border-radius: var(--bs-border-radius) !important;
+        --bs-navbar-toggler-border-radius: var(--bs-border-radius) !important;
+        --bs-card-border-radius: var(--bs-border-radius) !important;
+        --bs-accordion-border-radius: var(--bs-border-radius) !important;
+        --bs-pagination-border-radius: var(--bs-border-radius) !important;
+        --bs-badge-border-radius: var(--bs-border-radius) !important;
+        --bs-alert-border-radius: var(--bs-border-radius) !important;
+        --bs-list-group-border-radius: var(--bs-border-radius) !important;
+        --bs-toast-border-radius: var(--bs-border-radius) !important;
+        --bs-tooltip-border-radius: var(--bs-border-radius) !important;
+      }
+
+      * {
+        --bs-primary: #46b04a;
+        --bs-primary-rgb: rgb(70, 176, 74);
+
+        --bs-success: hsl(90, 67%, 47%);
+        --bs-success-rgb: 119, 200, 39;
+        --bs-success-fill: hsl(90, 73%, 41%);
+        --bs-success-disabled: hsl(90, 51%, 48%);
+      }
+
+      .h1,
+      h1 {
+        font-size: 1.85rem;
+      }
+      .fs-1 {
+        font-size: 1.85rem !important;
+      }
+      .h2,
+      h2 {
+        font-size: calc(1.3rem + 0.6vw);
+      }
+      .fs-2 {
+        font-size: calc(1.3rem + 0.6vw) !important;
+      }
+      .h3,
+      h3 {
+        font-size: calc(1rem + 0.6vw);
+      }
+      .fs-3 {
+        font-size: calc(1rem + 0.6vw) !important;
+      }
+      .h4,
+      h4 {
+        font-size: calc(0.92rem + 0.3vw);
+      }
+      .fs-4 {
+        font-size: calc(0.92rem + 0.3vw) !important;
+      }
+      .h5,
+      h5 {
+        font-size: calc(0.8rem + 0.15vw);
+      }
+      .fs-5 {
+        font-size: calc(0.8rem + 0.15vw) !important;
+      }
+      .h6:not(.modal-title),
+      h6 {
+        font-size: 0.7rem;
+      }
+      .fs-6 {
+        font-size: 0.7rem !important;
+      }
+
+      .text-bg-primary {
+        color: var(--bs-light) !important;
+        background: rgba(
+          var(--bs-primary-rgb),
+          var(--bs-bg-opacity, 1)
+        ) !important;
+      }
+
+      .btn-primary {
+        --bs-btn-bg: var(--bs-primary);
+        --bs-btn-border-color: var(--bs-primary);
+        --bs-btn-hover-bg: var(--accent-color-dark);
+        --bs-btn-hover-border-color: var(--accent-color-dark);
+        --bs-btn-active-bg: var(--accent-color-dark);
+        --bs-btn-active-border-color: var(--accent-color-dark);
+        --bs-btn-disabled-bg: var(--bs-primary);
+        --bs-btn-disabled-border-color: var(--bs-primary);
+      }
+
+      .btn-outline-primary {
+        --bs-btn-color: var(--bs-primary);
+        --bs-btn-border-color: var(--bs-primary);
+        --bs-btn-hover-bg: var(--bs-primary);
+        --bs-btn-hover-border-color: var(--bs-primary);
+        --bs-btn-active-bg: var(--bs-primary);
+        --bs-btn-active-border-color: var(--bs-primary);
+        --bs-btn-disabled-color: var(--bs-primary);
+        --bs-btn-disabled-border-color: var(--bs-primary);
+      }
+      .btn-outline-primary:active {
+        --bs-btn-color: var(--bs-primary);
+      }
+
+      .btn-success {
+        --bs-btn-bg: var(--bs-success);
+        --bs-btn-border-color: var(--bs-success);
+        --bs-btn-hover-bg: var(--bs-success-fill);
+        --bs-btn-active-bg: var(--bs-success-fill);
+        --bs-btn-disabled-bg: var(--bs-success-disabled);
+        --bs-btn-disabled-border-color: var(--bs-success);
+      }
+
+      .btn-outline-success {
+        --bs-btn-color: var(--bs-success);
+        --bs-btn-border-color: var(--bs-success);
+        --bs-btn-hover-bg: var(--bs-success);
+        --bs-btn-hover-border-color: var(--bs-success);
+        --bs-btn-focus-shadow-rgb: var(--bs-success-rgb);
+        --bs-btn-active-bg: var(--bs-success);
+        --bs-btn-active-border-color: var(--bs-success);
+        --bs-btn-disabled-color: var(--bs-success-disabled);
+        --bs-btn-disabled-border-color: var(--bs-success-disabled);
+      }
+
+      .btn-outline-light {
+        --bs-btn-color: var(--bs-dark) !important;
+      }
+
+      /* Our Bootswatch theme hardcodes this as #fff; make it dynamic again here */
+      .btn-success,
+      .btn-warning {
+        --bs-btn-color: var(--bs-white);
+
+        color: var(--bs-btn-color) !important;
+      }
+
+      .form-check-input:checked,
+      .form-check-input[type="checkbox"]:indeterminate {
+        background-color: var(--bs-primary);
+        border-color: var(--bs-primary);
+      }
+
+      a:not(.btn),
+      .nav-link,
+      .btn-link {
+        color: var(--accent-color);
+        text-decoration: none;
+      }
+      a:hover:not(.btn),
+      .nav-link:hover,
+      .btn-link:hover {
+        color: var(--accent-color-dark);
+      }
+      a:active:not(.btn),
+      .nav-link:active,
+      .btn-link:active {
+        color: var(--accent-color-darker) !important;
+      }
+    </style>
+    <script src="popup.js"></script>
+  </head>
+
+  <body class="bg-light m-4">
+    <div id="noInstall" class="d-none">
+      <p class="mx-auto mb-4" style="width: max-content">
+        No app available for this page.
+      </p>
+    </div>
+
+    <div id="install" class="d-none">
+      <p class="mx-auto mb-4" style="width: max-content">
+        Get it on
+        <span
+          style="
+            font-family: Inter, var(--bs-body-font-family);
+            font-weight: 600;
+          "
+          >Overt</span
+        >
+      </p>
+
+      <a
+        id="link"
+        target="_blank"
+        class="d-flex align-items-center justify-content-center fw-normal m-0 p-2 btn btn-outline-primary"
+        style="text-transform: none"
+      >
+        <span class="ms-2 me-2 flex-shrink-0">Install</span>
+        <img id="caskIcon" class="user-drag-none me-1" height="32" />
+        <span id="cask" class="fw-bolder me-2" style="font-size: 1.25em"></span>
+      </a>
+    </div>
+  </body>
+</html>
