@@ -1,6 +1,5 @@
 export type Config = {
   sendNativeNotifications: boolean;
-  validateCodeSignatures: boolean;
 
   useSystemAccentColor: boolean;
   tintDarkBackgrounds: boolean;

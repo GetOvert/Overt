@@ -16,8 +16,6 @@ import { Config } from "shared/config";
 @customElement("openstore-settings-pane")
 export class SettingsPane extends BootstrapBlockElement {
   @state()
-  validateCodeSignatures: boolean;
-  @state()
   sendNativeNotifications: boolean;
 
   @state()
@@ -40,7 +38,6 @@ export class SettingsPane extends BootstrapBlockElement {
 
   private async fetchSettingsValues() {
     const keys: (keyof this & keyof Config)[] = [
-      "validateCodeSignatures",
       "sendNativeNotifications",
       "useSystemAccentColor",
       "tintDarkBackgrounds",
@@ -116,11 +113,6 @@ export class SettingsPane extends BootstrapBlockElement {
           "sendNativeNotifications",
           "Desktop notifications",
           "Send desktop notifications for requested tasks? (Default: Yes)"
-        )}
-        ${this.makeCheckbox(
-          "validateCodeSignatures",
-          "Use macOS Gatekeeper",
-          "Ask Gatekeeper to check downloads? Blocks known malware and some legitimate software. (Default: Yes)"
         )}
 
         <h3

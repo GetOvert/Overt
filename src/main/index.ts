@@ -214,7 +214,6 @@ app.on("ready", () => {
   store = new ElectronStore<Config & PersistentStorage>({
     defaults: {
       sendNativeNotifications: true,
-      validateCodeSignatures: true,
 
       useSystemAccentColor: false,
       tintDarkBackgrounds: false,
